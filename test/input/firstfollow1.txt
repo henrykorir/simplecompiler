@@ -1,0 +1,9 @@
+
+grammar:S,e,#
+S -> a b B
+A -> S C
+A -> B A A
+A -> e
+B -> A b A
+C -> B
+C -> c

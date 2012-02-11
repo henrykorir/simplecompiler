@@ -1,0 +1,21 @@
+# SConscript
+
+Import('aEnv')
+
+aEnv.Library(target = 'unittest', source = ['unittest.cpp'], CPPPATH=['../include'])
+
+UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax']
+UTinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm']
+UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm']
+
+aEnv.Program(target= 'docsplit', source = ['splitwords.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+aEnv.Program(target= 'gensyntax', source = ['tinygrammartest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+aEnv.Program(target= 'regex2nfa', source = ['regexnfatest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+aEnv.Program(target= 'basicga', source = ['basicalgorithmtest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+aEnv.Program(target= 'firstfollow', source = ['firstfollowtest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+aEnv.Program(target= 'nfa2dfa', source = ['nfa2dfatest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)

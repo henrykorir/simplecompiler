@@ -1,0 +1,23 @@
+grammar:S0
+S0 -> a S0
+S0 -> ÿ
+S0 -> b S1
+S1 -> ÿ
+S0 -> c S2
+S2 -> ÿ
+S1 -> b S1
+S1 -> ÿ
+S2 -> c S2
+S2 -> ÿ
+grammar:S1
+S0 -> b S1
+S0 -> a S3
+S0 -> ÿ
+S2 -> b S0
+S1 -> a S3
+S2 -> a S3
+S1 -> b S1
+S3 -> b S2
+S3 -> a S3
+S1 -> b S1
+S0 -> ÿ

@@ -1,0 +1,10 @@
+grammar:S
+S->AB
+A->aAb
+A->ab
+B->Bb
+B->b
+S->aAb
+S->ab
+S->Bb
+S->b

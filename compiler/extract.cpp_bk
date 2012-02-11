@@ -1,0 +1,142 @@
+#include "extract.h"
+#include <scerror.h>
+
+#include <iostream>
+#include "statemachine.h"
+#include "compiler.h"
+
+using namespace sc;
+using namespace compile;
+using namespace compile::doc;
+
+class iwordstream : public std::istream
+{
+public:
+	iwordstream& operator>>(word& aword)
+	{
+		size_t Chcount = 0;
+		const sentry _Ok(*this);// lock and skip whitespace
+
+		ios_base::iostate _State = ios_base::goodbit;
+
+		word tmp;
+		if (_Ok)
+		{	// state okay, use facet to extract
+			const _Ctype& _Ctype_fac = std::use_facet<_Ctype>(ios_base::getloc());
+
+			_TRY_IO_BEGIN
+			int_type _Meta = _Myios::rdbuf()->sgetc();
+			for(; ; _Meta = _Myios::rdbuf()->snextc())
+			{
+				if (std::istream::traits_type::eq_int_type(std::istream::traits_type::eof(), _Meta))
+				{	// end of file, quit
+					_State |= ios_base::eofbit;
+					break;
+				}
+				else if(_Ctype_fac.is(_Ctype::space,
+							std::istream::traits_type::to_char_type(_Meta)))
+				{// whitespace, continue
+					_Myios::rdbuf()->sbumpc();
+				}
+				else
+				{
+					++Chcount;
+					tmp.wordClass = try_to_read_symbol(tmp, _Meta);
+					tmp.txt.push_back(std::istream::char_type());	// add terminating null character
+				}
+			}
+			_CATCH_IO_END
+		}
+		aword.swap(tmp);
+		_Myios::setstate(Chcount == 0 ? _State | ios_base::failbit : _State);
+		return *this;
+	}
+private:
+	int try_to_read_symbol(word& aword, int_type _Meta)
+	{
+		if(_Meta <= '9' && _Meta >= '0') // number
+		{
+			_Myios::rdbuf()->sputbackc(_Meta);
+			state_machine nm = compiler::get_number_machine();
+			read_content(aword.txt, nm);
+			return 1;
+		}
+		else if(_Meta == '.')
+		{
+			_int_type _Meta_Next = _Myios::rdbuf()->snextc();
+			if(_Meta_Next >= '0' && _Meta_Next <= '9')
+			{
+				_Myios::rdbuf()->sputbackc(_Meta_Next);
+				_Myios::rdbuf()->sputbackc(_Meta);
+				state_machine nm = compiler::get_number_machine();
+				read_content(aword.txt, nm);
+				return 1;
+			}
+			else
+			{
+				aword.txt.push_back(_Meta);
+				return 2;
+			}
+		}
+		else if(compiler::is_separator(_Meta)) // separators
+		{
+			aword.txt.push_back(_Meta);
+			return 2;
+		}
+		else if(is_alpha(_Meta)) // alpha, symbol id
+		{
+			_Myios::rdbuf()->sputbackc(_Meta);
+			state_machine sm = compiler::get_symbol_machine();
+			read_content(aword.txt, sm);
+			return 3;
+		}
+		else
+		{	
+			//_State |= ios_base::badbit;
+			throw std::runtime_error("invalidate charactor!");
+		}
+		return -1;
+	}
+
+	void read_content(_Str& txt, state_machine& nm)
+	{
+		nm.init();
+		int_type _Meta = _Myios::rdbuf()->sgetc();
+		for(; ; _Meta = _Myios::rdbuf()->snextc())
+		{
+			if(!nm.accept(_Meta)) 
+			{
+				_Myios::sputbackc(_Meta);
+				break;
+			}
+			else
+			{
+				txt.push_back(_Meta);
+			}
+		}
+		txt = nm.str();
+	}
+};
+
+compile::doc::streamsplit::streamsplit()
+{
+}
+
+compile::doc::streamsplit::~streamsplit()
+{
+}
+
+streamsplit::deqwords& streamsplit::operator()(std::istream& is)
+{
+	iwordstream iws;
+	iws.rdbuf(is.rdbuf());
+	word aword;
+	while(iws>>aword)
+	{
+		words_.push_back(aword);
+	}
+	bool isdone = iws.eof();
+	iws.rdbuf(NULL);
+	if(!isdone) throw scerror("failed read word!");
+	return words_;
+}

@@ -1,0 +1,16 @@
+
+grammar:S,e
+S->aA
+A->BC
+B->bB
+C->cC
+B->e
+C->e
+
+grammar:S,e
+S->cS
+S->AB
+A->aAb
+B->Bb
+A->e
+B->e

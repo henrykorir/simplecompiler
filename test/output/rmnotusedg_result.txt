@@ -1,0 +1,4 @@
+grammar:S
+S->aS
+S->U
+U->a

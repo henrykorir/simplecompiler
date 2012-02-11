@@ -1,0 +1,12 @@
+# SConscript
+
+Import('aEnv')
+
+cppfiles = ['xregex.cpp']
+
+libboost = 'boost-dev'
+#incboost = ''
+
+aEnv['regexlib'] = ['regex', libboost]
+
+aEnv.Library(target = 'regex', source = cppfiles, LIBS=[libboost])
