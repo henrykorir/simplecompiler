@@ -1,0 +1,10 @@
+# SConscript
+
+Import('aEnv')
+
+cppfiles = ['gensyntax.cpp', 'compilermake.cpp']
+inc = ['../include', '../syntax', '../galgorithm']
+usedlib = ['ga', 'syntax']
+usedlibpath = ['../syntax', '../galgorithm']
+
+aEnv.Library(target='mcompiler', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)

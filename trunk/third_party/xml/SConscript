@@ -1,0 +1,7 @@
+# SConscript
+
+Import('aEnv')
+
+cppfiles = ['Markup.cpp']
+
+aEnv.Library(target = 'markup', source = cppfiles)

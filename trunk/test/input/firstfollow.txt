@@ -1,0 +1,14 @@
+
+grammar:E,e,#
+E -> T E1
+E1 -> A T E1
+E1 -> e
+T -> F T1
+T1 -> M F T1
+T1 -> e
+F -> ( E )
+F -> i
+A -> +
+A -> -
+M -> *
+M -> /

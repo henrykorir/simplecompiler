@@ -1,0 +1,529 @@
+// stringX.h :
+//
+
+#ifndef _STRINGXF_H_HUXL_
+#define _STRINGXF_H_HUXL_
+
+#include <string>
+#include <cstdarg>
+#include <locale>
+//#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+//#include <wtypes.h>
+
+#include <macros.h>
+
+#if (defined _MSC_VER) || defined(MSC_VER)
+#ifndef MICROSIFT_VISUAL_STUDIO
+#define MICROSIFT_VISUAL_STUDIO
+#endif
+#endif
+
+NAMESPACE_BEGIN(stringX)
+
+class strformat
+{
+public:
+	static std::string format(const char* fmt, ...)
+	{
+		va_list argptr;
+		va_start(argptr, fmt);
+		std::string tmp;
+		format(fmt, argptr, tmp);
+		va_end(argptr);
+		return tmp;
+	}
+
+	static std::wstring format(const wchar_t* fmt, ...)
+	{
+		va_list argptr;
+		va_start(argptr, fmt);
+		std::wstring str;
+		format(fmt, argptr, str);
+		va_end(argptr);
+		return str;
+	}
+
+	static std::string& format(const char* fmt, va_list argptr, std::string& out_buf)
+	{
+#ifdef MICROSIFT_VISUAL_STUDIO
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+		int bufsize = vsnprintf(NULL, 0, fmt, argptr) + 2;
+		out_buf.clear();
+		char* buf = new char[bufsize];
+		try
+		{
+			bufsize = vsnprintf(buf, bufsize, fmt, argptr);
+			out_buf.insert(out_buf.end(), buf, buf + bufsize);
+		}catch(...){
+		}
+		delete []buf;
+#ifdef MICROSIFT_VISUAL_STUDIO
+#pragma warning(pop)
+#endif
+		return out_buf;
+	}
+
+	static std::wstring& format(const wchar_t* fmt, va_list argptr, std::wstring& out_buf)
+	{
+#ifdef MICROSIFT_VISUAL_STUDIO
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+		int bufsize = vswprintf(NULL, 0, fmt, argptr) + 2;
+		out_buf.clear();
+		wchar_t* buf = new wchar_t[bufsize];
+		try
+		{
+			bufsize = vswprintf(buf, bufsize, fmt, argptr);
+			out_buf.insert(out_buf.end(), buf, buf + bufsize);
+		}catch(...){
+		}
+		delete []buf;
+#ifdef MICROSIFT_VISUAL_STUDIO
+#pragma warning(pop)
+#endif
+		return out_buf;
+	}
+	//static int scanf(const char* source, const char* fmt, ...)
+	//{
+	//	va_list argptr;
+	//	va_start(argptr, fmt);
+
+	//	#pragma warning(push)
+	//	#pragma warning(disable : 4996)
+	//
+	//	//sscanf(source, fmt
+	//	#pragma warning(pop)
+	//	va_end(argptr);
+	//}
+};
+
+template<typename _Elem>
+std::basic_string<_Elem> format(const _Elem* _fmt, ...)
+{
+	va_list argptr;
+	va_start(argptr, _fmt);
+	std::basic_string<_Elem> buf;
+	strformat::format(_fmt, argptr, buf);
+	va_end(argptr);
+	return buf;
+}
+
+template<typename _Elem>
+std::basic_string<_Elem> replacefirst(const std::basic_string<_Elem>& str, const std::basic_string<_Elem>& oldString, const std::basic_string<_Elem>& newString, size_t pos = 0)
+{
+	std::string temp = str;
+	pos = temp.find(oldString, pos);
+	if(pos != std::string::npos)
+		temp.replace(pos, oldString.size(), newString);
+	return temp;
+}
+
+template<typename _Elem>
+std::basic_string<_Elem> replaceall(const std::basic_string<_Elem>& str, const std::basic_string<_Elem>& oldString, const std::basic_string<_Elem>& newString)
+{
+	size_t pos = 0;
+	std::string temp(str);
+	pos = temp.find(oldString, pos);
+	while(pos != std::string::npos)
+	{
+		temp.replace(pos, oldString.size(), newString);
+		pos = temp.find(oldString, pos + newString.size());
+	}
+	return temp;
+}
+
+template<typename _Elem>
+std::vector<std::basic_string<_Elem> > split(const std::basic_string<_Elem>& str, const std::basic_string<_Elem>& space, bool is_remove_empty = false)
+{
+	std::vector<std::basic_string<_Elem> > vtmp;
+	if(space.empty())
+	{
+		for(size_t i = 0; i < str.size(); ++ i) vtmp.push_back(std::basic_string<_Elem>(1, str[i]));
+		return vtmp;
+	}
+	size_t pos_p = 0;
+	size_t pos = str.find(space, pos_p);
+	while(pos != std::string::npos)
+	{
+		if(!(pos == pos_p && is_remove_empty))
+			vtmp.push_back(str.substr(pos_p, pos - pos_p));
+		pos_p = pos + space.size();
+		pos = str.find(space, pos_p);
+	}
+	if(pos_p == str.size() && is_remove_empty) return vtmp;
+	vtmp.push_back(str.substr(pos_p));
+	return vtmp;
+}
+
+template<typename _Elem>
+struct AWConvert
+{
+};
+/*
+template<>
+struct AWConvert<char>
+{
+	typedef wchar_t type;
+};
+
+template<>
+struct AWConvert<wchar_t>
+{
+	typedef char type;
+};
+
+//template<typename _Elem>
+struct convert_t
+{
+	template<typename _ElemSrc>
+	inline std::string ConvertToA(const _ElemSrc* s);
+};
+
+template<>
+inline std::string convert_t::ConvertToA<char>(const char* s)
+{
+	return s;
+}
+
+template<>
+inline std::string convert_t::ConvertToA<wchar_t>(const wchar_t* s)
+{
+	std::basic_string<wchar_t> str(s);
+	return w2a(str);
+}
+
+template<typename _Elem>
+std::string ConvertToA(const _Elem* s)
+{
+	convert_t ct;
+	return ct.ConvertToA(s);
+}
+
+template<typename _Elem, typename _Ty>
+_Ty Convert(const _Elem* ptr)
+{
+	std::basic_stringstream<_Elem> ss(ptr);
+	_Ty temp;
+	ss>>temp;
+	if(ss.fail())
+	{
+		convert_t ct;
+		std::string buf("can't convert string: ");
+		throw std::exception((buf.append(ct.ConvertToA(ptr))).c_str());
+	}
+	return temp;
+}
+
+template<typename _Ty1, typename _Ty2, typename _Elem>
+_Ty2 Convert(const _Ty1& _arg)
+{
+	std::basic_stringstream<_Elem> ss;
+	ss<<_arg;
+	_Ty2 temp;
+	ss>>temp;
+	return temp;
+}*/
+
+template<typename _Elem>
+_Elem tolower(_Elem _ch)
+{
+	int temp = _ch - 'a';
+	return (_ch - 'a') >=0 ? _ch : (_ch - 'A' + 'a');
+}
+
+template<typename _Elem>
+_Elem toupper(_Elem _ch)
+{
+	int temp = _ch - 'a';
+	return (_ch - 'a') >=0 ? (_ch - 'a' + 'A') : _ch;
+}
+
+template<typename _Elem>
+std::basic_string<_Elem> tolower(const std::basic_string<_Elem>& _Str)
+{
+	std::basic_string<_Elem> tmp(_Str.size(), (_Elem)'\0');
+	for(size_t i = 0; i < tmp.size(); ++ i)
+		if(std::isupper(_Str[i])) tmp[i] = (_Str[i] - 'A') + 'a';
+		else tmp[i] = _Str[i];
+	return tmp;
+}
+
+template<typename _Elem>
+std::basic_string<_Elem> toupper(const std::basic_string<_Elem>& _Str)
+{
+	std::basic_string<_Elem> tmp(_Str.size(), (_Elem)'\0');
+	for(size_t i = 0; i < tmp.size(); ++ i)
+		if(std::islower(_Str[i])) tmp[i] = (_Str[i] - 'a') + 'A';
+	return tmp;
+}
+/*inline bool AWEqual(const std::string& str1, const std::wstring& str2)
+{
+	std::string str = w2a(str2);
+	return str == str1;
+}*/
+
+template<typename _CmpFunc, typename _Elem>
+struct stringcmp : public std::binary_function<std::basic_string<_Elem>, std::basic_string<_Elem>, bool>
+{
+	bool operator()(const std::basic_string<_Elem>& str1, const std::basic_string<_Elem>& str2) const
+	{
+		return _fun(str1, str2);
+	}
+
+	_CmpFunc _fun;
+};
+
+namespace Format
+{
+	struct IsDigit
+	{
+		bool operator()(char _Ch) const
+		{
+			return _Ch >= '0' && _Ch <= '9';
+		}
+
+		bool operator()(wchar_t _Ch) const
+		{
+			return _Ch >= L'0' && _Ch <= L'9';
+		}
+	};
+
+	struct IsSpace
+	{
+		bool operator()(char _Ch) const
+		{
+			unsigned short i = (unsigned short)_Ch;
+			return i == ' ';
+		}
+
+		bool operator()(wchar_t _Ch) const
+		{
+			unsigned short i = (unsigned short)_Ch;
+			return i == L' ';
+		}
+	};
+
+	template<typename _Elem>
+	_Elem meta(unsigned short _ch)
+	{
+		return (_Elem)_ch;
+	}
+
+	struct swcvt
+	{
+		static bool convert(const std::string& _Src, std::wstring& _Dst)
+		{
+			std::exception ex;
+			return tryconvert(_Src, _Dst, ex);
+		}
+
+		static bool convert(const std::string& _Src, std::string& _Dst)
+		{
+			_Dst = _Src;
+			return true;
+		}
+
+		static std::wstring convert(const std::string& _Src)
+		{
+			std::exception ex;
+			std::wstring buf;
+			if(!tryconvert(_Src, buf, ex))
+				throw ex;
+			return buf;
+		}
+
+		static bool convert(const std::wstring& _Src, std::string& _Dst)
+		{
+			std::exception ex;
+			return tryconvert(_Src, _Dst, ex);
+		}
+
+		static bool convert(const std::wstring& _Src, std::wstring& _Dst)
+		{
+			_Dst = _Src;
+			return true;
+		}
+
+		static std::string convert(const std::wstring& _Src)
+		{
+			std::exception ex;
+			std::string buf;
+			if(!tryconvert(_Src, buf, ex))
+				throw ex;
+			return buf;
+		}
+
+		template<typename _Dst_Elem, typename _Src_Elem>
+		static std::basic_string<_Dst_Elem> convert(const std::basic_string<_Src_Elem>& _Src)
+		{
+			std::basic_string<_Dst_Elem> tmp;
+			convert(_Src, tmp);
+			return tmp;
+		}
+
+	private:
+		static bool tryconvert(const std::wstring& _Src, std::string& _Dst, std::exception& ex)
+		{
+			if(_Src.empty())
+			{
+				_Dst = std::string();
+				return true;
+			}
+			else if(_Src == L"")
+			{
+				_Dst = "";
+				return true;
+			}
+
+			std::locale sys_loc("");
+
+			const wchar_t* src_wstr = _Src.c_str();
+			const size_t MAX_UNICODE_BYTES = 4;//_Src.size() / _Src.length();
+			const size_t BUFFER_SIZE =
+				_Src.length() * MAX_UNICODE_BYTES + 1;
+
+			//std::auto_ptr<char> buf(new char[BUFFER_SIZE]);
+			std::string buf(BUFFER_SIZE, '\0');
+			char* extern_buffer = (char*)buf.c_str();
+			memset(extern_buffer, 0, BUFFER_SIZE);
+
+			const wchar_t* intern_from = src_wstr;
+			const wchar_t* intern_from_end = intern_from + _Src.size();
+			const wchar_t* intern_from_next = 0;
+			char* extern_to = extern_buffer;
+			char* extern_to_end = extern_to + BUFFER_SIZE;
+			char* extern_to_next = 0;
+
+			typedef std::codecvt<wchar_t, char, mbstate_t> CodecvtFacet;
+
+			mbstate_t out_cvt_state;
+			CodecvtFacet::result cvt_rst =
+				std::use_facet<CodecvtFacet>(sys_loc).out(
+					out_cvt_state,
+					intern_from, intern_from_end, intern_from_next,
+					extern_to, extern_to_end, extern_to_next);
+			if (cvt_rst != CodecvtFacet::ok) {
+				std::string exceptionMsg =
+					"an exception occur when convert wstring to string: the exception is ";
+
+				switch(cvt_rst) {
+					case CodecvtFacet::partial:
+						exceptionMsg += "convert partial";
+						break;
+					case CodecvtFacet::error:
+						exceptionMsg += "error";
+						break;
+					case CodecvtFacet::noconv:
+						exceptionMsg += "noconv";
+						break;
+					default:
+						exceptionMsg += "unknown";
+				}
+				ex = std::runtime_error(exceptionMsg.c_str());
+				return false;
+			}
+
+			_Dst = buf.c_str();
+			return true;
+		}
+
+		static bool tryconvert(const std::string& _Src, std::wstring& _Dst, std::exception& ex)
+		{
+			if(_Src.empty())
+			{
+				_Dst = std::wstring();
+				return true;
+			}
+			else if(_Src == "")
+			{
+				_Dst = L"";
+				return true;
+			}
+
+			std::locale sys_loc("");
+
+			const char* src_str = _Src.c_str();
+			const size_t BUFFER_SIZE = _Src.size() + 1;
+
+			//std::auto_ptr<wchar_t> buf(new wchar_t[BUFFER_SIZE]);
+			std::wstring buf(BUFFER_SIZE, L'\0');
+			wchar_t* intern_buffer = (wchar_t*)buf.c_str();
+			wmemset(intern_buffer, 0, BUFFER_SIZE);
+
+			const char* extern_from = src_str;
+			const char* extern_from_end = extern_from + _Src.size();
+			const char* extern_from_next = 0;
+			wchar_t* intern_to = intern_buffer;
+			wchar_t* intern_to_end = intern_to + BUFFER_SIZE;
+			wchar_t* intern_to_next = 0;
+
+			typedef std::codecvt<wchar_t, char, mbstate_t> CodecvtFacet;
+
+			mbstate_t in_cvt_state;
+			CodecvtFacet::result cvt_rst =
+				std::use_facet<CodecvtFacet>(sys_loc).in(
+					in_cvt_state,
+					extern_from, extern_from_end, extern_from_next,
+					intern_to, intern_to_end, intern_to_next);
+
+			if (cvt_rst != CodecvtFacet::ok) {
+				std::string exceptionMsg =
+					"an exception occur when convert string \"" + _Src + "\" to wstring: the exception is ";
+				switch(cvt_rst) {
+					case CodecvtFacet::partial:
+						exceptionMsg += "convert partial";
+						break;
+					case CodecvtFacet::error:
+						exceptionMsg += "error";
+						break;
+					case CodecvtFacet::noconv:
+						exceptionMsg += "noconv";
+						break;
+					default:
+						exceptionMsg += "unknown";
+				}
+				ex = std::runtime_error(exceptionMsg.c_str());
+				return false;
+			}
+
+			_Dst = buf.c_str();
+			return true;
+		}
+	};
+}
+
+// erase the pad spaces of the string
+// param@ path, the original string
+// param@ trimType
+//		trimType == 1 : erase the ending spaces
+//		trimType == 2 : erase the leading spaces
+//		trimType == 3 : erase the leading and ending spaces
+inline std::string trim(const std::string& path, int trimType = 3)
+{
+	size_t pos = 0;
+	size_t len = path.size();
+
+	if(trimType & 0x01)
+	{
+		while(len && Format::IsSpace()(path[len-1])) -- len;
+	}
+	if(trimType & 0x02)
+	{
+		while(len && Format::IsSpace()(path[pos])) ++ pos, -- len;
+	}
+	return path.substr(pos, len);
+}
+
+typedef stringcmp<std::less<std::string>, char> stringless; 
+NAMESPACE_END(stringX)
+
+#endif

@@ -1,0 +1,10 @@
+# SConscript
+
+Import('aEnv')
+
+cppfiles = aEnv.Glob('*.cpp')
+
+inc = ['../include', '../syntax']
+usedlib = ['syntax']
+usedlibpath = ['../syntax']
+aEnv.Library(target='ga', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)

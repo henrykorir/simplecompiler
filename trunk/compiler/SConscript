@@ -1,0 +1,12 @@
+# SConscript
+
+Import('aEnv')
+
+cppfiles = ['extract.cpp', 'compiler.cpp']
+inc = ['../include', '../syntax']
+usedlib = ['syntax']
+usedlibpath = ['../syntax']
+
+#aEnv.Library(target='wordextract', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)
+
+aEnv.Library(target='compiler', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)

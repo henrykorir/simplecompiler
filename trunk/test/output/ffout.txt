@@ -1,0 +1,11 @@
+first sets:
+First(S)={ a }
+First(B)={ a b }
+First(A)={ a b  }
+First(C)={ a b c }
+
+follow sets:
+Follow(S)={ # a b c }
+Follow(B)={ # a b c }
+Follow(A)={ # a b c }
+Follow(C)={ # a b c }
