@@ -84,7 +84,27 @@ struct AlgorithmArg
 	bool CheckLR1(const lrstate* cs) const;
 	const lrstate* insert_new_state(const lrstate* A, int32 a, const lrstate* B);
 	void get_firsts(int32 x, const sfollowset& f, sfollowset& nf) const;
+
+	int32 get_lrsid(const lrstate* p) const;
+	int32 get_pid(const production* p) const;
 };
+
+int32 AlgorithmArg::get_pid(const production* p) const
+{
+	return (int32)std::distance(tig->productions().begin(), 
+						std::find_if(tig->productions().begin(), tig->productions().end(), 
+							kog::composite_function(kog::get_ptr_t<production>(), 
+								std::bind2nd(std::equal_to<const production*>(), p))));
+}
+
+int32 AlgorithmArg::get_lrsid(const lrstate* p) const
+{
+	return (int32)std::distance(lrsts.begin(), 
+						std::find_if(lrsts.begin(), lrsts.end(), 
+							kog::composite_function(kog::get_ptr_t<lrstate>(), 
+								std::bind2nd(std::equal_to<const lrstate*>(), p))));
+}
+
 
 //std::ostream& operator<<(std::ostream& os, const lrstateitem& itm)
 std::ostream& print_item(std::ostream& os, const lrstateitem& itm, const symholder& sholder)
@@ -132,6 +152,10 @@ void lranalyse::operator()(const grammar& gin, lrmachine& mot)
 				for(sfollowset::const_iterator iterf = iter->follow.begin(); iterf != iter->follow.end(); ++ iterf)
 				{
 					arg.sparsesheet.push_back(kog::make_triple(pRow, *iterf, nextstate(&p)));
+#ifdef DEBUG_OUTPUT
+					const char* name = *iterf < 0 ? "#" : gin.gettinyg().symbols()[*iterf].name;
+					logstring("(I%d, %s) -> r%d\n", arg.get_lrsid(pRow), name, arg.get_pid(&p));
+#endif
 				}
 			}
 			else
@@ -305,7 +329,7 @@ void AlgorithmArg::update_closure(lrstate& li) const
 			{
 				int32 xn = sfollows[p[0]]->size();
 				get_firsts(get_next_symbol(p, 1), *sfollows[i], *sfollows[p[0]]);
-				issupdated[p[0]] = sfollows[p[0]]->size() != xn; // need to update
+				issupdated[p[0]] |= sfollows[p[0]]->size() != xn; // need to update
 			}
 			else if(sholder[p[0]].name == NULL || *sholder[p[0]].name == '\0')
 				fire("lranalyse, invalidate gramar: no eplison!");
@@ -338,17 +362,6 @@ void AlgorithmArg::update_closure(lrstate& li) const
 		sfollows[i] = NULL;
 	}
 	tmps.swap(li);
-
-#ifdef DEBUG_OUTPUT
-	static int32 ii = 1;
-	logstring("I%d\n", ii++);
-	for(size_t i = 0; i != li.size(); ++ i)
-	{
-		const lrstateitem& itm = li[i];
-		print_item(kog::loggermanager::instance().get_logger().getos(), itm, sholder);
-	}
-	logstring("\n");
-#endif
 }
 
 // A -> aB
@@ -359,7 +372,7 @@ const lrstate* AlgorithmArg::insert_new_state(const lrstate* A, int32 a, const l
 	std::list<lrstate>::iterator iterfind = std::find(lrsts.begin(), lrsts.end(), *B);
 	if(iterfind != lrsts.end())
 	{
-		// find an existing lrstate
+		// found an existing lrstate
 		ps = &(*iterfind);
 	}
 	else
@@ -367,8 +380,22 @@ const lrstate* AlgorithmArg::insert_new_state(const lrstate* A, int32 a, const l
 		lrsts.push_back(*B);
 		ps = &lrsts.back();
 		rv = ps;
+#ifdef DEBUG_OUTPUT
+		static int32 ii = 2;
+		logstring("\nI%d\n", ii++);
+		for(size_t i = 0; i != ps->size(); ++ i)
+		{
+			const lrstateitem& itm = (*ps)[i];
+			print_item(kog::loggermanager::instance().get_logger().getos(), itm, tig->symbols());
+		}
+		logstring("\n");
+#endif
 	}
 	sparsesheet.push_back(kog::make_triple(A, a, ps));
+#ifdef DEBUG_OUTPUT
+	const char* name = a < 0 ? "#" : tig->symbols()[a].name;
+	logstring("(I%d, %s) -> I%d\n", get_lrsid(A), name, get_lrsid(ps));
+#endif
 	return rv;
 }
 
@@ -446,6 +473,16 @@ AlgorithmArg::AlgorithmArg(const grammar& gin)
 		}
 
 		update_closure(start);
+
+#ifdef DEBUG_OUTPUT
+		logstring("\nI1\n");
+		for(size_t i = 0; i != start.size(); ++ i)
+		{
+			const lrstateitem& itm = start[i];
+			print_item(kog::loggermanager::instance().get_logger().getos(), itm, tig->symbols());
+		}
+		logstring("\n");
+#endif
 	}
 	
 	// add new goto row

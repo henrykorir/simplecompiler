@@ -89,15 +89,16 @@ void simplegrammar_test::init_grammar(grammar& g)
 /* tiny grammar
  *
  * Program -> AProgramItem | AProgramItem Program
- * AProgramItem -> ValueDeclear | Function | Expression
- * ValueDeclear -> type symbol;
- * Expression -> AExpression Expression | AExpression
- * AExpression -> symbol = AValue; | symbol = AValue op AValue; | FuncCall; | Print;
- * AValue -> symbol | number;
- * FuncCall -> symbol = symbol(AValue, AValue)
- * Print -> print(AValue)
+ * AProgramItem -> Function | AExpression ;
+ * ValueDeclear -> type symbol
+ * Expressions -> AExpression ; Expressions | AExpression ;
+ * AExpression -> Assignment | FuncCall | PrintFunc | ValueDeclear
+ * Assignment -> symbol = AValue | symbol = AValue op AValue
+ * AValue -> symbol | number
+ * FuncCall -> symbol = symbol ( AValue , AValue )
+ * PrintFunc -> print ( AValue )
  * Function -> type symbol(type symbol, type symbol) { FunctionContent ReturnExp }
- * FunctionContent -> Expression FunctionContent | ValueDeclear FunctionContent | Empty
+ * FunctionContent -> Expressions | Empty
  * ReturnExp -> return AValue;
  *
  * whitespace: " \t\r\n"
@@ -118,30 +119,30 @@ void grammar_wrapper::simple_grammar()
 	dthenu_ = true;
 
 	seperators_ = "{}()=*+-/;,";
-	syms.reset(20 + seperators_.size());
+	syms.reset(21 + seperators_.size());
 	syms[0] = Asymbol("Program", 0);
 	syms[1] = Asymbol("AProgramItem", 0);
 	syms[2] = Asymbol("ValueDeclear", 0);
 	syms[3] = Asymbol("Function", 0);
-	syms[4] = Asymbol("Expression", 0);
-	syms[5] = Asymbol("valuetype", 0);
+	syms[4] = Asymbol("Expressions", 0);
+	syms[5] = Asymbol("Valuetype", 0);
 	syms[6] = Asymbol("symbol", smac, "[a-zA-Z_][a-zA-Z_0-9]*");
 	syms[7] = Asymbol("AExpression", 0);
 	syms[8] = Asymbol("AValue", 0);
 	syms[9] = Asymbol("number", smac, "([0-9]+)|([0-9]+\\.[0-9]*)|(\\.[0-9]+)");
 	syms[10] = Asymbol("FuncCall", 0);
-	syms[11] = Asymbol("op", 0);
-	syms[12] = Asymbol("Print", 0);
-	syms[13] = Asymbol("printF", keyword, "print");
+	syms[11] = Asymbol("Op", 0);
+	syms[12] = Asymbol("PrintFunc", 0);
+	syms[13] = Asymbol("print", keyword, "print");
 	syms[14] = Asymbol("FunctionContent", 0);
 	syms[15] = Asymbol("ReturnExp", 0);
-	syms[16] = Asymbol("Return", keyword, "return");
-	syms[17] = Asymbol("Int", keyword, "int");
-	syms[18] = Asymbol("Float", keyword, "float");
+	syms[16] = Asymbol("return", keyword, "return");
+	syms[17] = Asymbol("int", keyword, "int");
+	syms[18] = Asymbol("float", keyword, "float");
 	syms[19] = Asymbol("", other_sym, "eplison");
+	syms[20] = Asymbol("Assignment", 0);
 	for(size_t i = 0; i < seperators_.size(); ++ i)
-		//syms[i + 20] = Asymbol(stringX::format("seperator%d", i), sep, tstring(1, seperators_[i]));
-		syms[i + 20] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
+		syms[i + 21] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
 	eplisons() = 19;
 	// reset symbols name string
 	{
@@ -166,23 +167,23 @@ void grammar_wrapper::simple_grammar()
 	V::symbols() = &syms;
 	prods[0] = Aproduction(0, V(1));
 	prods[1] = Aproduction(0, V(1, 0));
-	prods[2] = Aproduction(1, V(2));
-	prods[3] = Aproduction(1, V(3));
-	prods[4] = Aproduction(1, V(4));
-	prods[5] = Aproduction(2, V(5, 6));
-	prods[6] = Aproduction(4, V(7, 4));
-	prods[7] = Aproduction(4, V(7));
-	prods[8] = Aproduction(7, V(6, "=", 8, ";"));
-	prods[9] = Aproduction(7, V(6, "=", 8, 11, 8, ";"));
-	prods[10] = Aproduction(7, V(10, ";"));
-	prods[11] = Aproduction(7, V(12, ";"));
-	prods[12] = Aproduction(8, V(6));
-	prods[13] = Aproduction(8, V(9));
-	prods[14] = Aproduction(10, V(6, "=", "(", 6, ",", 6, ")"));
-	prods[15] = Aproduction(12, V(13, "(", 8, ")"));
-	prods[16] = Aproduction(3, V(5, 6, "(", 5, 6, ",", 5, 6, ")", "{", 14, 15, "}"));
-	prods[17] = Aproduction(14, V(4, 14));
-	prods[18] = Aproduction(14, V(2, 14));
+	prods[2] = Aproduction(1, V(3));
+	prods[3] = Aproduction(1, V(4, ";"));
+	prods[4] = Aproduction(2, V(5, 6));
+	prods[5] = Aproduction(4, V(7, ";", 4));
+	prods[6] = Aproduction(4, V(7, ";"));
+	prods[7] = Aproduction(7, V(2));
+	prods[8] = Aproduction(7, V(10));
+	prods[9] = Aproduction(7, V(12));
+	prods[10] = Aproduction(7, V(20));
+	prods[11] = Aproduction(20, V(6, "=", 8));
+	prods[12] = Aproduction(20, V(6, "=", 8, 11, 8));
+	prods[13] = Aproduction(8, V(6));
+	prods[14] = Aproduction(8, V(9));
+	prods[15] = Aproduction(10, V(6, "=", 6, "(", 6, ",", 6, ")"));
+	prods[16] = Aproduction(12, V(13, "(", 8, ")"));
+	prods[17] = Aproduction(3, V(5, 6, "(", 5, 6, ",", 5, 6, ")", "{", 14, 15, "}"));
+	prods[18] = Aproduction(14, V(4));
 	prods[19] = Aproduction(14, V(19));
 	prods[20] = Aproduction(15, V(16, 8, ";"));
 	prods[21] = Aproduction(5, V(17));

@@ -8,7 +8,7 @@
 
 //#define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
-#include <iostream>
+#include <logger.h>
 #include "../test/gio.h"
 #endif
 
@@ -152,7 +152,8 @@ void syntaxgenerator::regex_str_to_machine(const std::string& regexstr, automach
 	ga::dfa2machine d2m(dfa, m);
 
 #ifdef DEBUG_OUTPUT
-	static std::ofstream ofslog("runlog.txt");
+	logstring("\n[syntaxgenerator::regex_str_to_machine]\n");
+	std::ostream& ofslog = kog::loggermanager::instance().get_logger().getos();
 	gwriter gofs(ofslog);
 	r2n.invoke();
 	gofs<<nfa;
@@ -161,7 +162,6 @@ void syntaxgenerator::regex_str_to_machine(const std::string& regexstr, automach
 	gofs<<dfa;
 	ofslog<<std::endl;
 	d2m.invoke();
-//	ofslog.close();
 #else
 	r2n.invoke();
 	n2d.invoke();

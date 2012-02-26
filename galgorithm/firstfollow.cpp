@@ -100,8 +100,23 @@ void firstset::operator()(const grammar& gin, vecintset& sets)
 	{
 		sets[i].reset(TempSets[i].size() + (IsVNEmpty[i] != 0 ? 1 : 0));
 		std::copy(TempSets[i].begin(), TempSets[i].end(), sets[i].begin());
-		if(IsVNEmpty[i]) sets[i].back() = idxEmpty;
+		if(IsVNEmpty[i]) sets[i].back() = -1; // virtual ending
 	}
+#ifdef DEBUG_OUTPUT
+	logstring("\nFirst set!\n");
+	for (size_t i = 0; i < N; ++ i)
+	{
+		if (IsTerminate[i]) continue;
+		logstring("first(%s) = {", sholder[i].name);
+		const char* sep = "";
+		for (size_t j = 0; j < sets[i].size(); ++ j, sep = ", ")
+		{
+			const char* name = sets[i][j] == -1 ? "#" : sholder[sets[i][j]].name;
+			logstring("%s%s", sep, name);
+		}
+		logstring("}\n");
+	}
+#endif
 }
 
 void followset::operator()(const grammar& gin, const vecintset& FirstSets, vecintset& FollowSets)

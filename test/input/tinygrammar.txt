@@ -1,0 +1,27 @@
+grammar:Program
+Program -> AProgramItem
+Program -> AProgramItem Program
+AProgramItem -> AExpression ;
+AProgramItem -> Function
+ValueDeclear -> Valuetype symbol
+Expressions -> AExpression ; Expressions
+Expressions -> AExpression ;
+AExpression -> Assignment
+AExpression -> FuncCall
+AExpression -> Print
+AExpression -> ValueDeclear
+AValue -> symbol
+AValue -> number
+Assignment -> symbol = AValue
+Assignment -> symbol = AValue Op AValue
+FuncCall -> symbol = symbol ( symbol , symbol )
+Print -> printF ( AValue )
+Function -> Valuetype symbol ( Valuetype symbol , Valuetype symbol ) { Expressions ReturnExp }
+Function -> Valuetype symbol ( Valuetype symbol , Valuetype symbol ) { ReturnExp }
+ReturnExp -> return AValue ;
+Valuetype -> int
+Valuetype -> float
+Op -> +
+Op -> -
+Op -> *
+Op -> /

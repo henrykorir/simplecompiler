@@ -7,6 +7,7 @@
 
 #include <stringX.h>
 #include <scerror.h>
+#include <logger.h>
 
 using namespace compile;
 using namespace compile::ga;
@@ -477,8 +478,9 @@ void regex2nfa::tocfg(const tstring& input, grammar& otput)
 	tinygrammar tmpg;
 	parsecontent pc(input.c_str());
 	const int nchs = 128;
-
-	std::cout<<input<<std::endl;
+#ifdef DEBUG_OUTPUT
+	logstring("[regex2nfa::tocfg] %s\n", input.c_str());
+#endif
 	pc.iS = FIRST_NONTSID;
 	pc.brace_stage(FIRST_NONTSID, '\0');
 
