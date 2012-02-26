@@ -4,3 +4,4 @@ Import('aEnv')
 
 aEnv.SConscript('xml/SConscript', variant_dir = 'xmllib/', duplicate = 0)
 aEnv.SConscript('regex/SConscript', variant_dir = 'regexlib/', duplicate = 0)
+aEnv.SConscript('callstack/SConscript', variant_dir = 'stacktrace/', duplicate = 0)

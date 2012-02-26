@@ -9,6 +9,7 @@
 #include <locale>
 //#include <memory>
 #include <sstream>
+#include <functional>
 #include <stdexcept>
 #include <cstring>
 #include <cstdio>
@@ -118,6 +119,17 @@ std::basic_string<_Elem> format(const _Elem* _fmt, ...)
 }
 
 template<typename _Elem>
+std::basic_string<_Elem> format(const std::basic_string<_Elem>& _fmt, ...)
+{
+	va_list argptr;
+	va_start(argptr, _fmt);
+	std::basic_string<_Elem> buf;
+	strformat::format(_fmt.c_str(), argptr, buf);
+	va_end(argptr);
+	return buf;
+}
+
+template<typename _Elem>
 std::basic_string<_Elem> replacefirst(const std::basic_string<_Elem>& str, const std::basic_string<_Elem>& oldString, const std::basic_string<_Elem>& newString, size_t pos = 0)
 {
 	std::string temp = str;
@@ -207,22 +219,28 @@ std::string ConvertToA(const _Elem* s)
 	convert_t ct;
 	return ct.ConvertToA(s);
 }
+*/
 
-template<typename _Elem, typename _Ty>
-_Ty Convert(const _Elem* ptr)
+template<typename _Ty, typename _Elem> _Ty tovalue(const _Elem* ptr)
 {
-	std::basic_stringstream<_Elem> ss(ptr);
+	if(NULL == ptr) throw std::runtime_error("empty string!");
+	return tovalue(std::basic_string<_Elem>(ptr));
+}
+
+template<typename _Ty, typename _Elem> _Ty tovalue(const std::basic_string<_Elem>& s)
+{
+	std::basic_stringstream<_Elem> ss(s);
 	_Ty temp;
 	ss>>temp;
 	if(ss.fail())
 	{
-		convert_t ct;
-		std::string buf("can't convert string: ");
-		throw std::exception((buf.append(ct.ConvertToA(ptr))).c_str());
+		std::string buf("can't convert string to value!");
+		throw std::runtime_error(buf);
 	}
 	return temp;
 }
 
+/*
 template<typename _Ty1, typename _Ty2, typename _Elem>
 _Ty2 Convert(const _Ty1& _arg)
 {
@@ -252,7 +270,7 @@ std::basic_string<_Elem> tolower(const std::basic_string<_Elem>& _Str)
 {
 	std::basic_string<_Elem> tmp(_Str.size(), (_Elem)'\0');
 	for(size_t i = 0; i < tmp.size(); ++ i)
-		if(std::isupper(_Str[i])) tmp[i] = (_Str[i] - 'A') + 'a';
+		if(/*std*/::isupper(_Str[i])) tmp[i] = (_Str[i] - 'A') + 'a';
 		else tmp[i] = _Str[i];
 	return tmp;
 }
@@ -302,13 +320,15 @@ namespace Format
 		bool operator()(char _Ch) const
 		{
 			unsigned short i = (unsigned short)_Ch;
-			return i == ' ';
+			return i == ' ' || i == '\t' || 
+				i == '\n' || i == '\v' || i == '\f' || i == '\r';
 		}
 
 		bool operator()(wchar_t _Ch) const
 		{
 			unsigned short i = (unsigned short)_Ch;
-			return i == L' ';
+			return i == L' ' || i == L'\t' || 
+				i == L'\n' || i == L'\v' || i == L'\f' || i == L'\r';
 		}
 	};
 

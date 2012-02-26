@@ -3,6 +3,7 @@
 Import('aEnv')
 
 cppfiles = ['extract.cpp', 'compiler.cpp']
+
 inc = ['../include', '../syntax']
 usedlib = ['syntax']
 usedlibpath = ['../syntax']

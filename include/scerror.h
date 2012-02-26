@@ -9,6 +9,8 @@
 
 #include <basic_types.h>
 #include <stringX.h>
+#include <shared_ptr.h>
+#include "../third_party/callstack/stacktrace.h"
 
 NAMESPACE_BEGIN(sc)
 
@@ -17,19 +19,44 @@ class scerror : public std::runtime_error
 public:
 	scerror()
 		: std::runtime_error("")
-	{}
+	{
+		make_trace();
+	}
 
 	scerror(const tstring& err)
 		: std::runtime_error(err)
-	{}
+	{
+		make_trace();
+	}
+
+	~scerror() throw()
+	{
+	}
+public:
+	tstring trace_message() const
+	{
+		tstring msg;
+		for (kog::callstack::trace::const_iterator iter = trace_->begin(); iter != trace_->end(); ++ iter)
+		{
+			msg += *iter + "\n";
+		}
+		return msg;
+	}
+private:
+	void make_trace()
+	{
+		trace_ = new kog::callstack::trace;
+	}
+private:
+	kog::shared_ptr<kog::callstack::trace> trace_;
 };
 
 #ifdef VISUAL_STDIO
 #define fire(fmt, ...) \
-	throw scerror(stringX::format(fmt, __VA_ARGS__))
+	throw sc::scerror(stringX::format("%s:%d ", __FILE__, __LINE__) + stringX::format(fmt, __VA_ARGS__))
 #else
 #define fire(fmt, arg...) \
-	throw scerror(stringX::format(fmt, ##arg))
+	throw sc::scerror(stringX::format(fmt, ##arg))
 #endif
 NAMESPACE_END(sc)
 

@@ -36,4 +36,8 @@ NAMESPACE_END(sc)
 #define NEW_UNITTEST(classname) \
 	classname a_classname##ut_obj
 
+#define ASSERT_COMMAND_ARGUMENTS(minnum, usage) \
+	if (argc < minnum) \
+		throw std::runtime_error(std::string("too few command arguments! usage: ") + usage);
+
 #endif

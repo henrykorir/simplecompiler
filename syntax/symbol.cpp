@@ -1,5 +1,6 @@
 #include "symbol.h"
 #include <algorithm>
+#include <scerror.h>
 
 using namespace compile;
 
@@ -15,9 +16,10 @@ void symholder::make_index()
 
 int32 symholder::index(const tstring& name) const
 {
-	if(nameIndexer_.empty()) throw std::runtime_error("indexer not created!");
+	if(nameIndexer_.empty()) fire("indexer not created!");
 	std::map<const tchar*, const symbol*, stringless>::const_iterator iterfind = nameIndexer_.find(name.c_str());
 
 	if(iterfind != nameIndexer_.end()) return iterfind->second->sid;
+	//fire("can't find index of '%s'", name.c_str());
 	return -1;
 }

@@ -170,100 +170,100 @@ struct Float : public type
 };
 
 
-struct seperator0 : public type
-{
-	enum{ sid = 19 };
-	seperator0()
-		:type(sid)
-	{}
-};
-
-
-struct seperator1 : public type
+struct { : public type
 {
 	enum{ sid = 20 };
-	seperator1()
+	{()
 		:type(sid)
 	{}
 };
 
 
-struct seperator2 : public type
+struct } : public type
 {
 	enum{ sid = 21 };
-	seperator2()
+	}()
 		:type(sid)
 	{}
 };
 
 
-struct seperator3 : public type
+struct ( : public type
 {
 	enum{ sid = 22 };
-	seperator3()
+	(()
 		:type(sid)
 	{}
 };
 
 
-struct seperator4 : public type
+struct ) : public type
 {
 	enum{ sid = 23 };
-	seperator4()
+	)()
 		:type(sid)
 	{}
 };
 
 
-struct seperator5 : public type
+struct = : public type
 {
 	enum{ sid = 24 };
-	seperator5()
+	=()
 		:type(sid)
 	{}
 };
 
 
-struct seperator6 : public type
+struct * : public type
 {
 	enum{ sid = 25 };
-	seperator6()
+	*()
 		:type(sid)
 	{}
 };
 
 
-struct seperator7 : public type
+struct + : public type
 {
 	enum{ sid = 26 };
-	seperator7()
+	+()
 		:type(sid)
 	{}
 };
 
 
-struct seperator8 : public type
+struct - : public type
 {
 	enum{ sid = 27 };
-	seperator8()
+	-()
 		:type(sid)
 	{}
 };
 
 
-struct seperator9 : public type
+struct / : public type
 {
 	enum{ sid = 28 };
-	seperator9()
+	/()
 		:type(sid)
 	{}
 };
 
 
-struct seperator10 : public type
+struct ; : public type
 {
 	enum{ sid = 29 };
-	seperator10()
+	;()
+		:type(sid)
+	{}
+};
+
+
+struct , : public type
+{
+	enum{ sid = 30 };
+	,()
 		:type(sid)
 	{}
 };

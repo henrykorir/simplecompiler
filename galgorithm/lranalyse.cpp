@@ -3,29 +3,50 @@
 #include <vector>
 #include <list>
 #include <deque>
+#include <queue>
 #include <map>
+#include <iostream>
 
 #include <functionalX.h>
 #include <sortc.h>
+#include <scerror.h>
 
 #include "eclosures.h"
 #include "firstfollow.h"
 
+#ifdef DEBUG_OUTPUT
+#include <logger.h>
+#endif
+
 using namespace compile;
 using namespace compile::ga;
-/*(
-typedef kog::sortc<std::vector<int32>, std::less<int32> > followset;
+
+typedef kog::sortc<std::vector<int32>, std::less<int32> > sfollowset;
 
 struct lrstateitem
 {
 	const production* prod; // ref production
 	int32 dot; // dot position
-	followset follow;
+	sfollowset follow;
+
+	bool operator == (const lrstateitem& other) const
+	{
+		if(prod != other.prod || dot != other.dot) return false;
+		else if(follow.size() != other.follow.size()) return false;
+		return std::mismatch(follow.begin(), follow.end(), other.follow.begin()).first == follow.end();
+	}
 };
 
 class lrstate : public std::vector<lrstateitem>
 {
 //	automachine::sheetrow rows;
+
+public:
+	bool operator == (const lrstate& other) const
+	{
+		return size() == other.size() &&
+			(std::mismatch(begin(), end(), other.begin()).first == end());
+	}
 };
 
 struct nextstate
@@ -48,56 +69,77 @@ struct nextstate
 
 struct AlgorithmArg
 {
-	AlgorithmArg(const grammar& orggrammar);
-	std::vector<int> IsVNEmpty;
-	std::vector<int> IsTerminate;
+	AlgorithmArg(const grammar& tig);
+	kog::smart_vector<int> ists; // is terminate symbol
+	eclosure::closure_array closures;
+	firstset::vecintset firstsets;
 	kog::smart_vector<const production*> plist;
-	kog::smart_vector<int32> ntpi; 
+	kog::smart_vector<int32> ntpi;
 	std::list<lrstate> lrsts;
 	std::list<kog::triple<const lrstate*, int32, nextstate> > sparsesheet;
-	std::vector<size_t> productionMap;
-	 FirstSets;
-	const tinygrammar& tig;
+	const tinygrammar* tig;
 
 	void update_closure(lrstate& lrs) const;
-	void update_firsts(lrstateitem& snew, const lrstateitem& sorg) const;
+	int32 get_next_symbol(const production& p, int32 idot) const;
+	bool CheckLR1(const lrstate* cs) const;
+	const lrstate* insert_new_state(const lrstate* A, int32 a, const lrstate* B);
+	void get_firsts(int32 x, const sfollowset& f, sfollowset& nf) const;
 };
 
-void lranalyse::operator()(const grammar& gin, lrmachine& mot) const
+//std::ostream& operator<<(std::ostream& os, const lrstateitem& itm)
+std::ostream& print_item(std::ostream& os, const lrstateitem& itm, const symholder& sholder)
 {
-	AlgorithmArg arg(gin.gettinyg());
+	const production& p = *itm.prod;
+		
+	os<<sholder[p.left()].name<<" -> ";
+	
+	for(size_t j = 0; j < p.right_size(); ++ j)
+	{
+		if(itm.dot == j) os<<".";
+		os<<sholder[p[j]].name<<" ";
+	}
+	if(itm.dot == p.right_size()) os<<".";
+	os<<"\t,";
+	for(sfollowset::const_iterator iter_f = itm.follow.begin(); iter_f != itm.follow.end(); ++ iter_f)
+	{
+		if (*iter_f < 0) os<<" #";
+		else os<<" "<<sholder[*iter_f].name;
+	}
+	return os<<"\n";
+}
 
-	std::queue<lrstate*> sQueue;
-	sQueue.push(&arg.lrsts.front());
+void lranalyse::operator()(const grammar& gin, lrmachine& mot)
+{
+	std::auto_ptr<AlgorithmArg> ptr_arg(new AlgorithmArg(gin));
+	AlgorithmArg& arg = *ptr_arg;
+
+	std::queue<const lrstate*> sQueue;
+	sQueue.push(&(*kog::iterator_next(arg.lrsts.begin())));
 	
 	while(!sQueue.empty())
 	{
 		const lrstate* pRow = sQueue.front();
 		sQueue.pop();
-	
-		// reduce - reduce conflict
-		// reduce - shiftin conflict
-		arg.CheckLR1(pRow);
 
 		typedef std::pair<int32, const lrstateitem*> etapair;
-		std::pair<etapair> eats;// first: next symbol, second: ref lrstateitem
+		std::vector<etapair> eats;// first: next symbol, second: ref lrstateitem
 		for(lrstate::const_iterator iter = pRow->begin(); iter != pRow->end(); ++ iter)
 		{
 			const production& p = *iter->prod;
 			if(iter->dot == p.right_size()) // reduce item
 			{
 				// using first(By) to make reduce item
-				for(std::set<int32>::const_iterator iterf = iter->follow.begin(); iterf != iter->follow.end(); ++ iterf)
+				for(sfollowset::const_iterator iterf = iter->follow.begin(); iterf != iter->follow.end(); ++ iterf)
 				{
-					//reduces.push_back(std::make_pair(*iter, &p));
-					arg.sparsesheet.push_back(kog::make_triple(&(*iter), *iterf, nextstate(&p)));
+					arg.sparsesheet.push_back(kog::make_triple(pRow, *iterf, nextstate(&p)));
 				}
 			}
 			else
 			{
-				eats.push_back(kog::make_pair(p.right()[iter->dot], &(*iter)));
+				eats.push_back(std::make_pair(p.right()[iter->dot], &(*iter)));
 			}
 		}
+
 		// sort by first 
 		std::sort(eats.begin(), eats.end(), kog::composite_function(kog::mem_value(&etapair::first),
 					kog::mem_value(&etapair::first), std::less<int32>()));
@@ -109,222 +151,213 @@ void lranalyse::operator()(const grammar& gin, lrmachine& mot) const
 			for(j = i; j < eats.size() && eats[i].first == eats[j].first; ++ j)
 			{
 				lrstateitem item;
-				item.prod = etas[j].second->prod;
-				item.dot = etas[j].second->dot + 1;
-				s.pushback(item);
+				item.prod = eats[j].second->prod;
+				item.dot = eats[j].second->dot + 1;
+				
 				// update follow set
-				arg.update_follow(item, etas[j].second->follow)
+				item.follow = eats[j].second->follow;
+				//int32 x = arg.get_next_symbol(*item.prod, item.dot);
+				//arg.get_firsts(x, eats[j].second->follow, item.follow);
+
+				s.push_back(item);
 			}
-			arg.upate_closure(s);
-			if((const lrstate* pNewS = arg.insert_new_state(pRow, etas[i].first, &s)) != NULL)
+			arg.update_closure(s);
+			const lrstate* pNewS = arg.insert_new_state(pRow, eats[i].first, &s);
+			if(pNewS != NULL)
 				sQueue.push(pNewS);
 		}
+
+		// reduce - reduce conflict
+		// reduce - shiftin conflict
+		arg.CheckLR1(pRow);
 	}
 
-	automachine::shared_sheet psheet(new automachine::sparsesheet(arg.lrsts.size() + 1)); // s0 is ending status
-	automachine::sparsesheet& sheet = *psheet();
+	make_machine(arg, gin.gettinyg(), mot);
+}
+
+void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachine& mot) const
+{
+	lrmachine tmpm(tig);
+	automachine::sparsesheet& sheet = tmpm.sheet();
+	sheet.reset(arg.lrsts.size() + 1); // s0 is ending status
+	tmpm.sstate() = 1;	// s1 is starting status
+	
 	typedef kog::triple<const lrstate*, int32, nextstate> gototriple;
 	arg.sparsesheet.sort(kog::composite_function(kog::mem_value(&gototriple::first),
 					kog::mem_value(&gototriple::first), std::less<const lrstate*>()));
-	for (gototriple::const_iterator iterI = arg.sparsesheet.begin(), iterJ; iterI != arg.sparsesheet.end(); )
+	int32 nstate = arg.lrsts.size();
+	sheet.reset(nstate);
+	std::map<const lrstate*, int32> lrmap;
+	int32 idx = 0;
+	for (std::list<lrstate>::const_iterator iter = arg.lrsts.begin(); iter != arg.lrsts.end(); ++ iter) lrmap[&(*iter)] = idx ++;
+	for (std::list<gototriple>::const_iterator iterI = arg.sparsesheet.begin(), iterJ; iterI != arg.sparsesheet.end(); )
 	{
-	}
-}
+		int nc = 0;
+		int32 A = lrmap[iterI->first];
+		for (iterJ = iterI; iterJ != arg.sparsesheet.end() && iterJ->first == iterI->first; ++ iterJ) ++ nc;
+		sheet[A].reset(nc);
 
-size_t Algorithm_IsLR1::AlgorithmArg::UpdateClosure(LR::LRState& orgState) const
-{
-	const size_t P = orgState.size();
-	std::list<LR::Closure> TempClosures(P);
-	std::list<LR::Closure>::iterator iter_temp = TempClosures.begin();
-	std::queue<std::list<LR::Closure>::iterator> Q;
-	std::list<size_t> EmptySet;
-	for(size_t i = 0; i != P; ++ i)
-	{
-		iter_temp->swap(orgState[i]);
-		Q.push(iter_temp);
-		++ iter_temp;
-	}
-
-	while(!Q.empty())
-	{
-		std::list<LR::Closure>::iterator iter = Q.front();
-		Q.pop();
-		right_range range = GetNextSymbols(iter->ProdutionNo(), iter->DotPos());
-		if(range.first != range.second && !IsTerminate[*range.first])
-		{// non-terminate
-			std::list<size_t> NewFollows;
-			right_range yrange = range;
-			++ yrange.first;
-			if(GetFirsts(yrange, NewFollows))
+		lrmachine::pinfoarray parray;
+		parray.reset(iterI->first->size());
+		nc = 0;
+		for (lrstate::const_iterator iter_item = iterI->first->begin(); iter_item != iterI->first->end(); ++ iter_item)
+		{
+			parray[nc].dot = iter_item->dot;
+			parray[nc].pid = (int32)std::distance(tig.productions().get(), iter_item->prod);
+			++ nc;
+		}
+		tmpm.morelist().push_back(parray);
+		sheet[A].more(&tmpm.morelist().back());
+		nc = 0;
+		for (iterJ = iterI; iterJ != arg.sparsesheet.end() && iterJ->first == iterI->first; ++ iterJ, ++ nc)
+		{
+			switch(iterJ->third.sorp)
 			{
-				NewFollows.insert(NewFollows.begin(), iter->Follows().begin(), iter->Follows().end());
+			case 0: 
+				sheet[A][nc] = automachine::gotoitem(iterJ->second, lrmap[iterJ->third.ps]);
+				break;
+			case 1:
+				{
+					//tinygrammar::vecprods::const_iterator iter_find = std::find
+					int32 pid = (int32)std::distance(tig.productions().begin(), 
+						std::find_if(tig.productions().begin(), tig.productions().end(), 
+							kog::composite_function(kog::get_ptr_t<production>(), 
+								std::bind2nd(std::equal_to<const production*>(), iterJ->third.pp))));
+					sheet[A][nc] = automachine::gotoitem(iterJ->second, -pid);
+				}
+				break;
+			default:
+				fire("invalidate goto item!");
 			}
 			
-			// add all A->.b
-			std::vector<grammar::RefProduction>::const_iterator iterProd = 
-				std::lower_bound(refProductions.begin(), refProductions.end(),
-				std::make_pair(*range.first, std::list<size_t>()), ProductionCmpLeft());
-			size_t idx = std::distance(refProductions.begin(), iterProd);
-			while(iterProd != refProductions.end() && iterProd->first == *range.first)
-			{
-				LR::Closure tempClosure(idx, 0, NewFollows.begin(), NewFollows.end());
-				// if found the same closure
-				std::list<LR::Closure>::iterator iterSameClosure = 
-					std::find_if(TempClosures.begin(), TempClosures.end(),
-					//std::bind2nd(LR::Closure::ClosureKernelEqual(), tempClosure));
-					std::bind2nd(LR::Closure::ClosureEqual(), tempClosure));
-				if(iterSameClosure == TempClosures.end())
-				{// can't find a same closure
-					TempClosures.push_back(tempClosure);
-					//TempClosures.back().swap(LR::Closure(idx, 0, NewFollows.begin(), NewFollows.end()));
-					//Q.push(TempClosures.rbegin().base());
-					std::list<LR::Closure>::iterator iter_n = TempClosures.rbegin().base();
-					Q.push(-- iter_n);
-				}
-				else
-				{// 
-					//throw std::exc
-					//std::list<size_t> CombinedFollows(iterSameClosure->Follows().begin(),
-					//	iterSameClosure->Follows().end());
-					//CombinedFollows.insert(CombinedFollows.end(), 
-					//	NewFollows.begin(), NewFollows.end());
-					//iterSameClosure->swap(LR::Closure(iterSameClosure->ProdutionNo(), iterSameClosure->DotPos(),
-					//	CombinedFollows.begin(), CombinedFollows.end()));
-				}
-				++ iterProd;
-				++ idx;
-			}
 		}
+		iterI = iterJ;
 	}
 
-	LR::Closure::ClosureLess cLess;
-	TempClosures.sort(cLess);
-	// combine
-	std::vector<int> IsStatute;
-	IsStatute.reserve(TempClosures.size());
-	for(std::list<LR::Closure>::iterator iter_temp = TempClosures.begin();
-		iter_temp != TempClosures.end(); )
-	{
-		std::list<LR::Closure>::iterator iter_temp2 = iter_temp;
-		++ iter_temp2;
-		for(; iter_temp2 != TempClosures.end();)
-		{
-			if(iter_temp2->ProdutionNo() == iter_temp->ProdutionNo() && 
-				iter_temp2->DotPos() == iter_temp->DotPos())
-			{
-				iter_temp->Follows().insert(iter_temp->Follows().end(), iter_temp2->Follows().begin(),
-					iter_temp2->Follows().end());
-				iter_temp2 = TempClosures.erase(iter_temp2);
-			}
-			else break;
-		}
-		iter_temp->Follows().erase(
-			std::unique(iter_temp->Follows().begin(), iter_temp->Follows().end()),
-			iter_temp->Follows().end());
-		IsStatute.push_back(
-			iter_temp->DotPos() == 
-			refProductions[iter_temp->ProdutionNo()].second.size() ? 1 : 0);
-		iter_temp = iter_temp2;
-	}
-
-	orgState.swap(LR::LRState(TempClosures.begin(), TempClosures.end()));
-	
-	size_t idx = 0;
-	LR::LRState::IsLRStateEqual sEqual;
-	for(std::list<LR::AnalysisSheet::SheetRow>::const_iterator iter = sheetRows.begin();
-		iter != sheetRows.end(); ++ iter, ++ idx)
-	{
-		if(sEqual(iter->first, orgState)) return idx;
-	}
-
-#ifdef SHOW_DEBUG_MESSAGE
-	std::clog<<"I"<<sheetRows.size()<<"\n";
-	for(size_t i = 0; i != orgState.size(); ++ i)
-	{
-		LR::Closure& item = orgState[i];
-		const grammar::RefProduction& prod = refProductions[item.ProdutionNo()];
-		if(prod.first >= grammar.GetSymbolCount())
-			std::clog<<"S1"<<" -> ";
-		else std::clog<<grammar.GetSymbol(prod.first)->Name()<<" -> ";
-		std::list<size_t>::const_iterator iter_r = prod.second.begin();
-		for(size_t j = 0; j != prod.second.size(); ++ j, ++ iter_r)
-		{
-			if(item.DotPos() == j) std::clog<<".";
-			std::clog<<grammar.GetSymbol(*iter_r)->Name();
-		}
-		if(item.DotPos() == prod.second.size()) std::clog<<".";
-		std::clog<<"\t,";
-		for(LR::Closure::FollowVector::const_iterator iter_f = item.Follows().begin(); iter_f != item.Follows().end(); ++ iter_f)
-		{
-			Compile::_Str str = grammar.GetSymbol(*iter_f)->Name();
-			if(str == Symbol::EndSymbol) str = "#";
-			std::clog<<str;
-		}
-		std::clog<<"\n";
-	}
-	std::clog<<"\n";
-#endif
-
-	return -1;
+	tmpm.swap(mot);
 }
 
-bool AlgorithmArg::CheckLR1(const automachine::sheetrow& sortedActs) const
+bool AlgorithmArg::CheckLR1(const lrstate* cs) const
 {
-	if(!sortedActs.empty())
+	typedef std::list<kog::triple<const lrstate*, int32, nextstate> > lrrowlist;
+	kog::smart_vector<int32> issused(tig->symbols().size() + 1); // last one is for ending symbol('#')
+	memset(issused.get(), 0, issused.size_in_bytes());
+	for (lrrowlist::const_reverse_iterator  iter = sparsesheet.rbegin(); iter != sparsesheet.rend() && iter->first == cs; ++ iter)
 	{
-		automachine::sheetrow::const_iterator iterF = sortedActs.begin();
-		automachine::sheetrow::const_iterator iterN = algfun::iterator_next(iterF);
-		automachine::sheetrow::const_iterator iter_end = sortedActs.end();
-		while(iterN != iter_end && iterF->first != iterN->first) ++ iterF, ++ iterN;
-		return iterN == iter_end;
+		int32 x = iter->second == -1 ? (issused.size() - 1) : iter->second;
+		if(x < 0) fire("invalidate symbol!");
+		else if(issused[x]) 
+		{
+#ifdef DEBUG_OUTPUT
+			logstring("\nAlgorithmArg::CheckLR1, error lr state:\n");
+			for (lrstate::const_iterator iter_item = cs->begin(); iter_item != cs->end(); ++ iter_item)
+			{
+				print_item(kog::loggermanager::instance().get_logger().getos(), *iter_item, tig->symbols());
+			}
+#endif
+			
+			fire("not lr grammar!");
+		}
+		else issused[x] = 1;
 	}
 	return true;
 }
 
-void Algorithm::update_closure(lrstate& li)
+void AlgorithmArg::update_closure(lrstate& li) const
 {
 	std::set<int32> cset;
-	const prodholder& pholder = tig.productions();
-	const symholder& sholder = tig.symbols();
-	
-	kog::smart_vector<followset*> pfollows(pholder.size(), NULL);
-	size_t nlastsize = 0;
+	typedef tinygrammar::vecprods prodholder;
+	const prodholder& pholder = tig->productions();
+	const symholder& sholder = tig->symbols();
 
-	for (lrstate::const_iterator iter = li.begin(); iter != lr.end(); ++ iter)
+	kog::smart_vector<sfollowset*> sfollows(sholder.size(), NULL);
+	kog::smart_vector<int32> issupdated(sholder.size(), 0);
+	for (lrstate::const_iterator iter = li.begin(); iter != li.end(); ++ iter)
 	{
 		const production& p = *iter->prod;
-		pfollows[(int32)(iter->prod - pholder.get())] = new followset(iter->follow);
-		if(p.right_size() != iter->dot && !sholder[p.right()[iter->dot]].ist) // not last symbol?
+		if(iter->dot < p.right_size()) // not the end
 		{
-			cset.insert(sholder[p.right()[iter->dot]]);
+			int32 xx = p[iter->dot];
+			if(!ists[xx]) 
+			{
+				for (eclosure::closure::const_iterator ie = closures[xx].begin(); ie != closures[xx].end(); ++ ie)
+				{
+					if (sfollows[*ie] == NULL) sfollows[*ie] = new sfollowset;
+				}
+				get_firsts(get_next_symbol(p, iter->dot + 1), 
+					iter->follow, *sfollows[xx]);
+				issupdated[xx] = 1;
+			}
 		}
 	}
 
-	for (std::set<int32>::const_iterator iter = cset.begin(); iter != cset.end(); ++ iter)
+	while(true)
 	{
-		for (size_t i = npti[*iter]; i < plist.size() && plist[i].left() == *iter; ++ i)
+		// find first need to update
+		int32 i = 0;
+		for (; i < sholder.size() && !issupdated[i]; ++ i);
+		if(i == sholder.size()) break;
+		issupdated[i] = 0;
+		for (int32 j = ntpi[i]; j < plist.size() && plist[j]->left() == i; ++ j)
 		{
-			if(ispused[i])  // update follows
+			const production& p = *plist[j];
+			if(!ists[p[0]])
 			{
+				int32 xn = sfollows[p[0]]->size();
+				get_firsts(get_next_symbol(p, 1), *sfollows[i], *sfollows[p[0]]);
+				issupdated[p[0]] = sfollows[p[0]]->size() != xn; // need to update
 			}
-			else
-			{
-				ispused[i] = 1;
-				lrstateitem itm;
-				itm.prod = plist[i];
-				itm.dot = 0;
-				// get follows of new item
-				li.push_back(itm);
-			}
+			else if(sholder[p[0]].name == NULL || *sholder[p[0]].name == '\0')
+				fire("lranalyse, invalidate gramar: no eplison!");
 		}
 	}
+
+	// set follows of closure's item
+	lrstate tmps;
+	for (lrstate::const_iterator iter = li.begin(); iter != li.end(); ++ iter)
+	{
+		const production& p = *iter->prod;
+		if (sfollows[p.left()] == NULL || iter->dot != 0)
+		{
+			tmps.push_back(*iter);
+		}
+	}
+
+	for (int32 i = 0; i < sfollows.size(); ++ i)
+	{
+		if(sfollows[i] == NULL) continue;
+		for (int32 j = ntpi[i]; j < plist.size() && plist[j]->left() == i; ++ j)
+		{
+			lrstateitem itm;
+			itm.prod = plist[j];
+			itm.dot = 0;
+			itm.follow = *sfollows[i];
+			tmps.push_back(itm);
+		}
+		delete sfollows[i];
+		sfollows[i] = NULL;
+	}
+	tmps.swap(li);
+
+#ifdef DEBUG_OUTPUT
+	static int32 ii = 1;
+	logstring("I%d\n", ii++);
+	for(size_t i = 0; i != li.size(); ++ i)
+	{
+		const lrstateitem& itm = li[i];
+		print_item(kog::loggermanager::instance().get_logger().getos(), itm, sholder);
+	}
+	logstring("\n");
+#endif
 }
 
 // A -> aB
-void Algorithm::insert_new_state(const lrstate* A, int32 a, const lrstate* B)
+const lrstate* AlgorithmArg::insert_new_state(const lrstate* A, int32 a, const lrstate* B)
 {
 	const lrstate* ps = NULL;
-	if((std::list<lrstate>::iterator iterfind = std::find(lrsts.begin(), lrsts.end(), *B)) != lrsts.end())
+	const lrstate* rv = NULL;
+	std::list<lrstate>::iterator iterfind = std::find(lrsts.begin(), lrsts.end(), *B);
+	if(iterfind != lrsts.end())
 	{
 		// find an existing lrstate
 		ps = &(*iterfind);
@@ -333,11 +366,13 @@ void Algorithm::insert_new_state(const lrstate* A, int32 a, const lrstate* B)
 	{
 		lrsts.push_back(*B);
 		ps = &lrsts.back();
+		rv = ps;
 	}
 	sparsesheet.push_back(kog::make_triple(A, a, ps));
+	return rv;
 }
 
-void AlgorithmArg::get_firsts(int32 x, const followset& f, followset& nf) const
+void AlgorithmArg::get_firsts(int32 x, const sfollowset& f, sfollowset& nf) const
 {
 	if (x == -1) // end of production
 	{
@@ -353,77 +388,68 @@ void AlgorithmArg::get_firsts(int32 x, const followset& f, followset& nf) const
 int32 AlgorithmArg::get_next_symbol(const production& p, int32 idot) const
 {
 	if(p.right_size() == idot) return -1; // ending of production
-	return p.right[idot];
+	return p.right()[idot];
 }
 
-AlgorithmArg::AlgorithmArg(const grammar& orggrammar)
-: IsVNEmpty(orggrammar.GetSymbolCount() + 1)
-, IsTerminate(orggrammar.GetSymbolCount() + 1)
-, refProductions(orggrammar.GetProductionCount() + 1)
-, productionMap(orggrammar.GetProductionCount() + 1)
-, grammar(orggrammar)
+AlgorithmArg::AlgorithmArg(const grammar& gin)
+: ists(gin.gettinyg().symbols().size() + 1, 0)
+, plist(gin.gettinyg().productions().size(), NULL)
+, ntpi(gin.gettinyg().symbols().size(), -1)
+, tig(&gin.gettinyg())
 {
-	const size_t M = orggrammar.GetProductionCount();
-	const size_t N = orggrammar.GetSymbolCount();
+	typedef tinygrammar::vecprods prodholder;
+	const symholder& sholder = tig->symbols();
+	const prodholder& pholder = tig->productions();
+	const size_t M = pholder.size();
+	const size_t N = sholder.size();
 
-	kog::smart_vector<const production*> plist(pholder.size());
 	std::transform(pholder.begin(), pholder.end(), plist.begin(), kog::get_ptr_t<production>());
 	// sort by production left
 	kog::depointer_t<const production> dpp;
 	std::sort(plist.begin(), plist.end(), kog::composite_function(dpp, dpp, pleft_less()));
-	kog::smart_vector<int32> ntpi(sholder.size(), -1);
 	for(size_t i = 0; i < plist.size(); ++ i)
 		if(ntpi[plist[i]->left()] == -1) ntpi[plist[i]->left()] = i;
 
-	// get e-closure of every symbol
-	eclosures::closure_array closures;
-	eclosures ec_algorithm(tig, closures);
+	// get e-closure of every non-terminate symbol
+	eclosure ec_algorithm(*tig, closures);
 	ec_algorithm.invoke();
 
-	size_t idxEmpty = -1;
-	size_t idxStart = -1;
-	size_t idxEnd = -1;
-	for(size_t i = 0; i != N; ++ i)
+	// get first set of every non-terminate symbol 
+	firstset fs_algorithm(gin, firstsets);
+	fs_algorithm.invoke();
+
+	std::transform(sholder.begin(), sholder.end(), ists.begin(),
+		kog::mem_value(&symbol::ist));
+	// Symbol[N] = S'; S' -> S
+
+	// update 
+	lrsts.resize(2);
+	// 0: ending status
+	// 1: start status
 	{
-		const Symbol* pSym = orggrammar.GetSymbol(i);
-		IsTerminate[i] = pSym->IsTerminate();
-		if(pSym->IsEmpty()) idxEmpty = i;
-		else if(pSym->Content() == orggrammar.GetStartSymbol())
-			idxStart = i;
-		else if(pSym->IsEnd()) idxEnd = i;
+		lrstate& start = *kog::iterator_next(lrsts.begin());
+		int32 start_symbol = tig->starts();
+		if(start_symbol < 0 || start_symbol >= N)
+			fire("invalidate start symbol index(%d)", start_symbol);
+//		size_t nc = std::distance(plist.begin() + npti[start_symbol], 
+//			std::find_if(plist.begin() + npti[start_symbol], plist.end(), 
+//			kog::composite_function(kog::composite_function(kog::depointer_t<const production*>(), kog::member_value(&production::left)))))
+		int32 nc = 0;
+		for (int32 i = ntpi[start_symbol]; i < plist.size() && plist[i]->left() == start_symbol; ++ i) ++ nc;
+		start.resize(nc);
+		for (int32 i = ntpi[start_symbol], j = 0; j < nc; ++ i, ++ j)
+		{
+			lrstateitem& itm = start[j];
+			itm.prod = plist[i];
+			itm.dot = 0;
+			itm.follow.insert(-1); // -1 is ending symbol
+		}
+
+		update_closure(start);
 	}
-	if(idxEmpty < N) IsVNEmpty[idxEmpty] = 1;
-	// Symbol[N] = S';
-
-	refProductions.reserve(M + 1);
-	orggrammar.GetAllRefProduction(refProductions);
-	// S' -> S
-	refProductions.push_back(grammar::RefProduction(N, std::list<size_t>(1, idxStart)));
-	//std::sort(refProductions.begin(), refProductions.end(), ProductionCmpLeft());
-	//std::vector<std::pair<size_t, size_t> > 
-	//for(size_t i = 0; i != M + 1; ++ i)
-	//	productionMap[i] = i;
-	//std::sort(
-	productionMap = algfun::index_sort(refProductions.begin(), refProductions.end(),
-		ProductionCmpLeft());
-
-	Algorithm_First algorithmFirst;
-	//FirstSets.reserve(N + 1);
-	if(0 != algorithmFirst(orggrammar, FirstSets))
-		throw std::exception("can't calculate first sets of the grammar!");
-
-	for(size_t i = 0; i < N; ++ i)
-	{
-		FirstSets[i].sort();
-		if(std::find(FirstSets[i].begin(), FirstSets[i].end(), idxEmpty) != FirstSets[i].end())
-			IsVNEmpty[i] = 1;
-	}
-
-	std::vector<size_t> buf(1, idxEnd);
-	LR::Closure item(M, 0, buf.begin(), buf.end());
-	LR::LRState tempState(&item, &item + 1);
-	UpdateClosure(tempState);
-	sheetRows.push_back(std::make_pair(tempState, automachine::sheetrow()));
-	//UpdateClosure(sheetRows.front().first);
+	
+	// add new goto row
+	const lrstate* s1 = &(*kog::iterator_next(lrsts.begin()));
+	const lrstate* s0 = &(*lrsts.begin());
+	sparsesheet.push_back(kog::make_triple(s1, tig->starts(), nextstate(s0)));
 }
-*/

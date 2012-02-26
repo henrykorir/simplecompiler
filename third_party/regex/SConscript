@@ -5,8 +5,8 @@ Import('aEnv')
 cppfiles = ['xregex.cpp']
 
 libboost = 'boost-dev'
-#incboost = ''
+incboost = r'D:\Program Files\boost'
 
 aEnv['regexlib'] = ['regex', libboost]
 
-aEnv.Library(target = 'regex', source = cppfiles, LIBS=[libboost])
+aEnv.Library(target = 'regex', source = cppfiles, LIBS=[libboost], CPPPATH=[incboost])

@@ -7,9 +7,9 @@
 #include <functionalX.h>
 #include <stringX.h>
 
-#define DEBUG_OUTPUT
+//#define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
-#include <iostream>
+#include <logger.h>
 #endif
 
 using namespace compile;
@@ -67,10 +67,10 @@ void removenotused::rm_notoT(const tinygrammar& tig)
 	}while(nNewCount != nLastCount);
 
 #ifdef DEBUG_OUTPUT
-	std::cout<<"can to terminate:\n";
+	logstring("\n[removenotused::rm_notoT] can to terminate\n");
 	for(size_t i = 0; i < useds.size(); ++ i)
 	{
-		if(useds[i]) std::cout<<tig.symbols()[i].name<<"\n";
+		if(useds[i]) logstring("%s\n", tig.symbols()[i].name);
 	}
 #endif
 }
@@ -106,10 +106,10 @@ void removenotused::rm_Snofm(const tinygrammar& tig)
 		useds[i] = useds[i] == 3 ? 1 : 0;
 
 #ifdef DEBUG_OUTPUT
-	std::cout<<"can from start:\n";
+	logstring("\n[removenotused::rm_Snofm] can from start\n");
 	for(size_t i = 0; i < useds.size(); ++ i)
 	{
-		if(useds[i]) std::cout<<tig.symbols()[i].name<<"\n";
+		if(useds[i]) logstring("%s\n", tig.symbols()[i].name);
 	}
 #endif
 }
@@ -199,11 +199,13 @@ void removesingle::operator()(const grammar& gin, grammar& gout)
 		{
 			int32 x = Wstack.back();
 			Wstack.pop_back();
-			if(Wi[x]) continue;
 			Wi[x] = 1;
 			
-			for(size_t v = idx[x]; singleP[v].first == x; ++ v) 
-				Wstack.push_back(singleP[v].second);
+			for(size_t v = idx[x]; v != -1 && singleP[v].first == x; ++ v)
+			{
+				int32 ss = singleP[v].second;
+				if(!Wi[ss]) Wstack.push_back(ss);
+			}
 		}
 
 		Wi[i] = 0; // set A -> A not occure
@@ -216,7 +218,7 @@ void removesingle::operator()(const grammar& gin, grammar& gout)
 		}
 	}
 	// remove duplicate productions
-	//NewProdList.unique();
+	// NewProdList.unique();
 	remove_duplicate(NewProdList);
 
 	tinygrammar totg(tig.symbols().begin(), tig.symbols().end(), NewProdList.begin(), NewProdList.end(), tig.starts());
@@ -229,10 +231,69 @@ void removesingle::remove_duplicate(std::list<production>& plist)
 	plist.unique(p_equal());
 }
 
+void symbol_to_eplison::operator()(const tinygrammar& tig, vecint& istoe, int32& eid)
+{
+	const symholder& sholder = tig.symbols();
+	const tinygrammar::vecprods& prods = tig.productions();
+	
+	kog::smart_vector<int32> IsProdUsed(prods.size());
+	memset(IsProdUsed.get(), 0, IsProdUsed.size_in_bytes());
+
+	kog::smart_vector<int32> toe(sholder.size());
+	memset(toe.get(), 0, toe.size_in_bytes());
+	
+	eid = -2;
+	try{
+		const tchar* eplison = ""; // eplison is empty string
+		eid = sholder.index(eplison);
+		if(eid >= 0 && eid < sholder.size())toe[eid] = 1;
+	}catch(...){
+	}
+
+	size_t nLastCount = 1;
+	size_t nNewCount = 1;
+
+	do{
+		nLastCount = nNewCount;
+		for(size_t i = 0; i < prods.size(); ++ i)
+		{
+			const production& p = prods[i];
+			if(toe[p.left()] || IsProdUsed[i]) continue;
+			production::right_array::const_iterator iter = p.right().begin();
+			production::right_array::const_iterator iter_end = p.right().end();
+			for(; iter != iter_end; ++ iter)
+			{
+				if(!toe[*iter]) break;
+			}
+			if(iter_end == iter)
+			{
+				toe[p.left()] = 1;
+				IsProdUsed[i] = 1;
+			}
+		}
+		
+		nNewCount = std::count(toe.begin(), toe.end(), 1);
+	}while(nNewCount != nLastCount);
+
+	istoe.swap(toe);
+
+#ifdef DEBUG_OUTPUT
+	logstring("symbol_to_eplison, Wset = { ");
+	const char* sep = "";
+	for(size_t i = 0; i < istoe.size(); ++ i, sep = ", ")
+	{
+		if(istoe[i] && i != eid) 
+		{
+			logstring("%s%s", sep, tig.symbols()[i].name);
+		}
+	}
+	logstring(" }\n");
+#endif
+}
+
 void eliminate_eplison::operator()(const grammar& gin, grammar& gout)
 {
 	const tinygrammar& tig = gin.gettinyg();
-
 	const symholder& sholder = tig.symbols();
 	const tinygrammar::vecprods& prods = tig.productions();
 
@@ -269,51 +330,8 @@ void eliminate_eplison::operator()(const grammar& gin, grammar& gout)
 
 void eliminate_eplison::findtoe(const tinygrammar& tig)
 {
-	const symholder& sholder = tig.symbols();
-	const tinygrammar::vecprods& prods = tig.productions();
-	
-	kog::smart_vector<int32> IsProdUsed(prods.size());
-	memset(IsProdUsed.get(), 0, IsProdUsed.size_in_bytes());
-
-	toe[eid] = 1;
-
-	size_t nLastCount = 1;
-	size_t nNewCount = 1;
-
-	do{
-		nLastCount = nNewCount;
-		for(size_t i = 0; i < prods.size(); ++ i)
-		{
-			const production& p = prods[i];
-			if(toe[p.left()] || IsProdUsed[i]) continue;
-			production::right_array::const_iterator iter = p.right().begin();
-			production::right_array::const_iterator iter_end = p.right().end();
-			for(; iter != iter_end; ++ iter)
-			{
-				if(!toe[*iter]) break;
-			}
-			if(iter_end == iter)
-			{
-				toe[p.left()] = 1;
-				IsProdUsed[i] = 1;
-			}
-		}
-		
-		nNewCount = std::count(toe.begin(), toe.end(), 1);
-	}while(nNewCount != nLastCount);
-
-#ifdef DEBUG_OUTPUT
-	std::cout<<"Wset = { ";
-	for(size_t i = 0, j = 0; i < toe.size(); ++ i)
-	{
-		if(toe[i] && i != eid) 
-		{
-			if(j ++ != 0) std::cout<<", ";
-			std::cout<<tig.symbols()[i].name;
-		}
-	}
-	std::cout<<" }"<<std::endl;
-#endif
+	symbol_to_eplison stoe(tig, toe, eid);
+	stoe.invoke();
 }
 
 bool eliminate_eplison::is_start_in_right(const tinygrammar& tig) const

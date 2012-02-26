@@ -41,3 +41,13 @@ int32 lrmachine::reduce(int32 pid)
 	cstate_ = pstack_.top().state;
 	return p.left();
 }
+
+void lrmachine::swap(lrmachine& other) throw()
+{
+	((automachine*)this)->swap(other);
+	//pstack_.swap(other.pstack_);
+	std::swap(pstack_, other.pstack_);
+	funcs_.swap(other.funcs_);
+	morelist_.swap(other.morelist_);
+	std::swap(pg_, other.pg_);
+}

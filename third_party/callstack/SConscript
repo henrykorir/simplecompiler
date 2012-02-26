@@ -1,0 +1,12 @@
+# SConscript
+
+import os
+
+Import('aEnv')
+
+
+platform = os.sys.platform.lower()
+
+cppfiles = aEnv.Glob(os.path.join(platform, '*.cpp'))
+
+aEnv.Library(target = 'stacktrace', source = cppfiles, CPPPATH=['../../include'])

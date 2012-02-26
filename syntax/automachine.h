@@ -8,10 +8,11 @@
 #include <functional>
 #include <macros.h>
 #include <basic_types.h>
-#include <share_ptr.h>
 #include <arrayX.h>
-#include <boost/shared_ptr.hpp>
+//#include <boost/shared_ptr.hpp>
+#include <shared_ptr.h>
 
+class compiler;
 NAMESPACE_BEGIN(compile)
 
 template<typename _CmpFunc>
@@ -51,6 +52,13 @@ public:
 		, isendings_(0)
 		, more_(NULL)
 		{}
+
+		sheetrow(int32 etype, int32 ise, void* morei)
+		: eattype_(etype)
+		, isendings_(ise)
+		, more_(morei)
+		{
+		}
 	//	static sheetrow& make_any(int32 nextS, sheetrow& row);
 	private:
 		int32 eattype_;
@@ -60,7 +68,7 @@ public:
 public:
 	//typedef kog::smart_vector<gotoitem> sheetrow;
 	typedef kog::smart_vector<sheetrow> sparsesheet;
-	typedef boost::shared_ptr<sparsesheet> shared_sheet;
+	typedef kog::shared_ptr<sparsesheet> shared_sheet;
 public:
 	automachine();
 	automachine(const shared_sheet& asheet);

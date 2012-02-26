@@ -56,7 +56,7 @@ public:
 						p3 = stringX::trim(line.substr(pos2 + 1));
 					}
 				}
-				if(stringX::tolower(p1) != "grammar" || p2.empty() || !std::isupper(p2[0]) || p3.size() > 1)
+				if(stringX::tolower(p1) != "grammar" || p2.empty() || !/*std*/::isupper(p2[0]) || p3.size() > 1)
 					throw std::runtime_error("invalidate g: " + line);
 				read_grammar(is, g, p2, p3, p4);
 				return *this;
@@ -119,7 +119,7 @@ private:
 		asym.name = &bufs.back()[0];//.c_str();
 		asym.Lname = (int)s.size();
 		asym.sid = (int32)slist.size();
-		asym.ist = std::isupper(s[0]) ? 0 : 1;
+		asym.ist = /*std::*/isupper(s[0]) ? 0 : 1;
 		slist.push_back(asym);
 		return asym.sid;
 	}
@@ -137,8 +137,13 @@ public:
 public:
 	gwriter& operator<<(const compile::grammar& g)
 	{
+		const compile::tinygrammar& tg = g.gettinyg();
+		return (*this)<<tg;
+	}
+
+	gwriter& operator<<(const compile::tinygrammar& tg)
+	{
 		using namespace compile;
-		const tinygrammar& tg = g.gettinyg();
 		const tinygrammar::vecprods& prods = tg.productions();
 		const symholder& sholder = tg.symbols();
 		os_<<"grammar:"<<sholder[tg.starts()].name<<"\n";

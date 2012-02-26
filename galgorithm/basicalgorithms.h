@@ -66,6 +66,32 @@ private:
 	grammar* gout_;
 };
 
+class symbol_to_eplison : public grammar_algorithm
+{
+public:
+	typedef kog::smart_vector<int32> vecint;
+public:
+	symbol_to_eplison(const tinygrammar& gin, vecint& istoe, int32& eid)
+	: grammar_algorithm("symbol_to_eplison")
+	, gin_(&gin)
+	, istoe_(&istoe)
+	, eid_(&eid)
+	{}
+public:
+	/* overwrite */ virtual void invoke()
+	{
+		(*this)(*gin_, *istoe_, *eid_);
+	}
+
+private:
+	// algorithm 2.3
+	void operator()(const tinygrammar& tig, vecint& istoe, int32& eid);
+private:
+	const tinygrammar* gin_;
+	vecint* istoe_;
+	int32* eid_;
+};
+
 class eliminate_eplison : public grammar_algorithm
 {
 	typedef kog::smart_vector<int32> vecint;

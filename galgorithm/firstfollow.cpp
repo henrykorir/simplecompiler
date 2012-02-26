@@ -4,9 +4,8 @@
 #include <set>
 #include <list>
 
-#define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
-#include <iostream>
+#include <logger.h>
 #endif
 
 using namespace compile;
@@ -26,7 +25,11 @@ void firstset::operator()(const grammar& gin, vecintset& sets)
 	std::vector<int> IsProdUsed(M);
 	std::vector<int> IsTerminate(N);
 
-	size_t idxEmpty = sholder.index("");
+	size_t idxEmpty = -5;
+	try{
+		idxEmpty = sholder.index("");
+	}catch(...){
+	}
 	for(size_t i = 0; i != N; ++ i)
 	{
 		const symbol& sym = sholder[i];

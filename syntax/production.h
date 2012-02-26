@@ -109,16 +109,19 @@ struct prod_less : public std::binary_function<production, production, bool>
 {
 	bool operator()(const production& p1, const production& p2) const
 	{
-		if(p1.left() < p2.left()) return true;
+		if(p1.left() != p2.left()) return p1.left() < p2.left();
+
 		const int32 _N = std::min(p1.right_size(), p2.right_size());
-		for(int i = 0; i < _N; ++ i) if(p1.right()[i] < p2.right()[i]) return true;
-		return p1.right_size() < p2.right_size();
+		int32 i = 0;
+		for(; i < _N && p1.right()[i] == p2.right()[i]; ++ i);
+		if (i == _N) return p1.right_size() < p2.right_size();
+		return p1.right()[i] < p2.right()[i];
 	}
 };
 
 typedef pleft_cmp<std::less<int32> > pleft_less;
 typedef pfirstright_cmp<std::less<int32> > pfirstright_less;
-typedef p_cmp<std::less<int32>, std::logical_or<bool> > p_less;
+//typedef p_cmp<std::less<int32>, std::logical_or<bool> > p_less;
 typedef p_cmp<std::equal_to<int32>, std::logical_and<bool> > p_equal;
 
 NAMESPACE_END(compile)

@@ -56,7 +56,7 @@ public:
 	typedef kog::smart_vector<std::pair<tstring, int32> > veckeywords;
 public:
 	grammar();
-	grammar(const tinygrammar& atinyG);
+	explicit grammar(const tinygrammar& atinyG);
 	virtual ~grammar();
 public:
 	enum symtype
@@ -65,7 +65,8 @@ public:
 		// followings are terminate
 		sep = 1, // seperators
 		keyword = 2, // keyword
-		smac = 3	// symbol match state machine
+		smac = 3,	// symbol match state machine
+		other_sym
 	};
 public:
 	const tinygrammar& gettinyg() const
