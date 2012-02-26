@@ -76,6 +76,13 @@ public:
 		(*this)[2] = _2.idx;	(*this)[3] = _3.idx;
 	}
 
+	V(IDX _0, IDX _1, IDX _2, IDX _3, IDX _4) : v(5)
+	{
+		(*this)[0] = _0.idx;	(*this)[1] = _1.idx;
+		(*this)[2] = _2.idx;	(*this)[3] = _3.idx;
+		(*this)[4] = _4.idx;
+	}
+
 	V(IDX _0, IDX _1, IDX _2, IDX _3, IDX _4, IDX _5) : v(6)
 	{
 		(*this)[0] = _0.idx;	(*this)[1] = _1.idx;
@@ -89,6 +96,14 @@ public:
 		(*this)[2] = _2.idx;	(*this)[3] = _3.idx;
 		(*this)[4] = _4.idx;	(*this)[5] = _5.idx;
 		(*this)[6] = _6.idx;
+	}
+
+	V(IDX _0, IDX _1, IDX _2, IDX _3, IDX _4, IDX _5, IDX _6, IDX _7) : v(8)
+	{
+		(*this)[0] = _0.idx;	(*this)[1] = _1.idx;
+		(*this)[2] = _2.idx;	(*this)[3] = _3.idx;
+		(*this)[4] = _4.idx;	(*this)[5] = _5.idx;
+		(*this)[6] = _6.idx;	(*this)[7] = _7.idx;
 	}
 	
 	V(IDX _0, IDX _1, IDX _2, IDX _3, IDX _4, IDX _5, IDX _6,

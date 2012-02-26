@@ -35,19 +35,19 @@ struct Function : public type
 };
 
 
-struct Expression : public type
+struct Expressions : public type
 {
 	enum{ sid = 4 };
-	Expression()
+	Expressions()
 		:type(sid)
 	{}
 };
 
 
-struct valuetype : public type
+struct Valuetype : public type
 {
 	enum{ sid = 5 };
-	valuetype()
+	Valuetype()
 		:type(sid)
 	{}
 };
@@ -98,28 +98,28 @@ struct FuncCall : public type
 };
 
 
-struct op : public type
+struct Op : public type
 {
 	enum{ sid = 11 };
-	op()
+	Op()
 		:type(sid)
 	{}
 };
 
 
-struct Print : public type
+struct PrintFunc : public type
 {
 	enum{ sid = 12 };
-	Print()
+	PrintFunc()
 		:type(sid)
 	{}
 };
 
 
-struct printF : public type
+struct print : public type
 {
 	enum{ sid = 13 };
-	printF()
+	print()
 		:type(sid)
 	{}
 };
@@ -143,28 +143,37 @@ struct ReturnExp : public type
 };
 
 
-struct Return : public type
+struct return : public type
 {
 	enum{ sid = 16 };
-	Return()
+	return()
 		:type(sid)
 	{}
 };
 
 
-struct Int : public type
+struct int : public type
 {
 	enum{ sid = 17 };
-	Int()
+	int()
 		:type(sid)
 	{}
 };
 
 
-struct Float : public type
+struct float : public type
 {
 	enum{ sid = 18 };
-	Float()
+	float()
+		:type(sid)
+	{}
+};
+
+
+struct Assignment : public type
+{
+	enum{ sid = 20 };
+	Assignment()
 		:type(sid)
 	{}
 };
@@ -172,7 +181,7 @@ struct Float : public type
 
 struct { : public type
 {
-	enum{ sid = 20 };
+	enum{ sid = 21 };
 	{()
 		:type(sid)
 	{}
@@ -181,7 +190,7 @@ struct { : public type
 
 struct } : public type
 {
-	enum{ sid = 21 };
+	enum{ sid = 22 };
 	}()
 		:type(sid)
 	{}
@@ -190,7 +199,7 @@ struct } : public type
 
 struct ( : public type
 {
-	enum{ sid = 22 };
+	enum{ sid = 23 };
 	(()
 		:type(sid)
 	{}
@@ -199,7 +208,7 @@ struct ( : public type
 
 struct ) : public type
 {
-	enum{ sid = 23 };
+	enum{ sid = 24 };
 	)()
 		:type(sid)
 	{}
@@ -208,7 +217,7 @@ struct ) : public type
 
 struct = : public type
 {
-	enum{ sid = 24 };
+	enum{ sid = 25 };
 	=()
 		:type(sid)
 	{}
@@ -217,7 +226,7 @@ struct = : public type
 
 struct * : public type
 {
-	enum{ sid = 25 };
+	enum{ sid = 26 };
 	*()
 		:type(sid)
 	{}
@@ -226,7 +235,7 @@ struct * : public type
 
 struct + : public type
 {
-	enum{ sid = 26 };
+	enum{ sid = 27 };
 	+()
 		:type(sid)
 	{}
@@ -235,7 +244,7 @@ struct + : public type
 
 struct - : public type
 {
-	enum{ sid = 27 };
+	enum{ sid = 28 };
 	-()
 		:type(sid)
 	{}
@@ -244,7 +253,7 @@ struct - : public type
 
 struct / : public type
 {
-	enum{ sid = 28 };
+	enum{ sid = 29 };
 	/()
 		:type(sid)
 	{}
@@ -253,7 +262,7 @@ struct / : public type
 
 struct ; : public type
 {
-	enum{ sid = 29 };
+	enum{ sid = 30 };
 	;()
 		:type(sid)
 	{}
@@ -262,7 +271,7 @@ struct ; : public type
 
 struct , : public type
 {
-	enum{ sid = 30 };
+	enum{ sid = 31 };
 	,()
 		:type(sid)
 	{}

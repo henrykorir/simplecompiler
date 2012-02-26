@@ -1,0 +1,28 @@
+grammar:Program
+Program -> begin StatementList end
+StatementList -> Statement
+StatementList -> StatementList ; Statement
+Statement -> Assignment
+Statement -> If_Block
+Statement -> While_Block
+Assignment -> symbol : = Expression
+If_Block -> if Condition then Statement
+If_Block -> if Condition then Program
+While_Block -> while Condition do Statement
+While_Block -> while Condition do Program
+Expression -> AValue
+Expression -> AValue + AValue
+Expression -> AValue - AValue
+Condition -> Expression Op Expression
+Op -> <
+Op -> <>
+Op -> <=
+Op -> >
+Op -> >=
+Op ->  =
+AValue -> Factor
+AValue -> Factor * Factor
+AValue -> Factor / Factor
+AValue -> symbol
+AValue -> number
+AValue -> ( Expression )

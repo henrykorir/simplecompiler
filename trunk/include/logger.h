@@ -9,6 +9,7 @@
 
 #include <macros.h>
 #include <singleton.h>
+#include <stringX.h>
 
 NAMESPACE_BEGIN(kog)
 
