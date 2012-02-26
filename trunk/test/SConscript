@@ -2,11 +2,13 @@
 
 Import('aEnv')
 
+incboost = r'D:\Program Files\boost'
 aEnv.Library(target = 'unittest', source = ['unittest.cpp'], CPPPATH=['../include'])
 
-UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax']
-UTinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm']
-UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm']
+
+UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace']
+UTinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm', incboost]
+UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace']
 
 aEnv.Program(target= 'docsplit', source = ['splitwords.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
 
@@ -19,3 +21,6 @@ aEnv.Program(target= 'basicga', source = ['basicalgorithmtest.cpp'], LIBS=UTlib,
 aEnv.Program(target= 'firstfollow', source = ['firstfollowtest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
 
 aEnv.Program(target= 'nfa2dfa', source = ['nfa2dfatest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+aEnv.Program(target= 'lrmachine', source = ['lrmachinetest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+

@@ -3,8 +3,10 @@
 #include <deque>
 #include <vector>
 #include <list>
+#include <cctype>
 
 #include <stringX.h>
+#include <scerror.h>
 
 using namespace compile;
 using namespace compile::ga;
@@ -80,15 +82,15 @@ struct parsecontent
 					}
 					break;
 				case -1: // empty
-					throw std::runtime_error("no matched )");
+					fire("no matched )");
 				default:
-					throw std::runtime_error("no matched )");
+					fire("no matched )");
 				}
 			}
 			break;
 		case '|':
 			{
-				if(R.empty()) throw std::runtime_error("error no item before '|'");
+				if(R.empty()) fire("error no item before '|'");
 				int vL = ++iS;
 				insert_new_prod(vL, &R[0], R.size(), p_seq);
 				R.clear();
@@ -153,7 +155,7 @@ struct parsecontent
 				const char* t = pe + 1;
 				if(R[c] = isrepat(t))
 				{
-					if(c == 0) throw std::runtime_error("no charator before +*?");
+					if(c == 0) fire("no charator before +*?");
 					int vtmp = ++iS;
 					insert_new_prod(vtmp, R + c - 1, 2, p_rep);
 					R[c-1] = vtmp;
@@ -163,7 +165,7 @@ struct parsecontent
 			}
 			insert_new_prod(L, R, c, p_seq);
 		}
-		else throw std::runtime_error("not matched []");
+		else fire("not matched []");
 	}
 
 	void true_node(const char* vs, const char* ve, int L)
@@ -191,7 +193,7 @@ struct parsecontent
 		}
 		else
 		{
-			if(x.empty()) throw std::runtime_error("no charactor before +*?");
+			if(x.empty()) fire("no charactor before +*?");
 			int R[3]; int c = 0;
 			char ch = x[x.size() - 1];
 			x.resize(x.size() - 1);
@@ -251,7 +253,7 @@ struct parsecontent
 		{
 			if(syms[i].sid == sid) return i;
 		}
-		throw std::runtime_error("can't find speical symbol");
+		fire("can't find speical symbol");
 	}
 
 	struct list
@@ -418,13 +420,13 @@ void set_grammar_production(tinygrammar::vecprods& productions, parsecontent& pc
 				}
 				break;
 			default:
-				throw std::runtime_error("invalidate production!");
+				fire("invalidate production!");
 			}
 			break;
 		case parsecontent::p_switch:
 			{
 				const std::string&s = pc.syms[pc.getsymbol(pc.buf[p.iR])].s;
-				if(s.empty()) throw std::runtime_error("invalidate switch");
+				if(s.empty()) fire("invalidate switch");
 				char isEx = s[0] == '^' ? 0 : 1;
 				char inlist[128]; // we just use charators(0~127)
 				memset(inlist, 0, sizeof(inlist));
@@ -432,7 +434,7 @@ void set_grammar_production(tinygrammar::vecprods& productions, parsecontent& pc
 				{
 					if(x + 1< s.size() && s[x + 1] == '-')
 					{// range
-						if(x + 2 >= s.size()) throw std::runtime_error("invalidate range");
+						if(x + 2 >= s.size()) fire("invalidate range");
 						for(char ch = s[x]; ch <= s[x+2]; ++ ch)
 						{
 							inlist[ch] = 1;
@@ -448,7 +450,7 @@ void set_grammar_production(tinygrammar::vecprods& productions, parsecontent& pc
 				int R[2] = {0, ending[p.L]};
 				for(int x = 0; x < 128; ++ x)
 				{
-					if(inlist[x] == isEx && std::isprint(x)) 
+					if(inlist[x] == isEx && /*std::*/isprint(x)) 
 					{
 						R[0] = x;
 						tmpprods.push_back(production(p.L, R, 2));
@@ -457,7 +459,7 @@ void set_grammar_production(tinygrammar::vecprods& productions, parsecontent& pc
 			}
 			break;
 		default:
-			throw std::runtime_error("invalidate type!");
+			fire("invalidate type!");
 		}
 	}
 	productions.reset(tmpprods.size());

@@ -8,10 +8,12 @@
 #include <iterator>
 #include <stringX.h>
 #include <functionalX.h>
+#include <scerror.h>
 
-//#define DEBUG_OUTPUT
-#ifdef DEBUG_OUTPUT
 #include <iostream>
+
+#ifdef DEBUG_OUTPUT
+#include <logger.h>
 #include "../test/gio.h"
 #endif
 
@@ -28,9 +30,9 @@ void nfa2dfa::make_sure_rg(const grammar& gin)
 	{
 		const production& p = prods[i];
 		if(p.right_size() != 1 && p.right_size() != 2)
-			throw std::runtime_error("not a left grammar!");
+			fire("not a left grammar!");
 		else if(p.right_size() == 2 && !(sholder[p[0]].ist && !sholder[p[1]].ist))
-			throw std::runtime_error("not a left grammar!");
+			fire("not a left grammar!");
 	}
 }
 
@@ -40,7 +42,8 @@ void nfa2dfa::operator()(const grammar& minput, grammar& motput)
 	tinygrammar tg1, tg2;
 	todfa(minput.gettinyg(), tg1);
 #ifdef DEBUG_OUTPUT
-	gwriter gw(std::cout);
+	logstring("\n[nfa2dfa] \n");
+	gwriter gw(kog::loggermanager::instance().get_logger().getos());
 	gw<<tg1;
 #endif
 	mini_status(tg1, tg2);
@@ -138,7 +141,7 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		for(std::set<int32>::const_iterator iter = cs->begin(); iter != cs->end(); ++ iter)
 		{
 			int32 x = ntpi[*iter];
-			if (x == -1) throw std::runtime_error("can't be -1");
+			if (x == -1) fire("can't be -1");
 			for (size_t v = x; v < plist.size() && plist[v]->left() == *iter; ++ v)
 			{
 				int32 r0 = plist[v]->right().at(0);
@@ -233,7 +236,7 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 	std::vector<const production*> plist;
 //	std::transform(pholder.begin(), pholder.end(), plist.begin(), kog::get_ptr_t<production>());
 	// ending and non-ending set
-	if(tig.endings() == -1) throw std::runtime_error("[nfa2dfa::minis] ending symbol can't be -1!");
+	if(tig.endings() == -1) fire("[nfa2dfa::minis] ending symbol can't be -1!");
 	std::set<int32> endings; // store ending symbols' sid
 	for(size_t i = 0; i < pholder.size(); ++ i)
 	{
@@ -286,14 +289,17 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 			split(t, smap, pi);
 		}
 #ifdef DEBUG_OUTPUT
-		std::cout<<"pi = { ";
-		const char* sep = "";
-		for(std::deque<std::set<int32> >::const_iterator iter = pi.begin(); iter != pi.end(); ++ iter, sep = ", ")
 		{
-			std::copy(iter->begin(), iter->end(), std::ostream_iterator<int32>(std::cout<<sep<<"{ ", " "));
-			std::cout<<"}";
+			logstring("pi = { ");
+			const char* sep = "";
+			std::ostream& os = kog::loggermanager::instance().get_logger().getos();
+			for(std::deque<std::set<int32> >::const_iterator iter = pi.begin(); iter != pi.end(); ++ iter, sep = ", ")
+			{
+				std::copy(iter->begin(), iter->end(), std::ostream_iterator<int32>(os<<sep<<"{ ", " "));
+				os<<"}";
+			}
+			os<<" }"<<std::endl;
 		}
-		std::cout<<" }"<<std::endl;
 #endif
 	}while(opisize != pi.size());
 
@@ -353,6 +359,13 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 		}
 	}
 
+	//for (std::list<production>::const_iterator iter = newp.begin(); iter != newp.end(); ++ iter)
+	//{
+	//	std::cout<<iter->left()<<" -> ";
+	//	std::copy(iter->right().begin(), iter->right().end(),
+	//		std::ostream_iterator<int32>(std::cout, "\t"));
+	//	std::cout<<std::endl;
+	//}
 	newp.sort(prod_less());
 	newp.unique(p_equal());
 
@@ -396,11 +409,12 @@ void nfa2dfa::split(const std::vector<const production*>& t, kog::smart_vector<i
 			if(vtmp.empty())
 			{
 #ifdef DEBUG_OUTPUT
-				std::copy(s[newSid].begin(), s[newSid].end(), std::ostream_iterator<int32>(std::cout<<"\n", " "));
-				std::copy(caneats.begin(), caneats.end(), std::ostream_iterator<int32>(std::cout<<"\n", " "));
+				std::ostream& os = kog::loggermanager::instance().get_logger().getos();
+				std::copy(s[newSid].begin(), s[newSid].end(), std::ostream_iterator<int32>(os<<"\n", " "));
+				std::copy(caneats.begin(), caneats.end(), std::ostream_iterator<int32>(os<<"\n", " "));
 				std::cout<<"\n";
 #endif
-				throw std::runtime_error("empty!");
+				fire("empty!");
 			}
 			s[newSid].clear();
 			s[newSid].insert(vtmp.begin(), vtmp.end());

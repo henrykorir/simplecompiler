@@ -6,8 +6,16 @@ outdir = 'build'
 
 aEnv = Environment(ENV = os.environ)
 
+debug_ccflags = ''
+if os.sys.platform.lower() == 'win32':
+	aEnv.Append(CCFLAGS = '/D WIN32')
+	aEnv.Append(CCFLAGS = '/D UNICODE /D VISUAL_STDIO /EHsc /MT /D DEBUG_OUTPUT')
+	debug_ccflags = '/D _DEBUG'
+else:
+	debug_ccflags = '-g'
+
 if int(ARGUMENTS.get('debug', 0)):
-	aEnv.Append(CCFLAGS = '-g')
+	aEnv.Append(CCFLAGS = debug_ccflags)
 	aEnv.VariantDir(os.path.join(outdir, 'debug/'), '.', duplicate = 0)
 	aEnv['builddir'] = os.path.join(outdir, 'debug/')
 else:

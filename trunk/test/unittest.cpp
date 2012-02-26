@@ -3,6 +3,7 @@
 #include <list>
 #include <singleton.h>
 #include <typeinfo>
+#include <scerror.h>
 using namespace sc;
 
 class unittest_list : public std::list<unittest*>, public kog::singleton<unittest_list>

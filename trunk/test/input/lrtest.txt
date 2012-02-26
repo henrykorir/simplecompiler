@@ -1,0 +1,8 @@
+grammar:S
+S -> C b B A
+A -> A a b
+A -> a b
+B -> C
+B -> D b
+C -> a
+D -> a

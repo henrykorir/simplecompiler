@@ -21,6 +21,12 @@ using namespace compile::doc;
 class iwordstream : public std::istream
 {
 	typedef std::istream _Myios;
+	typedef std::streambuf _Mysb;
+public:
+	iwordstream(_Mysb *_Strbuf = NULL)
+	: std::istream(_Strbuf)
+	{
+	}
 public:
 	iwordstream& operator>>(word& aword)
 	{

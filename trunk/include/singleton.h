@@ -23,7 +23,7 @@ public:
 	typedef _T value_type;
 protected:
 	singleton(){}
-	~singleton(){}
+	virtual ~singleton(){} // make sure correct deconstruct
 
 public:
 	static value_type& instance()

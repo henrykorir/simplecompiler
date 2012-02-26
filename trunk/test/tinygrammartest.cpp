@@ -7,19 +7,26 @@
 #include "grammar.h"
 #include "gensyntax.h"
 #include "vhelp.h"
+#include "lrmio.h"
+#include "gio.h"
+
+#include <lranalyse.h>
+#include <basicalgorithms.h>
+#include <scerror.h>
+#include <logger.h>
 
 using namespace sc;
 using namespace compile;
+using namespace compile::ga;
 
 class simplegrammar_test : public unittest
 {
 public:
 	/* overwrite */ virtual void init(int argc, const char* argv[])
 	{
-		if(argc < 2)
-			throw std::runtime_error("too few command arguments!\n"
-					"usage: output_cppfile");
+		ASSERT_COMMAND_ARGUMENTS(3, "output_cppfile output_macfile");
 		cppfile = argv[1];
+		macfile = argv[2];
 	}
 
 	/* overwrite */ virtual void run_test()
@@ -29,11 +36,42 @@ public:
 		
 		syntaxgenerator gensyntax;
 		gensyntax(&simplegrammar, cppfile);
+
+		// remove eplison first
+		eliminate_eplison ee(simplegrammar, simplegrammar);
+		ee.invoke();
+
+		// remove single right production
+//		removesingle rms(simplegrammar, simplegrammar);
+//		rms.invoke();
+
+		// output tmp gramar
+		{
+			logstring("[simplegrammar_test::run_test] tmp grammar\n");
+			gwriter gw(kog::loggermanager::instance().get_logger().getos());
+			gw<<simplegrammar;
+		}
+
+		lrmachine m;
+		lranalyse lra(simplegrammar, m);
+		lra.invoke();
+
+		// output lr machine
+		{
+			std::ofstream ofs(macfile.c_str());
+			if(!ofs.is_open()) fire("can't open file " + macfile);
+
+			lrmwriter lrmw(ofs);
+			lrmw<<m;
+
+			ofs.close();
+		}
 	}
 private:
 	void init_grammar(grammar& g);
 private:
 	std::string cppfile;
+	std::string macfile;
 };
 
 class grammar_wrapper : public grammar
@@ -80,7 +118,7 @@ void grammar_wrapper::simple_grammar()
 	dthenu_ = true;
 
 	seperators_ = "{}()=*+-/;,";
-	syms.reset(19 + seperators_.size());
+	syms.reset(20 + seperators_.size());
 	syms[0] = Asymbol("Program", 0);
 	syms[1] = Asymbol("AProgramItem", 0);
 	syms[2] = Asymbol("ValueDeclear", 0);
@@ -100,9 +138,11 @@ void grammar_wrapper::simple_grammar()
 	syms[16] = Asymbol("Return", keyword, "return");
 	syms[17] = Asymbol("Int", keyword, "int");
 	syms[18] = Asymbol("Float", keyword, "float");
+	syms[19] = Asymbol("", other_sym, "eplison");
 	for(size_t i = 0; i < seperators_.size(); ++ i)
-		syms[i + 19] = Asymbol(stringX::format("seperator%d", i), sep, tstring(1, seperators_[i]));
-
+		//syms[i + 20] = Asymbol(stringX::format("seperator%d", i), sep, tstring(1, seperators_[i]));
+		syms[i + 20] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
+	eplisons() = 19;
 	// reset symbols name string
 	{
 		symholder newholder(Asymbol::stringBuf.begin(), Asymbol::stringBuf.end(), 
@@ -143,7 +183,7 @@ void grammar_wrapper::simple_grammar()
 	prods[16] = Aproduction(3, V(5, 6, "(", 5, 6, ",", 5, 6, ")", "{", 14, 15, "}"));
 	prods[17] = Aproduction(14, V(4, 14));
 	prods[18] = Aproduction(14, V(2, 14));
-	prods[19] = Aproduction(14, V());
+	prods[19] = Aproduction(14, V(19));
 	prods[20] = Aproduction(15, V(16, 8, ";"));
 	prods[21] = Aproduction(5, V(17));
 	prods[22] = Aproduction(5, V(18));

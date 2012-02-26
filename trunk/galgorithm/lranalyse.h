@@ -10,6 +10,7 @@
 #include <grammar.h>
 #include <lrmachine.h>
 
+struct AlgorithmArg;
 NAMESPACE_BEGIN(compile)
 NAMESPACE_BEGIN(ga)
 
@@ -31,6 +32,8 @@ private:
 	void operator()(const grammar& gin, lrmachine& mot);
 	
 	void make_true_lr1(const tinygrammar& tig) const;
+
+	void make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachine& mot) const;
 private:
 	const grammar* gin_;
 	lrmachine* mot_;

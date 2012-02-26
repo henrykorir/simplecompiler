@@ -3,7 +3,6 @@
 Import('aEnv')
 
 cppfiles = aEnv.Glob('*.cpp')
-
 inc = ['../include', '../syntax']
 usedlib = ['syntax']
 usedlibpath = ['../syntax']

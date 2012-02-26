@@ -1,4 +1,5 @@
 #include "automachine.h"
+#include <scerror.h>
 
 using namespace sc;
 using namespace compile;
@@ -46,7 +47,7 @@ bool automachine::eta(int32 meta)
 			std::make_pair(meta, 0), intpair_less());
 		break;
 	default:
-		throw std::runtime_error("invalidate sheetrow in machine");
+		fire("invalidate sheetrow in machine");
 	}
 	if(!((sheetrow::exclude == row.type()) ^ (iterfind != row.end() && iterfind->first == meta))) return false;
 	cstate_ = iterfind->second;

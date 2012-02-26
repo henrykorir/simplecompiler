@@ -120,6 +120,7 @@ public:
 	{
 		static int32 uid = 0;
 		sid = uid++;
+		this->ist = ist != 0;
 		name = (const tchar*)(stringBuf.size()); // using idx here
 		stringBuf.insert(stringBuf.end(), sname.begin(), sname.end());
 		stringBuf.push_back(tchar('\0'));
