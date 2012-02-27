@@ -1,4 +1,4 @@
-// lranalyse.h : test whea a grammar is lr(1) grammar, and make the lrmachine for the given grammar
+// lranalyse.h : test whea a tinygrammar is lr(1) tinygrammar, and make the lrmachine for the given tinygrammar
 //
 
 #ifndef _LRANALYSE_H_SC_
@@ -17,7 +17,7 @@ NAMESPACE_BEGIN(ga)
 class lranalyse : public grammar_algorithm
 {
 public:
-	lranalyse(const grammar& ing, lrmachine& lrm)
+	lranalyse(const tinygrammar& ing, lrmachine& lrm)
 		: grammar_algorithm("lr analyse")
 		, gin_(&ing)
 		, mot_(&lrm)
@@ -29,13 +29,13 @@ public:
 		(*this)(*gin_, *mot_);
 	}
 private:
-	void operator()(const grammar& gin, lrmachine& mot);
+	void operator()(const tinygrammar& gin, lrmachine& mot);
 	
 	void make_true_lr1(const tinygrammar& tig) const;
 
 	void make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachine& mot) const;
 private:
-	const grammar* gin_;
+	const tinygrammar* gin_;
 	lrmachine* mot_;
 };
 

@@ -467,13 +467,13 @@ void set_grammar_production(tinygrammar::vecprods& productions, parsecontent& pc
 	std::copy(tmpprods.begin(), tmpprods.end(), productions.begin());
 }
 
-void regex2nfa::operator()(const tstring& input, grammar& otput)
+void regex2nfa::operator()(const tstring& input, tinygrammar& otput)
 {
 	tocfg(input, otput);
 //	tonfa(otput, otput);
 }
 	
-void regex2nfa::tocfg(const tstring& input, grammar& otput)
+void regex2nfa::tocfg(const tstring& input, tinygrammar& otput)
 {
 	tinygrammar tmpg;
 	parsecontent pc(input.c_str());
@@ -491,10 +491,9 @@ void regex2nfa::tocfg(const tstring& input, grammar& otput)
 	tmpg.endings() = S_ending;
 	tmpg.eplisons() = 0;
 
-	grammar newG(tmpg);
-	otput.swap(newG);
+	otput.swap(tmpg);
 }
 
-void regex2nfa::tonfa(const grammar& input, grammar& otput)
+void regex2nfa::tonfa(const tinygrammar& input, tinygrammar& otput)
 {
 }

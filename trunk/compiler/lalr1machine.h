@@ -4,18 +4,17 @@
 #ifndef _LALR1_MACHINE_H_
 #define _LALR1_MACHINE_H_
 
+#include <lrmachine.h>
+
 NAMESPACE_BEGIN(compiler)
 
 
-class lalr1machine
+class lalr1machine : public compile::lrmachine
 {
 public:
 	lalr1machine();
 	virtual ~lalr1machine();
 public:
-	bool eta(const symbol* sym);
-private:
-	int32 cstate_;
 };
 
 NAMESPACE_END(compiler)

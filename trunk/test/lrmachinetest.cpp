@@ -22,13 +22,13 @@ class lrmachine_test : public sc::unittest
 
 	/* overwrite */ virtual void run_test()
 	{
-		grammar g;
+		tinygrammar g;
 		std::ifstream ifs(gfile_.c_str());
 		if(!ifs.is_open()) throw std::runtime_error("can't open file " + gfile_);
 		greader gifs(ifs);
 		while(ifs)
 		{
-			grammar g;
+			tinygrammar g;
 			lrmachine m;
 			gifs>>g;
 			lranalyse lra(g, m);

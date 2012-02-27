@@ -31,16 +31,16 @@ class nfa2dfa_test : public sc::unittest
 		greader gifs(ifs);
 		while(ifs)
 		{
-			grammar g;
+			tinygrammar g;
 			gifs>>g;
 			todfa(g);
 		}
 		ifs.close();
 	}
 
-	void todfa(const grammar& gin)
+	void todfa(const tinygrammar& gin)
 	{
-		grammar got;
+		tinygrammar got;
 		std::auto_ptr<grammar_algorithm> galg(new nfa2dfa(gin, got));
 		galg->invoke();
 		std::ofstream ofs(gotfile_.c_str(), std::ios_base::app);

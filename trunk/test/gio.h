@@ -22,6 +22,14 @@ public:
 public:
 	greader& operator>>(compile::grammar& g)
 	{
+		compile::tinygrammar tg;
+		(*this)>>tg;
+		g.swap_kernel(tg);
+		return *this;
+	}
+
+	greader& operator>>(compile::tinygrammar& g)
+	{
 		std::istream& is = is_;
 		while(is)
 		{
@@ -66,7 +74,7 @@ public:
 	}
 
 private:
-	void read_grammar(std::istream& is, compile::grammar& g, const std::string& start, const std::string& eplison, const std::string& ending) const
+	void read_grammar(std::istream& is, compile::tinygrammar& g, const std::string& start, const std::string& eplison, const std::string& ending) const
 	{
 		using namespace compile;
 		std::list<std::string> bufs;
@@ -97,11 +105,10 @@ private:
 
 		int32 ssid = finds(bufs, slist, start);
 		if(!eplison.empty()) bufs.front()[0] = '\0';// set eplison symbol content to empty string
-		tinygrammar tinyg(slist.begin(), slist.end(), plist.begin(), plist.end(), ssid, eid, xid);
+		tinygrammar tmp(slist.begin(), slist.end(), plist.begin(), plist.end(), ssid, eid, xid);
 	//	tinyg.make_index();
 	//	if(!ending.empty())tinyg.endings() = tinyg.index(ending);
 	//	if(!eplison.empty()) tinyg.eplisons() = tinyg.index("");
-		grammar tmp(tinyg);
 		tmp.swap(g);
 	}
 

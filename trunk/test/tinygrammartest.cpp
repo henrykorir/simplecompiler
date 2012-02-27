@@ -24,26 +24,25 @@ class simplegrammar_test : public unittest
 public:
 	/* overwrite */ virtual void init(int argc, const char* argv[])
 	{
-		ASSERT_COMMAND_ARGUMENTS(3, "output_cppfile output_macfile");
+		ASSERT_COMMAND_ARGUMENTS(2, "output_cppfile");
 		cppfile = argv[1];
-		macfile = argv[2];
 	}
 
 	/* overwrite */ virtual void run_test()
 	{
 		grammar simplegrammar;
 		init_grammar(simplegrammar);
-		
-		syntaxgenerator gensyntax;
-		gensyntax(&simplegrammar, cppfile);
 
 		// remove eplison first
-		eliminate_eplison ee(simplegrammar, simplegrammar);
+		tinygrammar gouttmp;
+		eliminate_eplison ee(simplegrammar.gettinyg(), gouttmp);
 		ee.invoke();
 
 		// remove single right production
-//		removesingle rms(simplegrammar, simplegrammar);
+//		removesingle rms(gouttmp, gouttmp);
 //		rms.invoke();
+
+		simplegrammar.swap_kernel(gouttmp);
 
 		// output tmp gramar
 		{
@@ -52,26 +51,13 @@ public:
 			gw<<simplegrammar;
 		}
 
-		lrmachine m;
-		lranalyse lra(simplegrammar, m);
-		lra.invoke();
-
-		// output lr machine
-		{
-			std::ofstream ofs(macfile.c_str());
-			if(!ofs.is_open()) fire("can't open file " + macfile);
-
-			lrmwriter lrmw(ofs);
-			lrmw<<m;
-
-			ofs.close();
-		}
+		syntaxgenerator gensyntax;
+		gensyntax(&simplegrammar, cppfile);
 	}
 private:
 	void init_grammar(grammar& g);
 private:
 	std::string cppfile;
-	std::string macfile;
 };
 
 class grammar_wrapper : public grammar

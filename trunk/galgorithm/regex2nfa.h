@@ -1,4 +1,4 @@
-// regex2nfa.h: regex string -> nfa grammar
+// regex2nfa.h: regex string -> nfa tinygrammar
 //
 
 #ifndef _REGEX2NFA_H_SC_
@@ -13,7 +13,7 @@ NAMESPACE_BEGIN(ga)
 class regex2nfa : public grammar_algorithm
 {
 public:
-	regex2nfa(const tstring& regexstr, grammar& otput)
+	regex2nfa(const tstring& regexstr, tinygrammar& otput)
 		: grammar_algorithm("regex2nfa")
 		, regexstr_(regexstr)
 		, gout_(&otput)
@@ -25,12 +25,12 @@ public:
 		(*this)(regexstr_, *gout_);
 	}
 private:
-	void operator()(const tstring& input, grammar& otput);
-	void tocfg(const tstring& input, grammar& otput);
-	void tonfa(const grammar& input, grammar& otput);
+	void operator()(const tstring& input, tinygrammar& otput);
+	void tocfg(const tstring& input, tinygrammar& otput);
+	void tonfa(const tinygrammar& input, tinygrammar& otput);
 private:
 	tstring regexstr_;
-	grammar* gout_;
+	tinygrammar* gout_;
 };
 
 NAMESPACE_END(ga)

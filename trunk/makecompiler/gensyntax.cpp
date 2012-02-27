@@ -5,6 +5,11 @@
 #include <regex2nfa.h>
 #include <nfa2dfa.h>
 #include <dfa2machine.h>
+#include <lrmachine.h>
+#include <lranalyse.h>
+#include <basicalgorithms.h>
+#include <scerror.h>
+#include <logger.h>
 
 //#define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
@@ -13,6 +18,7 @@
 #endif
 
 using namespace compile;
+using namespace compile::ga;
 
 syntaxgenerator::syntaxgenerator()
 {
@@ -113,35 +119,58 @@ void syntaxgenerator::print_statemachines()
 		state_machine mac;
 //		state_machine::construct_fromstring(smacs[i].first, mac);
 		regex_str_to_machine(smacs[i].first, mac);
-		// print state machines
-		os<<newline
-			<<newline<<"{"<<inc
-			<<newline<<"state_machine m;"
-			<<newline<<"state_machine::sparsesheet& sheet = m.sheet();"
-			<<newline<<"sheet.reset("<<mac.sheet().size()<<");";
-		// print each sheet row
-		os<<newline<<"state_machine::sheetrow::value_type* ptr = NULL;";
-		for(size_t r = 0; r < mac.sheet().size(); ++ r)
-		{
-			os<<newline
-				<<newline<<"sheet["<<r<<"].reset("<<mac.sheet()[r].size()<<");"
-				<<newline<<"sheet["<<r<<"].type("<<mac.sheet()[r].type()<<");"
-				<<newline<<"sheet["<<r<<"].endings("<<mac.sheet()[r].endings()<<");"
-				<<newline<<"ptr = sheet["<<r<<"].get()"<<inc;
-			for(state_machine::sheetrow::iterator iter = mac.sheet()[r].begin(); iter != mac.sheet()[r].end(); ++ iter)
-			{
-				os<<newline<<"*(ptr ++) = std::make_pair("<<iter->first<<", "<<iter->second<<");";
-			}
-			os<<dec;
-		}
-		os<<newline
-			<<newline<<"m.sstate() = "<<mac.sstate()<<";"
-			<<newline<<"c[\""<<sholder[smacs[i].second].name<<"\"] = m;"<<dec
+
+		os<<newline<<newline<<"{"<<inc;
+		print_machine(os, mac);
+		os<<newline<<"c[\""<<sholder[smacs[i].second].name<<"\"] = m;"<<dec
 			<<newline<<"}";
 	}
 	os<<newline<<dec
 		<<newline<<"}"
 		<<newline;
+
+	// print lr machine
+	lrmachine lrm;
+	lranalyse lra(*syntax_, lrm);
+	lra.invoke();
+	os<<newline<<"void init_syntax_machine(lalr1machine& lrm)"
+		<<newline<<"{"<<inc;
+	print_machine(os, lrm);
+	os<<newline<<"lrm.swap(m);"
+		<<newline<<dec
+		<<newline<<"}"
+		<<newline;
+}
+
+void syntaxgenerator::print_machine(std::ostream& os, const compile::automachine& mac)
+{
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	typedef std::ostream& (*pfun)(std::ostream& os);
+	pfun newline = tabident::newline;
+	const symholder& sholder = syntax_->symbols();
+
+	// print state machines
+	os<<newline<<"automachine m;"
+		<<newline<<"automachine::sparsesheet& sheet = m.sheet();"
+		<<newline<<"sheet.reset("<<mac.sheet().size()<<");";
+	// print each sheet row
+	os<<newline<<"automachine::sheetrow::value_type* ptr = NULL;";
+	for(size_t r = 0; r < mac.sheet().size(); ++ r)
+	{
+		os<<newline
+			<<newline<<"sheet["<<r<<"].reset("<<mac.sheet()[r].size()<<");"
+			<<newline<<"sheet["<<r<<"].type("<<mac.sheet()[r].type()<<");"
+			<<newline<<"sheet["<<r<<"].endings("<<mac.sheet()[r].endings()<<");"
+			<<newline<<"ptr = sheet["<<r<<"].get()"<<inc;
+		for(state_machine::sheetrow::const_iterator iter = mac.sheet()[r].begin(); iter != mac.sheet()[r].end(); ++ iter)
+		{
+			os<<newline<<"*(ptr ++) = std::make_pair("<<iter->first<<", "<<iter->second<<");";
+		}
+		os<<dec;
+	}
+	os<<newline
+		<<newline<<"m.sstate() = "<<mac.sstate()<<";";
 }
 	
 void syntaxgenerator::regex_str_to_machine(const std::string& regexstr, automachine& m)
