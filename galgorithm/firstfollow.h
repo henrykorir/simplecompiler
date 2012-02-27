@@ -16,7 +16,7 @@ public:
 	typedef kog::smart_vector<int32> vecint;
 	typedef kog::smart_vector<vecint> vecintset;
 public:
-	firstset(const grammar& gin, vecintset& sets)
+	firstset(const tinygrammar& gin, vecintset& sets)
 	: grammar_algorithm("get first set")
 	, gin_(&gin)
 	, sets_(&sets)
@@ -28,9 +28,9 @@ public:
 		(*this)(*gin_, *sets_);
 	}
 private:
-	void operator()(const grammar& gin, vecintset& sets);
+	void operator()(const tinygrammar& gin, vecintset& sets);
 
-	const grammar* gin_;
+	const tinygrammar* gin_;
 	vecintset* sets_;
 };
 
@@ -40,7 +40,7 @@ public:
 	typedef kog::smart_vector<int32> vecint;
 	typedef kog::smart_vector<vecint> vecintset;
 public:
-	followset(const grammar& gin, const vecintset& firstsets, vecintset& followsets)
+	followset(const tinygrammar& gin, const vecintset& firstsets, vecintset& followsets)
 	: grammar_algorithm("get follow set")
 	, gin_(&gin)
 	, firstsets_(&firstsets)
@@ -53,9 +53,9 @@ public:
 		(*this)(*gin_, *firstsets_, *followsets_);
 	}
 private:
-	void operator()(const grammar& gin, const vecintset& firstsets, vecintset& followsets);
+	void operator()(const tinygrammar& gin, const vecintset& firstsets, vecintset& followsets);
 
-	const grammar* gin_;
+	const tinygrammar* gin_;
 	const vecintset* firstsets_;
 	vecintset* followsets_;
 };

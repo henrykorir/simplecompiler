@@ -75,6 +75,7 @@ public:
 	}
 public:
 	void swap(grammar& other) throw ();
+	void swap_kernel(tinygrammar& tg) throw ();
 protected:
 	vecsmacs smacs_; // state machines
 	veckeywords keywords_;

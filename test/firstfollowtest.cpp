@@ -31,14 +31,14 @@ class firstfollow_test : public sc::unittest
 		greader gifs(ifs);
 		while(ifs)
 		{
-			grammar g;
+			tinygrammar g;
 			gifs>>g;
 			output_first_follow_set(g);
 		}
 		ifs.close();
 	}
 
-	void output_first_follow_set(const grammar& g)
+	void output_first_follow_set(const tinygrammar& g)
 	{
 		firstset::vecintset firsts;
 		firstset::vecintset follows;
@@ -48,11 +48,11 @@ class firstfollow_test : public sc::unittest
 		if(!ofs.is_open()) throw std::runtime_error("can't open file " + sotfile_);
 		
 		// output first set
-		outputSets(firsts, g.gettinyg().symbols(), ofs<<"first sets:\n", "First");
+		outputSets(firsts, g.symbols(), ofs<<"first sets:\n", "First");
 		std::auto_ptr<grammar_algorithm> g2(new followset(g, firsts, follows));
 		g2->invoke();
 		// output follow set
-		outputSets(follows, g.gettinyg().symbols(), ofs<<"\nfollow sets:\n", "Follow");
+		outputSets(follows, g.symbols(), ofs<<"\nfollow sets:\n", "Follow");
 		ofs.close();
 	}
 

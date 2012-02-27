@@ -15,9 +15,8 @@
 using namespace compile;
 using namespace compile::ga;
 
-void removenotused::operator()(const grammar& gin, grammar& gout)
+void removenotused::operator()(const tinygrammar& tig, tinygrammar& tog)
 {
-	const tinygrammar& tig = gin.gettinyg();
 	useds.reset(tig.symbols().size());
 	usedp.reset(tig.productions().size());
 	memset(useds.get(), 0, useds.size_in_bytes());
@@ -29,7 +28,7 @@ void removenotused::operator()(const grammar& gin, grammar& gout)
 	rm_Snofm(tig);
 
 	// new grammar 
-	new_grammar(gin, gout);
+	new_grammar(tig, tog);
 }
 
 void removenotused::rm_notoT(const tinygrammar& tig)
@@ -114,9 +113,8 @@ void removenotused::rm_Snofm(const tinygrammar& tig)
 #endif
 }
 
-void removenotused::new_grammar(const grammar& gin, grammar& gout)
+void removenotused::new_grammar(const tinygrammar& tig, tinygrammar& tog)
 {
-	const tinygrammar& tig = gin.gettinyg();
 	size_t nNewCount = std::count(useds.begin(), useds.end(), 1);
 	std::vector<symbol> NewSymbols(nNewCount);
 	std::vector<int> OldNewMap(useds.size());
@@ -146,14 +144,11 @@ void removenotused::new_grammar(const grammar& gin, grammar& gout)
 	}
 
 	tinygrammar gout_kernel(NewSymbols.begin(), NewSymbols.end(), prodList.begin(), prodList.end(), OldNewMap[tig.starts()]);
-	grammar tmp(gout_kernel);
-	gout.swap(tmp);
+	tog.swap(gout_kernel);
 }
 
-void removesingle::operator()(const grammar& gin, grammar& gout)
+void removesingle::operator()(const tinygrammar& tig, tinygrammar& tog)
 {
-	const tinygrammar& tig = gin.gettinyg();
-
 	const tinygrammar::vecprods& refProductions = tig.productions();
 	typedef kog::smart_vector<int32> vecint;
 
@@ -221,9 +216,8 @@ void removesingle::operator()(const grammar& gin, grammar& gout)
 	// NewProdList.unique();
 	remove_duplicate(NewProdList);
 
-	tinygrammar totg(tig.symbols().begin(), tig.symbols().end(), NewProdList.begin(), NewProdList.end(), tig.starts());
-	grammar tmp(totg);
-	gout.swap(tmp);
+	tinygrammar tmp(tig.symbols().begin(), tig.symbols().end(), NewProdList.begin(), NewProdList.end(), tig.starts());
+	tog.swap(tmp);
 }
 
 void removesingle::remove_duplicate(std::list<production>& plist)
@@ -291,9 +285,8 @@ void symbol_to_eplison::operator()(const tinygrammar& tig, vecint& istoe, int32&
 #endif
 }
 
-void eliminate_eplison::operator()(const grammar& gin, grammar& gout)
+void eliminate_eplison::operator()(const tinygrammar& tig, tinygrammar& tog)
 {
-	const tinygrammar& tig = gin.gettinyg();
 	const symholder& sholder = tig.symbols();
 	const tinygrammar::vecprods& prods = tig.productions();
 
@@ -305,27 +298,26 @@ void eliminate_eplison::operator()(const grammar& gin, grammar& gout)
 	// eplison in G(Vn, Vt, P, S)?
 	if(-1 == eid) 
 	{
-		grammar tmpG(gin);
-		gout.swap(tmpG);
+		tinygrammar tmpG(tig);
+		tog.swap(tmpG);
 		return;
 	}
 
 	findtoe(tig);
 
-	tinygrammar tog;
+	tinygrammar tmp;
 	if(toe[tig.starts()]) // eplison in G
 	{
 		if(is_start_in_right(tig))
 		{
-			new_start_symbol(tig, tog);
-			rmeplison(tog, tog);
+			new_start_symbol(tig, tmp);
+			rmeplison(tog, tmp);
 		}
-		else rmeplison(tig, tog);
+		else rmeplison(tig, tmp);
 	}
-	else rmeplison(tig, tog); // remove eplison symbol
+	else rmeplison(tig, tmp); // remove eplison symbol
 
-	grammar tmp(tog);
-	tmp.swap(gout);
+	tog.swap(tmp);
 }
 
 void eliminate_eplison::findtoe(const tinygrammar& tig)
@@ -463,9 +455,9 @@ void eliminate_eplison::rmeplison(const tinygrammar& tig, tinygrammar& tog)
 	}
 }
 
-void simplegrammar::operator()(const grammar& gin, grammar& gout)
+void simplegrammar::operator()(const tinygrammar& gin, tinygrammar& tog)
 {
-	grammar gtmp;
+	tinygrammar gtmp;
 	// remove eplison
 	eliminate_eplison rme(gin, gtmp);
 	// remove single production
@@ -473,5 +465,5 @@ void simplegrammar::operator()(const grammar& gin, grammar& gout)
 	// remove not used symbols and productions
 	removenotused rmnu(gtmp, gtmp);
 	
-	gtmp.swap(gout);
+	gtmp.swap(tog);
 }

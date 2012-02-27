@@ -22,6 +22,7 @@ public:
 private:
 	void print_symbols();
 	void print_statemachines();
+	void print_machine(std::ostream& os, const compile::automachine& mac);
 private:
 	void regex_str_to_machine(const std::string& regexstr, automachine& m);
 public:

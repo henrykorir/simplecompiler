@@ -11,9 +11,8 @@
 using namespace compile;
 using namespace compile::ga;
 
-void firstset::operator()(const grammar& gin, vecintset& sets)
+void firstset::operator()(const tinygrammar& tig, vecintset& sets)
 {
-	const tinygrammar& tig = gin.gettinyg();
 	const symholder& sholder = tig.symbols();
 	const tinygrammar::vecprods& prods = tig.productions();
 
@@ -119,10 +118,9 @@ void firstset::operator()(const grammar& gin, vecintset& sets)
 #endif
 }
 
-void followset::operator()(const grammar& gin, const vecintset& FirstSets, vecintset& FollowSets)
+void followset::operator()(const tinygrammar& tig, const vecintset& FirstSets, vecintset& FollowSets)
 {
 	typedef std::vector<std::list<size_t> > UIntListVector; 
-	const tinygrammar& tig = gin.gettinyg();
 	const symholder& sholder = tig.symbols();
 	const tinygrammar::vecprods& prods = tig.productions();
 	const size_t M = prods.size();

@@ -16,7 +16,7 @@ NAMESPACE_BEGIN(ga)
 class nfa2dfa : public grammar_algorithm
 {
 public:
-	nfa2dfa(const grammar& gin, grammar& gout)
+	nfa2dfa(const tinygrammar& gin, tinygrammar& gout)
 	: grammar_algorithm("nfa2dfa")
 	, gin_(&gin)
 	, got_(&gout)
@@ -29,19 +29,19 @@ public:
 	}
 
 private:
-	void operator()(const grammar& input, grammar& otput);
+	void operator()(const tinygrammar& input, tinygrammar& otput);
 
 	void todfa(const tinygrammar& tig, tinygrammar& tog);
 	void mini_status(const tinygrammar& tig, tinygrammar& tog);
 private:
 	//friend struct context;
 	//friend struct minstatus;
-	// make sure the input grammar is right grammar
-	void make_sure_rg(const grammar& input);
+	// make sure the input tinygrammar is right tinygrammar
+	void make_sure_rg(const tinygrammar& input);
 
 	void split(const std::vector<const production*>& t, kog::smart_vector<int32>& smap, std::deque<std::set<int32> >& s) const;
-	const grammar* gin_;
-	grammar* got_;
+	const tinygrammar* gin_;
+	tinygrammar* got_;
 };
 
 NAMESPACE_END(ga)

@@ -36,14 +36,14 @@ class regex2nfa_test : public sc::unittest
 
 		for(int i = 0; i < sizeof(strs) / sizeof(const tchar*); ++ i)
 		{
-			grammar otputg;
+			tinygrammar otputg;
 			regex2nfa r2n(strs[i], otputg);
 			r2n.invoke();
 			print_grammar_to_file(otputg);
 		}
 	}
 
-	void print_grammar_to_file(const grammar& g)
+	void print_grammar_to_file(const tinygrammar& g)
 	{
 		std::ofstream ofs(outfile.c_str(), std::ios_base::app);
 		if(!ofs.is_open()) throw std::runtime_error("can't open file " + outfile);

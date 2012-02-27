@@ -69,7 +69,7 @@ struct nextstate
 
 struct AlgorithmArg
 {
-	AlgorithmArg(const grammar& tig);
+	AlgorithmArg(const tinygrammar& tig);
 	kog::smart_vector<int> ists; // is terminate symbol
 	eclosure::closure_array closures;
 	firstset::vecintset firstsets;
@@ -128,9 +128,9 @@ std::ostream& print_item(std::ostream& os, const lrstateitem& itm, const symhold
 	return os<<"\n";
 }
 
-void lranalyse::operator()(const grammar& gin, lrmachine& mot)
+void lranalyse::operator()(const tinygrammar& tig, lrmachine& mot)
 {
-	std::auto_ptr<AlgorithmArg> ptr_arg(new AlgorithmArg(gin));
+	std::auto_ptr<AlgorithmArg> ptr_arg(new AlgorithmArg(tig));
 	AlgorithmArg& arg = *ptr_arg;
 
 	std::queue<const lrstate*> sQueue;
@@ -153,7 +153,7 @@ void lranalyse::operator()(const grammar& gin, lrmachine& mot)
 				{
 					arg.sparsesheet.push_back(kog::make_triple(pRow, *iterf, nextstate(&p)));
 #ifdef DEBUG_OUTPUT
-					const char* name = *iterf < 0 ? "#" : gin.gettinyg().symbols()[*iterf].name;
+					const char* name = *iterf < 0 ? "#" : tig.symbols()[*iterf].name;
 					logstring("(I%d, %s) -> r%d\n", arg.get_lrsid(pRow), name, arg.get_pid(&p));
 #endif
 				}
@@ -196,7 +196,7 @@ void lranalyse::operator()(const grammar& gin, lrmachine& mot)
 		arg.CheckLR1(pRow);
 	}
 
-	make_machine(arg, gin.gettinyg(), mot);
+	make_machine(arg, tig, mot);
 }
 
 void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachine& mot) const
@@ -418,11 +418,11 @@ int32 AlgorithmArg::get_next_symbol(const production& p, int32 idot) const
 	return p.right()[idot];
 }
 
-AlgorithmArg::AlgorithmArg(const grammar& gin)
-: ists(gin.gettinyg().symbols().size() + 1, 0)
-, plist(gin.gettinyg().productions().size(), NULL)
-, ntpi(gin.gettinyg().symbols().size(), -1)
-, tig(&gin.gettinyg())
+AlgorithmArg::AlgorithmArg(const tinygrammar& gin)
+: ists(gin.symbols().size() + 1, 0)
+, plist(gin.productions().size(), NULL)
+, ntpi(gin.symbols().size(), -1)
+, tig(&gin)
 {
 	typedef tinygrammar::vecprods prodholder;
 	const symholder& sholder = tig->symbols();

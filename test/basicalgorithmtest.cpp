@@ -31,16 +31,16 @@ class basicalg_test : public sc::unittest
 		while(ifs)
 		{
 			greader gifs(ifs);
-			grammar g;
+			tinygrammar g;
 			gifs>>g;
 			test_grammar(g);
 		}
 		ifs.close();
 	}
 private:
-	void test_grammar(grammar& gin)
+	void test_grammar(tinygrammar& gin)
 	{
-		grammar gout;
+		tinygrammar gout;
 		//std::auto_ptr<grammar_algorithm> gatest(new removenotused(gin, gout));
 	//	std::auto_ptr<grammar_algorithm> gatest(new eliminate_eplison(gin, gout));
 		std::auto_ptr<grammar_algorithm> gatest(new removesingle(gin, gout));

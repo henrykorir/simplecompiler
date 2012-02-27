@@ -20,9 +20,8 @@
 using namespace compile;
 using namespace compile::ga;
 
-void nfa2dfa::make_sure_rg(const grammar& gin)
+void nfa2dfa::make_sure_rg(const tinygrammar& tig)
 {
-	const tinygrammar& tig = gin.gettinyg();
 	const tinygrammar::vecprods& prods = tig.productions();
 	const symholder sholder = tig.symbols();
 
@@ -36,11 +35,11 @@ void nfa2dfa::make_sure_rg(const grammar& gin)
 	}
 }
 
-void nfa2dfa::operator()(const grammar& minput, grammar& motput)
+void nfa2dfa::operator()(const tinygrammar& minput, tinygrammar& motput)
 {
 	make_sure_rg(minput);
 	tinygrammar tg1, tg2;
-	todfa(minput.gettinyg(), tg1);
+	todfa(minput, tg1);
 #ifdef DEBUG_OUTPUT
 	logstring("\n[nfa2dfa] \n");
 	gwriter gw(kog::loggermanager::instance().get_logger().getos());
@@ -49,8 +48,7 @@ void nfa2dfa::operator()(const grammar& minput, grammar& motput)
 	mini_status(tg1, tg2);
 //	mini_status(minput.gettinyg(), endings, tg2);
 
-	grammar gtmp(tg2);
-	gtmp.swap(motput);
+	tg2.swap(motput);
 }
 
 void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)

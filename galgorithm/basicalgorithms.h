@@ -15,7 +15,7 @@ class removenotused : public grammar_algorithm
 {
 	typedef kog::smart_vector<int32> vecint;
 public:
-	removenotused(const grammar& gin, grammar& gout)
+	removenotused(const tinygrammar& gin, tinygrammar& gout)
 	: grammar_algorithm("remove not used symbol and productions")
 	, gin_(&gin)
 	, gout_(&gout)
@@ -27,17 +27,17 @@ public:
 		(*this)(*gin_, *gout_);
 	}
 private:
-	void operator()(const grammar& gin, grammar& gout);
+	void operator()(const tinygrammar& gin, tinygrammar& gout);
 
 	// algorithm 2.1
 	void rm_notoT(const tinygrammar& tig);// remove symbols and productions can't to be a terminate symbol
 	// algorithm 2.2
 	void rm_Snofm(const tinygrammar& tig);// remove symbols and productions can't start from StartSymbol
 
-	void new_grammar(const grammar& gin, grammar& gout); // create new grammmar
+	void new_grammar(const tinygrammar& gin, tinygrammar& gout); // create new grammmar
 	
-	const grammar* gin_;
-	grammar* gout_;
+	const tinygrammar* gin_;
+	tinygrammar* gout_;
 
 	vecint useds;
 	vecint usedp;
@@ -46,7 +46,7 @@ private:
 class removesingle : public grammar_algorithm
 {
 public:
-	removesingle(const grammar& gin, grammar& gout)
+	removesingle(const tinygrammar& gin, tinygrammar& gout)
 	: grammar_algorithm("remove single-production")
 	, gin_(&gin)
 	, gout_(&gout)
@@ -59,11 +59,11 @@ public:
 	}
 private:
 	// algorithm 2.6
-	void operator()(const grammar& gin, grammar& gout);
+	void operator()(const tinygrammar& gin, tinygrammar& gout);
 	void remove_duplicate(std::list<production>& plist);
 
-	const grammar* gin_;
-	grammar* gout_;
+	const tinygrammar* gin_;
+	tinygrammar* gout_;
 };
 
 class symbol_to_eplison : public grammar_algorithm
@@ -96,7 +96,7 @@ class eliminate_eplison : public grammar_algorithm
 {
 	typedef kog::smart_vector<int32> vecint;
 public:
-	eliminate_eplison(const grammar& gin, grammar& gout)
+	eliminate_eplison(const tinygrammar& gin, tinygrammar& gout)
 	: grammar_algorithm("remove eplison")
 	, gin_(&gin)
 	, gout_(&gout)
@@ -108,28 +108,28 @@ public:
 		(*this)(*gin_, *gout_);
 	}
 private:
-	void operator()(const grammar& gin, grammar& gout);
+	void operator()(const tinygrammar& gin, tinygrammar& gout);
 
 	// algorithm 2.3
 	void findtoe(const tinygrammar& tig);
 	// algorithm 2.4
-	void rmeplison(const tinygrammar& tig, tinygrammar& tog);
+	void rmeplison(const tinygrammar& tig, tinygrammar& gout);
 
 	bool is_start_in_right(const tinygrammar& tig) const;
 	
-	void new_start_symbol(const tinygrammar& tig, tinygrammar& tog);
+	void new_start_symbol(const tinygrammar& tig, tinygrammar& gout);
 
 	vecint toe; // symbol A->..->e?
 	int32 eid; // sid of eplison
 	
-	const grammar* gin_;
-	grammar* gout_;
+	const tinygrammar* gin_;
+	tinygrammar* gout_;
 };
 
 class simplegrammar : public grammar_algorithm
 {
 public:
-	simplegrammar(const grammar& gin, grammar& gout)
+	simplegrammar(const tinygrammar& gin, tinygrammar& gout)
 	: grammar_algorithm("simplegrammar")
 	, gin_(&gin)
 	, gout_(&gout)
@@ -141,10 +141,10 @@ public:
 		(*this)(*gin_, *gout_);
 	}
 private:
-	void operator()(const grammar& gin, grammar& gout);
+	void operator()(const tinygrammar& gin, tinygrammar& gout);
 
-	const grammar* gin_;
-	grammar* gout_;
+	const tinygrammar* gin_;
+	tinygrammar* gout_;
 };
 NAMESPACE_END(ga)
 NAMESPACE_END(compile)

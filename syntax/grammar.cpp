@@ -41,10 +41,15 @@ void tinygrammar::swap(tinygrammar& other) throw()
 	std::swap(ending_symbol_, other.ending_symbol_);
 }
 
+void grammar::swap_kernel(tinygrammar& other) throw ()
+{
+	((tinygrammar*)this)->swap(other);
+}
+
 void grammar::swap(grammar& other) throw ()
 {
 	if(this == &other) return;
-	((tinygrammar*)this)->swap(other);
+	swap_kernel(other);
 	smacs_.swap(other.smacs_);
 	seperators_.swap(other.seperators_);
 	seperators_.swap(other.whitespaces_);
