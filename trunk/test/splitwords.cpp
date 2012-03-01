@@ -24,7 +24,7 @@ public:
 
 	/* overwrite */ virtual void run_test()
 	{
-		compiler::instance().initmachines();
+		compiler::instance().initialization();
 		streamsplit wordsplit;
 		std::ifstream cifs(input.c_str());
 		if(!cifs.is_open()) throw std::runtime_error("can't open file: " + input);

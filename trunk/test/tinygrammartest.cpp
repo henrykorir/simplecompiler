@@ -146,6 +146,7 @@ void grammar_wrapper::simple_grammar()
 	{
 		keywords_.reset(Asymbol::keywords.size());
 		smacs_.reset(Asymbol::smacs.size());
+		std::copy(Asymbol::keywords.begin(), Asymbol::keywords.end(), keywords_.begin());
 		std::copy(Asymbol::smacs.begin(), Asymbol::smacs.end(), smacs_.begin());
 	}
 	
@@ -154,7 +155,7 @@ void grammar_wrapper::simple_grammar()
 	prods[0] = Aproduction(0, V(1));
 	prods[1] = Aproduction(0, V(1, 0));
 	prods[2] = Aproduction(1, V(3));
-	prods[3] = Aproduction(1, V(4, ";"));
+	prods[3] = Aproduction(1, V(7, ";"));
 	prods[4] = Aproduction(2, V(5, 6));
 	prods[5] = Aproduction(4, V(7, ";", 4));
 	prods[6] = Aproduction(4, V(7, ";"));

@@ -72,7 +72,8 @@ public:
 			{
 				const char* name = iter->first < 0 ? "#" : sholder[iter->first].name;
 				const char* action = iter->second < 0 ? "r" : "G";
-				os<<"(I"<<i<<", "<<name<<") "<<action<<abs(iter->second)<<"\n";
+				int x = iter->second < 0 ? -(iter->second + 1) : iter->second;
+				os<<"(I"<<i<<", "<<name<<") "<<action<<x<<"\n";
 			}
 			os<<"\n";
 		}

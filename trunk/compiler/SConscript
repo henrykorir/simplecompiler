@@ -2,7 +2,7 @@
 
 Import('aEnv')
 
-cppfiles = ['extract.cpp', 'compiler.cpp']
+cppfiles = ['extract.cpp', 'compiler.cpp', 'lalr1machine.cpp']
 
 inc = ['../include', '../syntax']
 usedlib = ['syntax']

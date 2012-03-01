@@ -25,11 +25,16 @@ float test(int m, int n)
 	return d;
 }
 
-int v1 = 4;
-int v2 = 5;
-int c = v1 * v2;
+int v1;
+v1 = 4;
+int v2;
+v2 = 5;
+int c;
+c = v1 * v2;
 print(c);
-print(f(v1, v2));
+int m;
+m = f(v1, v2);
+print(m);
 float t;
 t = test(v1, v2);
 print(t);

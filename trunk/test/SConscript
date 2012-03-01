@@ -10,7 +10,7 @@ UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace']
 UTinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm', incboost]
 UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace']
 
-aEnv.Program(target= 'docsplit', source = ['splitwords.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+aEnv.Program(target= 'docsplit', source = ['splitwords.cpp', 'usefullmachines.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
 
 aEnv.Program(target= 'gensyntax', source = ['tinygrammartest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
 
@@ -24,3 +24,5 @@ aEnv.Program(target= 'nfa2dfa', source = ['nfa2dfatest.cpp'], LIBS=UTlib, CPPPAT
 
 aEnv.Program(target= 'lrmachine', source = ['lrmachinetest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
 
+if int(ARGUMENTS.get('tinyg', 0)):
+	aEnv.Program(target= 'tinycompiler', source = ['tinygrammar-compiler.cpp', 'output/tinyg/tinyg.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)

@@ -15,8 +15,10 @@ bool lrmachine::eta(int32 meta)
 	if(!automachine::eta(meta)) return false;
 	while(cstate_ < 0)
 	{
-		int32 newMeta = reduce(- cstate_);
+		int32 newMeta = reduce(- (cstate_ + 1));
 		if(!eta(newMeta)) return false;
+		if(meta == -1 && cstate_ == accept_state &&
+			pstack_.size() == 1) return true; // accept
 		if(!automachine::eta(meta)) return false;
 	}
 	if(cstate_ == accept_state) // accept, we use state 0 as the accept status

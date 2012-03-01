@@ -1,0 +1,207 @@
+lr state~:
+
+I0
+
+I1
+Expressions -> .AExpression ; Expressions 
+Expressions -> .AExpression ; 
+AExpression -> .symbol = AValue 
+AExpression -> .symbol = AValue Op AValue 
+AExpression -> .Print 
+Print -> .printF ( AValue ) 
+
+I2
+Expressions -> AExpression .; Expressions 
+Expressions -> AExpression .; 
+
+I3
+AExpression -> symbol .= AValue 
+AExpression -> symbol .= AValue Op AValue 
+
+I4
+AExpression -> Print .
+
+I5
+Print -> printF .( AValue ) 
+
+I6
+Expressions -> AExpression ; .Expressions 
+Expressions -> AExpression ; .
+Expressions -> .AExpression ; Expressions 
+Expressions -> .AExpression ; 
+AExpression -> .symbol = AValue 
+AExpression -> .symbol = AValue Op AValue 
+AExpression -> .Print 
+Print -> .printF ( AValue ) 
+
+I7
+AExpression -> symbol = .AValue 
+AExpression -> symbol = .AValue Op AValue 
+AValue -> .symbol 
+AValue -> .number 
+
+I8
+Print -> printF ( .AValue ) 
+AValue -> .symbol 
+AValue -> .number 
+
+I9
+Expressions -> AExpression ; Expressions .
+
+I10
+Print -> printF .( AValue ) 
+
+I11
+AValue -> symbol .
+
+I12
+AExpression -> symbol = AValue .
+AExpression -> symbol = AValue .Op AValue 
+Op -> .+ 
+Op -> .- 
+Op -> .* 
+Op -> ./ 
+
+I13
+AValue -> number .
+
+I14
+AValue -> symbol .
+
+I15
+Print -> printF ( AValue .) 
+
+I16
+AValue -> number .
+
+I17
+Print -> printF ( .AValue ) 
+AValue -> .symbol 
+AValue -> .number 
+
+I18
+AExpression -> symbol = AValue Op .AValue 
+AValue -> .symbol 
+AValue -> .number 
+
+I19
+Op -> + .
+
+I20
+Op -> - .
+
+I21
+Op -> * .
+
+I22
+Op -> / .
+
+I23
+Print -> printF ( AValue ) .
+
+I24
+Print -> printF ( AValue .) 
+
+I25
+AValue -> symbol .
+
+I26
+AExpression -> symbol = AValue Op AValue .
+
+I27
+AValue -> number .
+
+I28
+
+lr table~:
+
+(I1, Expressions) G0
+(I1, AExpression) G2
+(I1, symbol) G3
+(I1, Print) G4
+(I1, printF) G5
+
+(I2, ;) G6
+
+(I3, =) G7
+
+(I4, ;) r4
+
+(I5, () G8
+
+(I6, #) r1
+(I6, Expressions) G9
+(I6, AExpression) G2
+(I6, symbol) G3
+(I6, Print) G4
+(I6, printF) G10
+
+(I7, symbol) G11
+(I7, AValue) G12
+(I7, number) G13
+
+(I8, symbol) G14
+(I8, AValue) G15
+(I8, number) G16
+
+(I9, #) G0
+
+(I10, () G17
+
+(I11, ;) r5
+(I11, +) r5
+(I11, -) r5
+(I11, *) r5
+(I11, /) r5
+
+(I12, ;) r2
+(I12, Op) G18
+(I12, +) G19
+(I12, -) G20
+(I12, *) G21
+(I12, /) G22
+
+(I13, ;) r6
+(I13, +) r6
+(I13, -) r6
+(I13, *) r6
+(I13, /) r6
+
+(I14, )) r5
+
+(I15, )) G23
+
+(I16, )) r6
+
+(I17, symbol) G14
+(I17, AValue) G24
+(I17, number) G16
+
+(I18, symbol) G25
+(I18, AValue) G26
+(I18, number) G27
+
+(I19, symbol) r10
+(I19, number) r10
+
+(I20, symbol) r11
+(I20, number) r11
+
+(I21, symbol) r12
+(I21, number) r12
+
+(I22, symbol) r13
+(I22, number) r13
+
+(I23, ;) r7
+
+(I24, )) G28
+
+(I25, ;) r5
+
+(I26, ;) r3
+
+(I27, ;) r6
+
+
+
