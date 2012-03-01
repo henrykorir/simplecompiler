@@ -247,7 +247,7 @@ void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachin
 						std::find_if(tig.productions().begin(), tig.productions().end(), 
 							kog::composite_function(kog::get_ptr_t<production>(), 
 								std::bind2nd(std::equal_to<const production*>(), iterJ->third.pp))));
-					sheet[A][nc] = automachine::gotoitem(iterJ->second, -pid);
+					sheet[A][nc] = automachine::gotoitem(iterJ->second, -(pid + 1));
 				}
 				break;
 			default:
@@ -257,6 +257,14 @@ void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachin
 		}
 		iterI = iterJ;
 	}
+
+	for (automachine::sparsesheet::iterator iter = sheet.begin(); iter != sheet.end(); ++ iter)
+	{
+		std::sort(iter->begin(), iter->end(), 
+			kog::composite_function(kog::mem_value(&automachine::gotoitem::first), kog::mem_value(&automachine::gotoitem::first),
+				std::less<int32>()));
+	}
+	sheet.begin()->endings(1); // mark as ending status
 
 	tmpm.swap(mot);
 }

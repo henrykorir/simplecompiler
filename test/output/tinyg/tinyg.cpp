@@ -874,7 +874,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	
 	sheet[0].reset(0);
 	sheet[0].type(1);
-	sheet[0].endings(0);
+	sheet[0].endings(1);
 	ptr = sheet[0].get();
 	
 	sheet[1].reset(13);
@@ -899,7 +899,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[2].type(1);
 	sheet[2].endings(0);
 	ptr = sheet[2].get();
-		*(ptr ++) = std::make_pair(-1, 0);
+		*(ptr ++) = std::make_pair(-1, -1);
 		*(ptr ++) = std::make_pair(0, 14);
 		*(ptr ++) = std::make_pair(1, 2);
 		*(ptr ++) = std::make_pair(2, 3);
@@ -918,17 +918,17 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[3].type(1);
 	sheet[3].endings(0);
 	ptr = sheet[3].get();
-		*(ptr ++) = std::make_pair(29, -7);
+		*(ptr ++) = std::make_pair(29, -8);
 	
 	sheet[4].reset(5);
 	sheet[4].type(1);
 	sheet[4].endings(0);
 	ptr = sheet[4].get();
-		*(ptr ++) = std::make_pair(-1, -2);
-		*(ptr ++) = std::make_pair(6, -2);
-		*(ptr ++) = std::make_pair(13, -2);
-		*(ptr ++) = std::make_pair(17, -2);
-		*(ptr ++) = std::make_pair(18, -2);
+		*(ptr ++) = std::make_pair(-1, -3);
+		*(ptr ++) = std::make_pair(6, -3);
+		*(ptr ++) = std::make_pair(13, -3);
+		*(ptr ++) = std::make_pair(17, -3);
+		*(ptr ++) = std::make_pair(18, -3);
 	
 	sheet[5].reset(1);
 	sheet[5].type(1);
@@ -952,13 +952,13 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[8].type(1);
 	sheet[8].endings(0);
 	ptr = sheet[8].get();
-		*(ptr ++) = std::make_pair(29, -8);
+		*(ptr ++) = std::make_pair(29, -9);
 	
 	sheet[9].reset(1);
 	sheet[9].type(1);
 	sheet[9].endings(0);
 	ptr = sheet[9].get();
-		*(ptr ++) = std::make_pair(29, -9);
+		*(ptr ++) = std::make_pair(29, -10);
 	
 	sheet[10].reset(1);
 	sheet[10].type(1);
@@ -970,32 +970,32 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[11].type(1);
 	sheet[11].endings(0);
 	ptr = sheet[11].get();
-		*(ptr ++) = std::make_pair(6, -21);
+		*(ptr ++) = std::make_pair(6, -22);
 	
 	sheet[12].reset(1);
 	sheet[12].type(1);
 	sheet[12].endings(0);
 	ptr = sheet[12].get();
-		*(ptr ++) = std::make_pair(6, -22);
+		*(ptr ++) = std::make_pair(6, -23);
 	
 	sheet[13].reset(1);
 	sheet[13].type(1);
 	sheet[13].endings(0);
 	ptr = sheet[13].get();
-		*(ptr ++) = std::make_pair(29, -10);
+		*(ptr ++) = std::make_pair(29, -11);
 	
 	sheet[14].reset(1);
 	sheet[14].type(1);
 	sheet[14].endings(0);
 	ptr = sheet[14].get();
-		*(ptr ++) = std::make_pair(-1, -1);
+		*(ptr ++) = std::make_pair(-1, -2);
 	
 	sheet[15].reset(2);
 	sheet[15].type(1);
 	sheet[15].endings(0);
 	ptr = sheet[15].get();
 		*(ptr ++) = std::make_pair(22, 19);
-		*(ptr ++) = std::make_pair(29, -4);
+		*(ptr ++) = std::make_pair(29, -5);
 	
 	sheet[16].reset(3);
 	sheet[16].type(1);
@@ -1009,11 +1009,11 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[17].type(1);
 	sheet[17].endings(0);
 	ptr = sheet[17].get();
-		*(ptr ++) = std::make_pair(-1, -3);
-		*(ptr ++) = std::make_pair(6, -3);
-		*(ptr ++) = std::make_pair(13, -3);
-		*(ptr ++) = std::make_pair(17, -3);
-		*(ptr ++) = std::make_pair(18, -3);
+		*(ptr ++) = std::make_pair(-1, -4);
+		*(ptr ++) = std::make_pair(6, -4);
+		*(ptr ++) = std::make_pair(13, -4);
+		*(ptr ++) = std::make_pair(17, -4);
+		*(ptr ++) = std::make_pair(18, -4);
 	
 	sheet[18].reset(3);
 	sheet[18].type(1);
@@ -1036,11 +1036,11 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[20].endings(0);
 	ptr = sheet[20].get();
 		*(ptr ++) = std::make_pair(22, 27);
-		*(ptr ++) = std::make_pair(25, -13);
-		*(ptr ++) = std::make_pair(26, -13);
-		*(ptr ++) = std::make_pair(27, -13);
-		*(ptr ++) = std::make_pair(28, -13);
-		*(ptr ++) = std::make_pair(29, -13);
+		*(ptr ++) = std::make_pair(25, -14);
+		*(ptr ++) = std::make_pair(26, -14);
+		*(ptr ++) = std::make_pair(27, -14);
+		*(ptr ++) = std::make_pair(28, -14);
+		*(ptr ++) = std::make_pair(29, -14);
 	
 	sheet[21].reset(6);
 	sheet[21].type(1);
@@ -1051,23 +1051,23 @@ void init_syntax_machine(lalr1machine& lrm)
 		*(ptr ++) = std::make_pair(26, 30);
 		*(ptr ++) = std::make_pair(27, 31);
 		*(ptr ++) = std::make_pair(28, 32);
-		*(ptr ++) = std::make_pair(29, -11);
+		*(ptr ++) = std::make_pair(29, -12);
 	
 	sheet[22].reset(5);
 	sheet[22].type(1);
 	sheet[22].endings(0);
 	ptr = sheet[22].get();
-		*(ptr ++) = std::make_pair(25, -14);
-		*(ptr ++) = std::make_pair(26, -14);
-		*(ptr ++) = std::make_pair(27, -14);
-		*(ptr ++) = std::make_pair(28, -14);
-		*(ptr ++) = std::make_pair(29, -14);
+		*(ptr ++) = std::make_pair(25, -15);
+		*(ptr ++) = std::make_pair(26, -15);
+		*(ptr ++) = std::make_pair(27, -15);
+		*(ptr ++) = std::make_pair(28, -15);
+		*(ptr ++) = std::make_pair(29, -15);
 	
 	sheet[23].reset(1);
 	sheet[23].type(1);
 	sheet[23].endings(0);
 	ptr = sheet[23].get();
-		*(ptr ++) = std::make_pair(23, -13);
+		*(ptr ++) = std::make_pair(23, -14);
 	
 	sheet[24].reset(1);
 	sheet[24].type(1);
@@ -1079,7 +1079,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[25].type(1);
 	sheet[25].endings(0);
 	ptr = sheet[25].get();
-		*(ptr ++) = std::make_pair(23, -14);
+		*(ptr ++) = std::make_pair(23, -15);
 	
 	sheet[26].reset(1);
 	sheet[26].type(1);
@@ -1105,35 +1105,35 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[29].type(1);
 	sheet[29].endings(0);
 	ptr = sheet[29].get();
-		*(ptr ++) = std::make_pair(6, -25);
-		*(ptr ++) = std::make_pair(9, -25);
+		*(ptr ++) = std::make_pair(6, -26);
+		*(ptr ++) = std::make_pair(9, -26);
 	
 	sheet[30].reset(2);
 	sheet[30].type(1);
 	sheet[30].endings(0);
 	ptr = sheet[30].get();
-		*(ptr ++) = std::make_pair(6, -23);
-		*(ptr ++) = std::make_pair(9, -23);
+		*(ptr ++) = std::make_pair(6, -24);
+		*(ptr ++) = std::make_pair(9, -24);
 	
 	sheet[31].reset(2);
 	sheet[31].type(1);
 	sheet[31].endings(0);
 	ptr = sheet[31].get();
-		*(ptr ++) = std::make_pair(6, -24);
-		*(ptr ++) = std::make_pair(9, -24);
+		*(ptr ++) = std::make_pair(6, -25);
+		*(ptr ++) = std::make_pair(9, -25);
 	
 	sheet[32].reset(2);
 	sheet[32].type(1);
 	sheet[32].endings(0);
 	ptr = sheet[32].get();
-		*(ptr ++) = std::make_pair(6, -26);
-		*(ptr ++) = std::make_pair(9, -26);
+		*(ptr ++) = std::make_pair(6, -27);
+		*(ptr ++) = std::make_pair(9, -27);
 	
 	sheet[33].reset(1);
 	sheet[33].type(1);
 	sheet[33].endings(0);
 	ptr = sheet[33].get();
-		*(ptr ++) = std::make_pair(29, -16);
+		*(ptr ++) = std::make_pair(29, -17);
 	
 	sheet[34].reset(1);
 	sheet[34].type(1);
@@ -1151,19 +1151,19 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[36].type(1);
 	sheet[36].endings(0);
 	ptr = sheet[36].get();
-		*(ptr ++) = std::make_pair(29, -13);
+		*(ptr ++) = std::make_pair(29, -14);
 	
 	sheet[37].reset(1);
 	sheet[37].type(1);
 	sheet[37].endings(0);
 	ptr = sheet[37].get();
-		*(ptr ++) = std::make_pair(29, -12);
+		*(ptr ++) = std::make_pair(29, -13);
 	
 	sheet[38].reset(1);
 	sheet[38].type(1);
 	sheet[38].endings(0);
 	ptr = sheet[38].get();
-		*(ptr ++) = std::make_pair(29, -14);
+		*(ptr ++) = std::make_pair(29, -15);
 	
 	sheet[39].reset(3);
 	sheet[39].type(1);
@@ -1201,7 +1201,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[44].type(1);
 	sheet[44].endings(0);
 	ptr = sheet[44].get();
-		*(ptr ++) = std::make_pair(29, -15);
+		*(ptr ++) = std::make_pair(29, -16);
 	
 	sheet[45].reset(1);
 	sheet[45].type(1);
@@ -1232,7 +1232,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[47].type(1);
 	sheet[47].endings(0);
 	ptr = sheet[47].get();
-		*(ptr ++) = std::make_pair(16, -19);
+		*(ptr ++) = std::make_pair(16, -20);
 	
 	sheet[48].reset(1);
 	sheet[48].type(1);
@@ -1271,7 +1271,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[53].type(1);
 	sheet[53].endings(0);
 	ptr = sheet[53].get();
-		*(ptr ++) = std::make_pair(29, -4);
+		*(ptr ++) = std::make_pair(29, -5);
 	
 	sheet[54].reset(12);
 	sheet[54].type(1);
@@ -1285,7 +1285,7 @@ void init_syntax_machine(lalr1machine& lrm)
 		*(ptr ++) = std::make_pair(10, 8);
 		*(ptr ++) = std::make_pair(12, 9);
 		*(ptr ++) = std::make_pair(13, 10);
-		*(ptr ++) = std::make_pair(16, -6);
+		*(ptr ++) = std::make_pair(16, -7);
 		*(ptr ++) = std::make_pair(17, 11);
 		*(ptr ++) = std::make_pair(18, 12);
 		*(ptr ++) = std::make_pair(19, 13);
@@ -1300,11 +1300,11 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[56].type(1);
 	sheet[56].endings(0);
 	ptr = sheet[56].get();
-		*(ptr ++) = std::make_pair(-1, -18);
-		*(ptr ++) = std::make_pair(6, -18);
-		*(ptr ++) = std::make_pair(13, -18);
-		*(ptr ++) = std::make_pair(17, -18);
-		*(ptr ++) = std::make_pair(18, -18);
+		*(ptr ++) = std::make_pair(-1, -19);
+		*(ptr ++) = std::make_pair(6, -19);
+		*(ptr ++) = std::make_pair(13, -19);
+		*(ptr ++) = std::make_pair(17, -19);
+		*(ptr ++) = std::make_pair(18, -19);
 	
 	sheet[57].reset(1);
 	sheet[57].type(1);
@@ -1316,23 +1316,23 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[58].type(1);
 	sheet[58].endings(0);
 	ptr = sheet[58].get();
-		*(ptr ++) = std::make_pair(16, -5);
+		*(ptr ++) = std::make_pair(16, -6);
 	
 	sheet[59].reset(5);
 	sheet[59].type(1);
 	sheet[59].endings(0);
 	ptr = sheet[59].get();
-		*(ptr ++) = std::make_pair(-1, -17);
-		*(ptr ++) = std::make_pair(6, -17);
-		*(ptr ++) = std::make_pair(13, -17);
-		*(ptr ++) = std::make_pair(17, -17);
-		*(ptr ++) = std::make_pair(18, -17);
+		*(ptr ++) = std::make_pair(-1, -18);
+		*(ptr ++) = std::make_pair(6, -18);
+		*(ptr ++) = std::make_pair(13, -18);
+		*(ptr ++) = std::make_pair(17, -18);
+		*(ptr ++) = std::make_pair(18, -18);
 	
 	sheet[60].reset(1);
 	sheet[60].type(1);
 	sheet[60].endings(0);
 	ptr = sheet[60].get();
-		*(ptr ++) = std::make_pair(21, -20);
+		*(ptr ++) = std::make_pair(21, -21);
 	
 	m.sstate() = 1;
 	m.swap(lrm);

@@ -1,0 +1,1491 @@
+lr state~:
+
+I0
+
+I1
+Program -> .begin StatementList end 
+
+I2
+Program -> begin .StatementList end 
+StatementList -> .Statement 
+StatementList -> .StatementList ; Statement 
+Statement -> .Assignment 
+Statement -> .If_Block 
+Statement -> .While_Block 
+Assignment -> .symbol : = Expression 
+If_Block -> .if Condition then Statement 
+If_Block -> .if Condition then Program 
+While_Block -> .while Condition do Statement 
+While_Block -> .while Condition do Program 
+
+I3
+Program -> begin StatementList .end 
+StatementList -> StatementList .; Statement 
+
+I4
+StatementList -> Statement .
+
+I5
+Statement -> Assignment .
+
+I6
+Statement -> If_Block .
+
+I7
+Statement -> While_Block .
+
+I8
+Assignment -> symbol .: = Expression 
+
+I9
+If_Block -> if .Condition then Statement 
+If_Block -> if .Condition then Program 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+Condition -> .Expression Op Expression 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I10
+While_Block -> while .Condition do Statement 
+While_Block -> while .Condition do Program 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+Condition -> .Expression Op Expression 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I11
+Program -> begin StatementList end .
+
+I12
+StatementList -> StatementList ; .Statement 
+Statement -> .Assignment 
+Statement -> .If_Block 
+Statement -> .While_Block 
+Assignment -> .symbol : = Expression 
+If_Block -> .if Condition then Statement 
+If_Block -> .if Condition then Program 
+While_Block -> .while Condition do Statement 
+While_Block -> .while Condition do Program 
+
+I13
+Assignment -> symbol : .= Expression 
+
+I14
+AValue -> symbol .
+
+I15
+Condition -> Expression .Op Expression 
+Op -> .< 
+Op -> .<> 
+Op -> .<= 
+Op -> .> 
+Op -> .>= 
+Op -> .= 
+
+I16
+If_Block -> if Condition .then Statement 
+If_Block -> if Condition .then Program 
+
+I17
+Expression -> AValue .
+Expression -> AValue .+ AValue 
+Expression -> AValue .- AValue 
+
+I18
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I19
+AValue -> number .
+
+I20
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I21
+Condition -> Expression .Op Expression 
+Op -> .< 
+Op -> .<> 
+Op -> .<= 
+Op -> .> 
+Op -> .>= 
+Op -> .= 
+
+I22
+While_Block -> while Condition .do Statement 
+While_Block -> while Condition .do Program 
+
+I23
+StatementList -> StatementList ; Statement .
+
+I24
+Assignment -> symbol : = .Expression 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I25
+Op -> = .
+
+I26
+Condition -> Expression Op .Expression 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I27
+Op -> < .
+
+I28
+Op -> <> .
+
+I29
+Op -> <= .
+
+I30
+Op -> > .
+
+I31
+Op -> >= .
+
+I32
+If_Block -> if Condition then .Statement 
+If_Block -> if Condition then .Program 
+Program -> .begin StatementList end 
+Statement -> .Assignment 
+Statement -> .If_Block 
+Statement -> .While_Block 
+Assignment -> .symbol : = Expression 
+If_Block -> .if Condition then Statement 
+If_Block -> .if Condition then Program 
+While_Block -> .while Condition do Statement 
+While_Block -> .while Condition do Program 
+
+I33
+Expression -> AValue + .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I34
+Expression -> AValue - .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I35
+AValue -> Factor * .Factor 
+
+I36
+AValue -> Factor / .Factor 
+
+I37
+AValue -> symbol .
+
+I38
+AValue -> ( Expression .) 
+
+I39
+Expression -> AValue .
+Expression -> AValue .+ AValue 
+Expression -> AValue .- AValue 
+
+I40
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I41
+AValue -> number .
+
+I42
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I43
+Condition -> Expression Op .Expression 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I44
+While_Block -> while Condition do .Statement 
+While_Block -> while Condition do .Program 
+Program -> .begin StatementList end 
+Statement -> .Assignment 
+Statement -> .If_Block 
+Statement -> .While_Block 
+Assignment -> .symbol : = Expression 
+If_Block -> .if Condition then Statement 
+If_Block -> .if Condition then Program 
+While_Block -> .while Condition do Statement 
+While_Block -> .while Condition do Program 
+
+I45
+AValue -> symbol .
+
+I46
+Assignment -> symbol : = Expression .
+
+I47
+Expression -> AValue .
+Expression -> AValue .+ AValue 
+Expression -> AValue .- AValue 
+
+I48
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I49
+AValue -> number .
+
+I50
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I51
+AValue -> symbol .
+
+I52
+Condition -> Expression Op Expression .
+
+I53
+Expression -> AValue .
+Expression -> AValue .+ AValue 
+Expression -> AValue .- AValue 
+
+I54
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I55
+AValue -> number .
+
+I56
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I57
+If_Block -> if Condition then Program .
+
+I58
+Program -> begin .StatementList end 
+StatementList -> .Statement 
+StatementList -> .StatementList ; Statement 
+Statement -> .Assignment 
+Statement -> .If_Block 
+Statement -> .While_Block 
+Assignment -> .symbol : = Expression 
+If_Block -> .if Condition then Statement 
+If_Block -> .if Condition then Program 
+While_Block -> .while Condition do Statement 
+While_Block -> .while Condition do Program 
+
+I59
+If_Block -> if Condition then Statement .
+
+I60
+AValue -> symbol .
+
+I61
+Expression -> AValue + AValue .
+
+I62
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I63
+AValue -> number .
+
+I64
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I65
+Expression -> AValue - AValue .
+
+I66
+AValue -> Factor * Factor .
+
+I67
+AValue -> Factor / Factor .
+
+I68
+AValue -> ( Expression ) .
+
+I69
+Expression -> AValue + .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I70
+Expression -> AValue - .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I71
+AValue -> Factor * .Factor 
+
+I72
+AValue -> Factor / .Factor 
+
+I73
+AValue -> ( Expression .) 
+
+I74
+AValue -> symbol .
+
+I75
+Condition -> Expression Op Expression .
+
+I76
+Expression -> AValue .
+Expression -> AValue .+ AValue 
+Expression -> AValue .- AValue 
+
+I77
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I78
+AValue -> number .
+
+I79
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I80
+While_Block -> while Condition do Program .
+
+I81
+While_Block -> while Condition do Statement .
+
+I82
+Expression -> AValue + .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I83
+Expression -> AValue - .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I84
+AValue -> Factor * .Factor 
+
+I85
+AValue -> Factor / .Factor 
+
+I86
+AValue -> ( Expression .) 
+
+I87
+Expression -> AValue + .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I88
+Expression -> AValue - .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I89
+AValue -> Factor * .Factor 
+
+I90
+AValue -> Factor / .Factor 
+
+I91
+AValue -> ( Expression .) 
+
+I92
+Program -> begin StatementList .end 
+StatementList -> StatementList .; Statement 
+
+I93
+AValue -> Factor * .Factor 
+
+I94
+AValue -> Factor / .Factor 
+
+I95
+AValue -> ( Expression .) 
+
+I96
+AValue -> symbol .
+
+I97
+Expression -> AValue + AValue .
+
+I98
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I99
+AValue -> number .
+
+I100
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I101
+Expression -> AValue - AValue .
+
+I102
+AValue -> Factor * Factor .
+
+I103
+AValue -> Factor / Factor .
+
+I104
+AValue -> ( Expression ) .
+
+I105
+Expression -> AValue + .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I106
+Expression -> AValue - .AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I107
+AValue -> Factor * .Factor 
+
+I108
+AValue -> Factor / .Factor 
+
+I109
+AValue -> ( Expression .) 
+
+I110
+AValue -> symbol .
+
+I111
+Expression -> AValue + AValue .
+
+I112
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I113
+AValue -> number .
+
+I114
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I115
+Expression -> AValue - AValue .
+
+I116
+AValue -> Factor * Factor .
+
+I117
+AValue -> Factor / Factor .
+
+I118
+AValue -> ( Expression ) .
+
+I119
+AValue -> symbol .
+
+I120
+Expression -> AValue + AValue .
+
+I121
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I122
+AValue -> number .
+
+I123
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I124
+Expression -> AValue - AValue .
+
+I125
+AValue -> Factor * Factor .
+
+I126
+AValue -> Factor / Factor .
+
+I127
+AValue -> ( Expression ) .
+
+I128
+Program -> begin StatementList end .
+
+I129
+AValue -> Factor * Factor .
+
+I130
+AValue -> Factor / Factor .
+
+I131
+AValue -> ( Expression ) .
+
+I132
+AValue -> Factor * .Factor 
+
+I133
+AValue -> Factor / .Factor 
+
+I134
+AValue -> ( Expression .) 
+
+I135
+AValue -> symbol .
+
+I136
+Expression -> AValue + AValue .
+
+I137
+AValue -> Factor .
+AValue -> Factor .* Factor 
+AValue -> Factor ./ Factor 
+
+I138
+AValue -> number .
+
+I139
+AValue -> ( .Expression ) 
+Expression -> .AValue 
+Expression -> .AValue + AValue 
+Expression -> .AValue - AValue 
+AValue -> .Factor 
+AValue -> .Factor * Factor 
+AValue -> .Factor / Factor 
+AValue -> .symbol 
+AValue -> .number 
+AValue -> .( Expression ) 
+
+I140
+Expression -> AValue - AValue .
+
+I141
+AValue -> Factor * Factor .
+
+I142
+AValue -> Factor / Factor .
+
+I143
+AValue -> ( Expression ) .
+
+I144
+AValue -> Factor * .Factor 
+
+I145
+AValue -> Factor / .Factor 
+
+I146
+AValue -> ( Expression .) 
+
+I147
+AValue -> Factor * .Factor 
+
+I148
+AValue -> Factor / .Factor 
+
+I149
+AValue -> ( Expression .) 
+
+I150
+AValue -> Factor * Factor .
+
+I151
+AValue -> Factor / Factor .
+
+I152
+AValue -> ( Expression ) .
+
+I153
+AValue -> Factor * .Factor 
+
+I154
+AValue -> Factor / .Factor 
+
+I155
+AValue -> ( Expression .) 
+
+I156
+AValue -> Factor * Factor .
+
+I157
+AValue -> Factor / Factor .
+
+I158
+AValue -> ( Expression ) .
+
+I159
+AValue -> Factor * Factor .
+
+I160
+AValue -> Factor / Factor .
+
+I161
+AValue -> ( Expression ) .
+
+I162
+AValue -> Factor * Factor .
+
+I163
+AValue -> Factor / Factor .
+
+I164
+AValue -> ( Expression ) .
+
+lr table~:
+
+(I1, Program) G0
+(I1, begin) G2
+
+(I2, StatementList) G3
+(I2, Statement) G4
+(I2, Assignment) G5
+(I2, If_Block) G6
+(I2, While_Block) G7
+(I2, symbol) G8
+(I2, if) G9
+(I2, while) G10
+
+(I3, end) G11
+(I3, ;) G12
+
+(I4, end) r1
+(I4, ;) r1
+
+(I5, end) r3
+(I5, ;) r3
+
+(I6, end) r4
+(I6, ;) r4
+
+(I7, end) r5
+(I7, ;) r5
+
+(I8, :) G13
+
+(I9, symbol) G14
+(I9, Expression) G15
+(I9, Condition) G16
+(I9, AValue) G17
+(I9, Factor) G18
+(I9, number) G19
+(I9, () G20
+
+(I10, symbol) G14
+(I10, Expression) G21
+(I10, Condition) G22
+(I10, AValue) G17
+(I10, Factor) G18
+(I10, number) G19
+(I10, () G20
+
+(I11, #) G0
+
+(I12, Statement) G23
+(I12, Assignment) G5
+(I12, If_Block) G6
+(I12, While_Block) G7
+(I12, symbol) G8
+(I12, if) G9
+(I12, while) G10
+
+(I13, =) G24
+
+(I14, =) r24
+(I14, +) r24
+(I14, -) r24
+(I14, <) r24
+(I14, <>) r24
+(I14, <=) r24
+(I14, >) r24
+(I14, >=) r24
+
+(I15, =) G25
+(I15, Op) G26
+(I15, <) G27
+(I15, <>) G28
+(I15, <=) G29
+(I15, >) G30
+(I15, >=) G31
+
+(I16, then) G32
+
+(I17, =) r11
+(I17, <) r11
+(I17, <>) r11
+(I17, <=) r11
+(I17, >) r11
+(I17, >=) r11
+(I17, +) G33
+(I17, -) G34
+
+(I18, =) r21
+(I18, +) r21
+(I18, -) r21
+(I18, <) r21
+(I18, <>) r21
+(I18, <=) r21
+(I18, >) r21
+(I18, >=) r21
+(I18, *) G35
+(I18, /) G36
+
+(I19, =) r25
+(I19, +) r25
+(I19, -) r25
+(I19, <) r25
+(I19, <>) r25
+(I19, <=) r25
+(I19, >) r25
+(I19, >=) r25
+
+(I20, symbol) G37
+(I20, Expression) G38
+(I20, AValue) G39
+(I20, Factor) G40
+(I20, number) G41
+(I20, () G42
+
+(I21, =) G25
+(I21, Op) G43
+(I21, <) G27
+(I21, <>) G28
+(I21, <=) G29
+(I21, >) G30
+(I21, >=) G31
+
+(I22, do) G44
+
+(I23, end) r2
+(I23, ;) r2
+
+(I24, symbol) G45
+(I24, Expression) G46
+(I24, AValue) G47
+(I24, Factor) G48
+(I24, number) G49
+(I24, () G50
+
+(I25, symbol) r20
+(I25, number) r20
+(I25, () r20
+
+(I26, symbol) G51
+(I26, Expression) G52
+(I26, AValue) G53
+(I26, Factor) G54
+(I26, number) G55
+(I26, () G56
+
+(I27, symbol) r15
+(I27, number) r15
+(I27, () r15
+
+(I28, symbol) r16
+(I28, number) r16
+(I28, () r16
+
+(I29, symbol) r17
+(I29, number) r17
+(I29, () r17
+
+(I30, symbol) r18
+(I30, number) r18
+(I30, () r18
+
+(I31, symbol) r19
+(I31, number) r19
+(I31, () r19
+
+(I32, Program) G57
+(I32, begin) G58
+(I32, Statement) G59
+(I32, Assignment) G5
+(I32, If_Block) G6
+(I32, While_Block) G7
+(I32, symbol) G8
+(I32, if) G9
+(I32, while) G10
+
+(I33, symbol) G60
+(I33, AValue) G61
+(I33, Factor) G62
+(I33, number) G63
+(I33, () G64
+
+(I34, symbol) G60
+(I34, AValue) G65
+(I34, Factor) G62
+(I34, number) G63
+(I34, () G64
+
+(I35, Factor) G66
+
+(I36, Factor) G67
+
+(I37, +) r24
+(I37, -) r24
+(I37, )) r24
+
+(I38, )) G68
+
+(I39, )) r11
+(I39, +) G69
+(I39, -) G70
+
+(I40, +) r21
+(I40, -) r21
+(I40, )) r21
+(I40, *) G71
+(I40, /) G72
+
+(I41, +) r25
+(I41, -) r25
+(I41, )) r25
+
+(I42, symbol) G37
+(I42, Expression) G73
+(I42, AValue) G39
+(I42, Factor) G40
+(I42, number) G41
+(I42, () G42
+
+(I43, symbol) G74
+(I43, Expression) G75
+(I43, AValue) G76
+(I43, Factor) G77
+(I43, number) G78
+(I43, () G79
+
+(I44, Program) G80
+(I44, begin) G58
+(I44, Statement) G81
+(I44, Assignment) G5
+(I44, If_Block) G6
+(I44, While_Block) G7
+(I44, symbol) G8
+(I44, if) G9
+(I44, while) G10
+
+(I45, end) r24
+(I45, ;) r24
+(I45, +) r24
+(I45, -) r24
+
+(I46, end) r6
+(I46, ;) r6
+
+(I47, end) r11
+(I47, ;) r11
+(I47, +) G82
+(I47, -) G83
+
+(I48, end) r21
+(I48, ;) r21
+(I48, +) r21
+(I48, -) r21
+(I48, *) G84
+(I48, /) G85
+
+(I49, end) r25
+(I49, ;) r25
+(I49, +) r25
+(I49, -) r25
+
+(I50, symbol) G37
+(I50, Expression) G86
+(I50, AValue) G39
+(I50, Factor) G40
+(I50, number) G41
+(I50, () G42
+
+(I51, then) r24
+(I51, +) r24
+(I51, -) r24
+
+(I52, then) r14
+
+(I53, then) r11
+(I53, +) G87
+(I53, -) G88
+
+(I54, then) r21
+(I54, +) r21
+(I54, -) r21
+(I54, *) G89
+(I54, /) G90
+
+(I55, then) r25
+(I55, +) r25
+(I55, -) r25
+
+(I56, symbol) G37
+(I56, Expression) G91
+(I56, AValue) G39
+(I56, Factor) G40
+(I56, number) G41
+(I56, () G42
+
+(I57, end) r8
+(I57, ;) r8
+
+(I58, StatementList) G92
+(I58, Statement) G4
+(I58, Assignment) G5
+(I58, If_Block) G6
+(I58, While_Block) G7
+(I58, symbol) G8
+(I58, if) G9
+(I58, while) G10
+
+(I59, end) r7
+(I59, ;) r7
+
+(I60, =) r24
+(I60, <) r24
+(I60, <>) r24
+(I60, <=) r24
+(I60, >) r24
+(I60, >=) r24
+
+(I61, =) r12
+(I61, <) r12
+(I61, <>) r12
+(I61, <=) r12
+(I61, >) r12
+(I61, >=) r12
+
+(I62, =) r21
+(I62, <) r21
+(I62, <>) r21
+(I62, <=) r21
+(I62, >) r21
+(I62, >=) r21
+(I62, *) G93
+(I62, /) G94
+
+(I63, =) r25
+(I63, <) r25
+(I63, <>) r25
+(I63, <=) r25
+(I63, >) r25
+(I63, >=) r25
+
+(I64, symbol) G37
+(I64, Expression) G95
+(I64, AValue) G39
+(I64, Factor) G40
+(I64, number) G41
+(I64, () G42
+
+(I65, =) r13
+(I65, <) r13
+(I65, <>) r13
+(I65, <=) r13
+(I65, >) r13
+(I65, >=) r13
+
+(I66, =) r22
+(I66, +) r22
+(I66, -) r22
+(I66, <) r22
+(I66, <>) r22
+(I66, <=) r22
+(I66, >) r22
+(I66, >=) r22
+
+(I67, =) r23
+(I67, +) r23
+(I67, -) r23
+(I67, <) r23
+(I67, <>) r23
+(I67, <=) r23
+(I67, >) r23
+(I67, >=) r23
+
+(I68, =) r26
+(I68, +) r26
+(I68, -) r26
+(I68, <) r26
+(I68, <>) r26
+(I68, <=) r26
+(I68, >) r26
+(I68, >=) r26
+
+(I69, symbol) G96
+(I69, AValue) G97
+(I69, Factor) G98
+(I69, number) G99
+(I69, () G100
+
+(I70, symbol) G96
+(I70, AValue) G101
+(I70, Factor) G98
+(I70, number) G99
+(I70, () G100
+
+(I71, Factor) G102
+
+(I72, Factor) G103
+
+(I73, )) G104
+
+(I74, do) r24
+(I74, +) r24
+(I74, -) r24
+
+(I75, do) r14
+
+(I76, do) r11
+(I76, +) G105
+(I76, -) G106
+
+(I77, do) r21
+(I77, +) r21
+(I77, -) r21
+(I77, *) G107
+(I77, /) G108
+
+(I78, do) r25
+(I78, +) r25
+(I78, -) r25
+
+(I79, symbol) G37
+(I79, Expression) G109
+(I79, AValue) G39
+(I79, Factor) G40
+(I79, number) G41
+(I79, () G42
+
+(I80, end) r10
+(I80, ;) r10
+
+(I81, end) r9
+(I81, ;) r9
+
+(I82, symbol) G110
+(I82, AValue) G111
+(I82, Factor) G112
+(I82, number) G113
+(I82, () G114
+
+(I83, symbol) G110
+(I83, AValue) G115
+(I83, Factor) G112
+(I83, number) G113
+(I83, () G114
+
+(I84, Factor) G116
+
+(I85, Factor) G117
+
+(I86, )) G118
+
+(I87, symbol) G119
+(I87, AValue) G120
+(I87, Factor) G121
+(I87, number) G122
+(I87, () G123
+
+(I88, symbol) G119
+(I88, AValue) G124
+(I88, Factor) G121
+(I88, number) G122
+(I88, () G123
+
+(I89, Factor) G125
+
+(I90, Factor) G126
+
+(I91, )) G127
+
+(I92, end) G128
+(I92, ;) G12
+
+(I93, Factor) G129
+
+(I94, Factor) G130
+
+(I95, )) G131
+
+(I96, )) r24
+
+(I97, )) r12
+
+(I98, )) r21
+(I98, *) G132
+(I98, /) G133
+
+(I99, )) r25
+
+(I100, symbol) G37
+(I100, Expression) G134
+(I100, AValue) G39
+(I100, Factor) G40
+(I100, number) G41
+(I100, () G42
+
+(I101, )) r13
+
+(I102, +) r22
+(I102, -) r22
+(I102, )) r22
+
+(I103, +) r23
+(I103, -) r23
+(I103, )) r23
+
+(I104, +) r26
+(I104, -) r26
+(I104, )) r26
+
+(I105, symbol) G135
+(I105, AValue) G136
+(I105, Factor) G137
+(I105, number) G138
+(I105, () G139
+
+(I106, symbol) G135
+(I106, AValue) G140
+(I106, Factor) G137
+(I106, number) G138
+(I106, () G139
+
+(I107, Factor) G141
+
+(I108, Factor) G142
+
+(I109, )) G143
+
+(I110, end) r24
+(I110, ;) r24
+
+(I111, end) r12
+(I111, ;) r12
+
+(I112, end) r21
+(I112, ;) r21
+(I112, *) G144
+(I112, /) G145
+
+(I113, end) r25
+(I113, ;) r25
+
+(I114, symbol) G37
+(I114, Expression) G146
+(I114, AValue) G39
+(I114, Factor) G40
+(I114, number) G41
+(I114, () G42
+
+(I115, end) r13
+(I115, ;) r13
+
+(I116, end) r22
+(I116, ;) r22
+(I116, +) r22
+(I116, -) r22
+
+(I117, end) r23
+(I117, ;) r23
+(I117, +) r23
+(I117, -) r23
+
+(I118, end) r26
+(I118, ;) r26
+(I118, +) r26
+(I118, -) r26
+
+(I119, then) r24
+
+(I120, then) r12
+
+(I121, then) r21
+(I121, *) G147
+(I121, /) G148
+
+(I122, then) r25
+
+(I123, symbol) G37
+(I123, Expression) G149
+(I123, AValue) G39
+(I123, Factor) G40
+(I123, number) G41
+(I123, () G42
+
+(I124, then) r13
+
+(I125, then) r22
+(I125, +) r22
+(I125, -) r22
+
+(I126, then) r23
+(I126, +) r23
+(I126, -) r23
+
+(I127, then) r26
+(I127, +) r26
+(I127, -) r26
+
+(I128, end) G0
+(I128, ;) G0
+
+(I129, =) r22
+(I129, <) r22
+(I129, <>) r22
+(I129, <=) r22
+(I129, >) r22
+(I129, >=) r22
+
+(I130, =) r23
+(I130, <) r23
+(I130, <>) r23
+(I130, <=) r23
+(I130, >) r23
+(I130, >=) r23
+
+(I131, =) r26
+(I131, <) r26
+(I131, <>) r26
+(I131, <=) r26
+(I131, >) r26
+(I131, >=) r26
+
+(I132, Factor) G150
+
+(I133, Factor) G151
+
+(I134, )) G152
+
+(I135, do) r24
+
+(I136, do) r12
+
+(I137, do) r21
+(I137, *) G153
+(I137, /) G154
+
+(I138, do) r25
+
+(I139, symbol) G37
+(I139, Expression) G155
+(I139, AValue) G39
+(I139, Factor) G40
+(I139, number) G41
+(I139, () G42
+
+(I140, do) r13
+
+(I141, do) r22
+(I141, +) r22
+(I141, -) r22
+
+(I142, do) r23
+(I142, +) r23
+(I142, -) r23
+
+(I143, do) r26
+(I143, +) r26
+(I143, -) r26
+
+(I144, Factor) G156
+
+(I145, Factor) G157
+
+(I146, )) G158
+
+(I147, Factor) G159
+
+(I148, Factor) G160
+
+(I149, )) G161
+
+(I150, )) r22
+
+(I151, )) r23
+
+(I152, )) r26
+
+(I153, Factor) G162
+
+(I154, Factor) G163
+
+(I155, )) G164
+
+(I156, end) r22
+(I156, ;) r22
+
+(I157, end) r23
+(I157, ;) r23
+
+(I158, end) r26
+(I158, ;) r26
+
+(I159, then) r22
+
+(I160, then) r23
+
+(I161, then) r26
+
+(I162, do) r22
+
+(I163, do) r23
+
+(I164, do) r26
+
+

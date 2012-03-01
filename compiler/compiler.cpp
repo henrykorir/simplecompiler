@@ -1,118 +1,162 @@
 #include "compiler.h"
 #include <functional>
 #include <algorithm>
+#include <logger.h>
+#include <fstream>
+#include <scerror.h>
+
+#include "extract.h"
+#include "lalr1machine.h"
+
 using namespace sc;
 using namespace compile;
+using namespace compile::doc;
+
+compiler::compiler()
+: keywords(string_2_int::max_int)
+{
+}
 
 state_machine compiler::get_number_machine()
 {
-	return instance().machines["number"];
+	return *(dynamic_cast<state_machine*>(instance().machines["number"].mac.get()));
 }
 
 state_machine compiler::get_symbol_machine()
 {
-	return instance().machines["symbol"];
+	return *(dynamic_cast<state_machine*>(instance().machines["symbol"].mac.get()));
 }
 
 state_machine compiler::get_string_machine()
 {
-	return instance().machines["string"];
+	return *(dynamic_cast<state_machine*>(instance().machines["string"].mac.get()));
 }
+
 bool compiler::is_separator(int32 elem)
 {
 	return std::find(instance().separators.begin(), 
 			instance().separators.end(), elem) != instance().separators.end();
 }
 
-int compiler::get_all_machines(std::list<state_machine*>& mlist)
+int compiler::get_all_machines(std::list<machine>& mlist)
 {
-	for(std::map<std::string, state_machine>::iterator iter = instance().machines.begin(); iter != instance().machines.end(); ++ iter)
-		mlist.push_back(&iter->second);
+	for(std::map<std::string, machine>::iterator iter = instance().machines.begin(); iter != instance().machines.end(); ++ iter)
+		if (typeid(*iter->second.mac) == typeid(state_machine))
+		{
+			mlist.push_back(iter->second);
+		}
+		
 	return (int32)mlist.size();
 }
 
-void compiler::initmachines()
+extern void init_grammar(tinygrammar& tig);
+extern void init_machines(std::map<std::string, machine>& machines);
+extern void init_syntax_machine(lalr1machine& lrm);
+extern void init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords);
+extern void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid);
+extern void init_printablechars(kog::smart_vector<sc::int32>& printablechars);
+
+void compiler::initialization()
 {
-	{
-	//kog::share_ptr<state_machine::sparsesheet> numsheet(new state_machine::sparsesheet());
-	state_machine::shared_sheet numsheet(new state_machine::sparsesheet());
-	// init number machine, current not support 1.4E3
-	state_machine::sparsesheet& ns = *numsheet;
-	numsheet->reset(5);
-	ns[0].reset(11); ns[0].endings(0);
-	ns[1].reset(11); ns[1].endings(1);
-	ns[2].reset(10); ns[2].endings(0);
-	ns[3].reset(10); ns[3].endings(1);
-	ns[4].endings(1);
-	for(int meta = '0', j = 0; meta <= '9'; ++ meta, ++ j)
-	{
-		ns.at(0)[j] = std::make_pair(meta, 1);
-		ns.at(1)[j] = std::make_pair(meta, 1);
-		ns.at(2)[j] = std::make_pair(meta, 3);
-		ns.at(3)[j] = std::make_pair(meta, 3);
-	}
-	ns.at(0)[10] = std::make_pair('.', 2);
-	ns.at(1)[10] = std::make_pair('.', 2);
-	std::sort(ns[0].get(), ns[0].get() + ns[0].size(), intpair_less());
-	std::sort(ns[1].get(), ns[1].get() + ns[1].size(), intpair_less());
-	std::sort(ns[2].get(), ns[2].get() + ns[2].size(), intpair_less());
-	std::sort(ns[3].get(), ns[3].get() + ns[3].size(), intpair_less());
-	instance().machines["number"] = state_machine(numsheet);
-	}
-
-	// init symbol machine
-	{
-	//kog::share_ptr<state_machine::sparsesheet> symsheet(new state_machine::sparsesheet());
-	state_machine::shared_sheet symsheet(new state_machine::sparsesheet());
-	state_machine::sparsesheet& ss = *symsheet;
-	symsheet->reset(2);
-	ss[0].reset(53); ss[0].endings(0);
-	ss[1].reset(63); ss[1].endings(1);
-	for(int meta = 'A', j = 0; meta <= 'Z'; ++ meta)
-	{
-		ss.at(0)[j] = std::make_pair(meta, 1);
-		ss.at(1)[j] = std::make_pair(meta, 1);
-		ss.at(0)[++j] = std::make_pair(meta - 'A' + 'a', 1);
-		ss.at(1)[j++] = std::make_pair(meta - 'A' + 'a', 1);
-	}
-	for(int meta = '0', j = 52; meta <= '9'; ++ meta, ++ j)
-	{
-		ss.at(1)[j] = std::make_pair(meta, 1);
-	}
-	ss.at(0)[52] = std::make_pair('_', 1);
-	ss.at(1)[62] = std::make_pair('_', 1);
-	std::sort(ss[0].get(), ss[0].get() + ss[0].size(), intpair_less());
-	std::sort(ss[1].get(), ss[1].get() + ss[1].size(), intpair_less());
-	state_machine tmpmac(symsheet);
-	instance().machines["symbol"] = tmpmac;
-	}
+	init_grammar(tg);
+	init_printablechars(printablechars);
+	init_keywords(keywords);
+	init_separators(separators, sepsid);
+	init_machines(machines);
 	
+	// 
+	machines["__main__"] = machine(kog::shared_ptr<automachine>(new lalr1machine(tg)), -1);
+	init_syntax_machine(*(dynamic_cast<lalr1machine*>(machines["__main__"].mac.get())));
+}
+
+
+int32 compiler::is_keywords(const std::string& s) const
+{
+	const int32* x = keywords.find(s);
+	if (!x) return -1;
+	return *x;
+}
+
+struct split_separators
+{
+	split_separators(const tchar* w)
+		: aword(w)
+		, x(-1)
 	{
-		// init string machine
-	state_machine::shared_sheet strsheet(new state_machine::sparsesheet());
-	state_machine::sparsesheet& ss = *strsheet;
-	const std::string tmp = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-	instance().printablechars.reset(tmp.size());
-	for(size_t i = 0; i < tmp.size(); ++ i) instance().printablechars[i] = tmp[i];
-	strsheet->reset(4);
-	ss[0].reset(1);   ss[0].endings(0);
-	ss[1].reset(128); ss[1].endings(0);
-	ss[2].reset(128); ss[2].endings(0); ss[3].endings(1);
-	//ss[3].reset(0);
-	ss[0][0] = std::make_pair((int)'"', 1);
-	for(int meta = 0; meta < 128; ++ meta)
-	{
-		if(meta == '\\') ss[1][meta] = std::make_pair(meta, 2);
-		else if(meta == '"') ss[1][meta] = std::make_pair(meta, 3);
-		else ss[1][meta] = std::make_pair(meta, 1);
-		ss[2][meta] = std::make_pair(meta, 1);
-	}
-	instance().machines["string"] = state_machine(strsheet);
+		next();
 	}
 
-	// set separators
-	std::string tmp = "+-*/&|~^%()[]{}'\"\\,.;?<>=!@$#:";
-	instance().separators.reset(tmp.size());
-	for(size_t i = 0; i < tmp.size(); ++ i)
-		instance().separators[i] = tmp[i];
+	int32 get() const
+	{
+		return x;
+	}
+
+	int32 next()
+	{
+		kog::tree<int32>::link p = compiler::instance().sepsid.root();
+		buf.clear();
+		while(*aword && p->nc)
+		{
+			unsigned char t = *(const unsigned char*)aword;
+			kog::tree<int32>::link q = p->children[t];
+			if(q) { buf.push_back(*(aword ++)); p = q; }
+			else break;
+		}
+
+		return x = p->v;
+	}
+
+	const tchar* aword;
+	tstring buf;
+	int32 x;
+};
+
+void compiler::check(const std::string& fname)
+{
+	streamsplit wordsplit;
+	std::ifstream cifs(fname.c_str());
+	if(!cifs.is_open()) fire("can't open file: " + fname);
+	const streamsplit::deqwords& words = wordsplit(cifs);
+	cifs.close();
+	
+	lrmachine& lrm = *(dynamic_cast<lrmachine*>(machines["__main__"].mac.get()));
+	lrm.init();
+
+	logstring("\nstart to run machine...\n");
+	for(streamsplit::deqwords::const_iterator iter = words.begin(); iter != words.end(); ++ iter)
+	{
+		switch (iter->wordClass)
+		{
+		case 0: // separators
+			{
+				split_separators splits(iter->txt.c_str());
+				for (int32 x = splits.get(); x != -1; x = splits.next())
+				{
+					logstring("%s\t%d\n", splits.buf.c_str(), x);
+					if(!lrm.eta(x))
+						fire("not expected sep!\n");
+				}
+			}
+			break;
+		case -1: // eof
+			{
+				logstring("%s\t%d\n", iter->txt.c_str(), -1);
+				if(!lrm.eta(-1))
+					fire("not expected eof!\n");
+			}
+			break;
+		default:
+			{
+				int32 x = is_keywords(iter->txt);
+				if(x == -1) x = iter->wordClass;
+				logstring("%s\t%d\n", iter->txt.c_str(), x);
+				if(!lrm.eta(x))
+					fire("not expected word!\n");
+			}
+		}		
+	}
+
+	if(lrm.isaccepted())
+		logstring("\naccepted!\n");
+	else logstring("\nerror, not accepted!\n");
 }

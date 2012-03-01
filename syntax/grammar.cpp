@@ -16,7 +16,7 @@ tinygrammar::tinygrammar(const tinygrammar& other)
 , eplison_symbol_(other.eplison_symbol_)
 , ending_symbol_(other.ending_symbol_)
 {
-//	symbols_.make_index();
+	symbols_.make_index();
 }
 
 tinygrammar::~tinygrammar()

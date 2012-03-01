@@ -20,11 +20,18 @@ public:
 public:
 	void operator()(const grammar* aGrammar, const tstring& outfile);
 private:
+	void print_grammar();
 	void print_symbols();
 	void print_statemachines();
+	void print_includes();
+	void print_separators();
+	void print_keywords();
+	void print_printablechars();
 	void print_machine(std::ostream& os, const compile::automachine& mac);
 private:
 	void regex_str_to_machine(const std::string& regexstr, automachine& m);
+	void refine_machine(automachine& m) const;
+	bool is_token_keyword(const tchar* name) const;
 public:
 	const grammar* syntax_;
 	tstring cppfile_;

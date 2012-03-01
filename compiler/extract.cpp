@@ -1,5 +1,6 @@
 #include "extract.h"
 #include <scerror.h>
+#include <logger.h>
 
 #include <iostream>
 #include "statemachine.h"
@@ -78,8 +79,11 @@ private:
 		}
 		else if(compiler::is_separator(_Meta)) // separators
 		{
-			aword.txt.push_back(_Meta);
-			_Myios::rdbuf()->snextc();
+			do{
+				aword.txt.push_back(_Meta);
+				_Meta = _Myios::rdbuf()->snextc();
+			}while(compiler::is_separator(_Meta));
+			
 			return 0;
 		}
 		else
@@ -124,15 +128,15 @@ private:
 
 	int32 match_machines(word& aword, int_type _Meta)
 	{
-		std::list<state_machine*> mlist;
+		std::list<machine> mlist;
 		compiler::get_all_machines(mlist);
-		typedef std::list<state_machine*>::iterator machine_iterator;
-		int sid = 0, i = 1;
-		for(machine_iterator iter = mlist.begin(); iter != mlist.end(); ++ i)
+		typedef std::list<machine>::iterator machine_iterator;
+		for(machine_iterator iter = mlist.begin(); iter != mlist.end();)
 		{
-			(*iter)->init();
-			if(!(*iter)->eta(_Meta)) iter = mlist.erase(iter);
-			else  { ++ iter; sid = i; }
+			state_machine& m = *dynamic_cast<state_machine*>(iter->mac.get());
+			m.init();
+			if(!m.eta(_Meta)) iter = mlist.erase(iter);
+			else  { ++ iter; }
 		}
 		switch(mlist.size())
 		{
@@ -140,17 +144,18 @@ private:
 		case 1: 
 			{
 				std::string buf;
-				if(read_content(buf, **mlist.begin()))
+				state_machine& m = *dynamic_cast<state_machine*>(mlist.begin()->mac.get());
+				if(read_content(buf, m))
 				{
 					aword.txt.swap(buf);
-					return sid;
+					return mlist.begin()->sid;
 				}
 				else return 0;
 			}
 		default:
 				fire("we can only accept one state machine");
 		}
-		return sid;
+		return 0;
 	}
 };
 
@@ -170,9 +175,17 @@ streamsplit::deqwords& streamsplit::operator()(std::istream& is)
 	while(iws>>aword)
 	{
 		words_.push_back(aword);
+#ifdef DEBUG_OUTPUT
+		logstring("read word: %s\n", aword.txt.c_str());
+#endif
 	}
 	bool isdone = iws.eof();
 	iws.rdbuf(NULL);
 	if(!isdone) throw scerror("failed read word!");
+
+	word eof_word;
+	eof_word.txt = "#";
+	eof_word.wordClass = -1;
+	words_.push_back(eof_word);
 	return words_;
 }

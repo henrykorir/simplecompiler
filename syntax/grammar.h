@@ -29,6 +29,7 @@ public:
 	, eplison_symbol_(_Eplison)
 	, ending_symbol_(_Ending)
 	{
+		symbols_.make_index();
 	}
 	tinygrammar(const tinygrammar& other);
 	virtual ~tinygrammar();

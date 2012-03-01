@@ -6,16 +6,17 @@
 
 #include <lrmachine.h>
 
-NAMESPACE_BEGIN(compiler)
+NAMESPACE_BEGIN(compile)
 
 
 class lalr1machine : public compile::lrmachine
 {
 public:
 	lalr1machine();
+	lalr1machine(const tinygrammar& g) : compile::lrmachine(g){};
 	virtual ~lalr1machine();
 public:
 };
 
-NAMESPACE_END(compiler)
+NAMESPACE_END(compile)
 #endif
