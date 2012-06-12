@@ -6,6 +6,7 @@
 #include <queue>
 #include <map>
 #include <iostream>
+#include <memory>
 
 #include <functionalX.h>
 #include <sortc.h>

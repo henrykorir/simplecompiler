@@ -50,6 +50,7 @@ public:
 	typedef typename mpl::add_const<_Tx>::type const_type;
 	typedef _tree_node<_Tx, _Alloc> _Base;
 	typedef typename _Base::link link;
+	typedef typename _Base::const_link const_link;
 
 public:
 	template<typename _Bidirection>
@@ -63,9 +64,10 @@ public:
 		typedef typename _Base::difference_type distance_type;	// retained
 		typedef typename _Base::pointer pointer;
 		typedef typename _Base::reference reference;
-		typedef typename const value_type& const_reference;
-		typedef typename const value_type* const_pointer;
+		typedef const value_type& const_reference;
+		typedef const value_type* const_pointer;
 		typedef _Const_iterator<_Tx> _Myt;
+		typedef typename tree<_Tx, _Alloc>::link link;
 	public:
 		_Const_iterator(link p)
 		: self_(p)
@@ -116,8 +118,8 @@ public:
 		}
 
 	public:
-		pointer operator ->() const { return &self_->v; }
-		reference operator*() const { return self_->v; }
+		pointer operator ->() const { return &_Const_base::self_->v; }
+		reference operator*() const { return _Const_base::self_->v; }
 	};
 	
 	struct first_order

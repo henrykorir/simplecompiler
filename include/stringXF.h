@@ -153,6 +153,119 @@ std::basic_string<_Elem> replaceall(const std::basic_string<_Elem>& str, const s
 	return temp;
 }
 
+template<class _Elem>
+struct string_split_t
+{
+    string_split_t(const std::basic_string<_Elem>& str, const std::basic_string<_Elem>& space, bool is_remove_empty = true)
+    : main_(str)
+    , space_(space)
+    , isre_(is_remove_empty)
+    {
+        if (space_.empty()) throw std::runtime_error("empty space!");
+    }
+
+    struct _Const_iterator
+    {
+    public:
+        _Const_iterator(string_split_t<_Elem>* ref, size_t posB)
+            : ref_(ref)
+            , posB_(posB)
+        {
+            posE_ = _next(posB_);
+            while (ref_->isre_ && posB_ == posE_ && posE_ != ref_->main_.length())
+            {
+                posB_ += ref_->space_.length();
+                posE_ = _next(posB_);
+            }
+        }
+
+        _Const_iterator(string_split_t<_Elem>* ref, size_t posB, size_t posE)
+            : ref_(ref)
+            , posB_(posB)
+            , posE_(posE)
+        {
+        }
+
+        _Const_iterator(const _Const_iterator& other)
+            : ref_(other.ref_)
+            , posB_(other.posB_)
+            , posE_(other.posE_)
+        {
+        }
+    public:
+        friend bool operator== (const _Const_iterator& iter1, const _Const_iterator& iter2)
+        {
+            if (iter1.ref_ != iter2.ref_)
+                throw std::runtime_error("string_split::const_iterator, ref not equal!");
+            return iter1.posB_ == iter2.posB_;
+        }
+        
+        friend bool operator!= (const _Const_iterator& iter1, const _Const_iterator& iter2)
+        {
+            return !(iter1 == iter2);
+        }
+
+    public:
+        std::basic_string<_Elem> operator*()
+        {
+            return ref_->main_.substr(posB_, posE_ - posB_);
+        }
+    public:
+        _Const_iterator& operator++()
+        {
+            if (posB_ >= ref_->main_.length())
+                throw std::out_of_range("string_split::const_iteator::operator++");
+            else if(posE_ == ref_->main_.length())
+                posB_ = posE_;
+            else
+            {
+                do {
+                    size_t pos = posE_ + ref_->space_.length();
+                    posB_ = pos;
+                    posE_ = _next(posB_);
+                }while(ref_->isre_ && posE_ == posB_ && posE_ != ref_->main_.length());
+            }
+        }
+
+        _Const_iterator operator++(int)
+        {
+            _Const_iterator tmp(*this);
+            ++ tmp;
+            return tmp;
+        }
+    private:
+        size_t _next(size_t posb)
+        {
+	        size_t pos = ref_->main_.find(ref_->space_, posb);
+            if (pos == std::basic_string<_Elem>::npos) pos = ref_->main_.length();
+            return pos;
+        }
+    private:
+        string_split_t<_Elem>* ref_;
+        size_t posB_;
+        size_t posE_;
+    };
+public:
+    typedef _Const_iterator const_iterator;
+    friend struct _Const_iterator;
+public:
+    const_iterator begin()
+    {
+        _Const_iterator iter(this, 0);
+        return iter;
+    }
+
+    const_iterator end()
+    {
+        _Const_iterator iter(this, main_.length(), main_.length());
+        return iter;
+    }
+private:
+    const std::basic_string<_Elem> main_;
+    const std::basic_string<_Elem> space_;
+    bool isre_;
+};
+
 template<typename _Elem>
 std::vector<std::basic_string<_Elem> > split(const std::basic_string<_Elem>& str, const std::basic_string<_Elem>& space, bool is_remove_empty = false)
 {
@@ -175,51 +288,6 @@ std::vector<std::basic_string<_Elem> > split(const std::basic_string<_Elem>& str
 	vtmp.push_back(str.substr(pos_p));
 	return vtmp;
 }
-
-template<typename _Elem>
-struct AWConvert
-{
-};
-/*
-template<>
-struct AWConvert<char>
-{
-	typedef wchar_t type;
-};
-
-template<>
-struct AWConvert<wchar_t>
-{
-	typedef char type;
-};
-
-//template<typename _Elem>
-struct convert_t
-{
-	template<typename _ElemSrc>
-	inline std::string ConvertToA(const _ElemSrc* s);
-};
-
-template<>
-inline std::string convert_t::ConvertToA<char>(const char* s)
-{
-	return s;
-}
-
-template<>
-inline std::string convert_t::ConvertToA<wchar_t>(const wchar_t* s)
-{
-	std::basic_string<wchar_t> str(s);
-	return w2a(str);
-}
-
-template<typename _Elem>
-std::string ConvertToA(const _Elem* s)
-{
-	convert_t ct;
-	return ct.ConvertToA(s);
-}
-*/
 
 template<typename _Ty, typename _Elem> _Ty tovalue(const _Elem* ptr)
 {

@@ -112,3 +112,7 @@ void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>&
 void init_grammar(tinygrammar& tig)
 {
 }
+
+void init_production_functions(kog::smart_vector<ifunction*>& pfuncs)
+{
+}

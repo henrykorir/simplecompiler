@@ -28,6 +28,7 @@ private:
 	void print_keywords();
 	void print_printablechars();
 	void print_machine(std::ostream& os, const compile::automachine& mac);
+    void print_productions();
 private:
 	void regex_str_to_machine(const std::string& regexstr, automachine& m);
 	void refine_machine(automachine& m) const;
@@ -36,6 +37,21 @@ public:
 	const grammar* syntax_;
 	tstring cppfile_;
 	std::ostream* cppstream_;
+};
+
+class function_parser
+{
+public:
+    function_parser(std::ostream& os)
+        : cppstream_(&os)
+    {}
+
+public:
+    function_parser& operator()(const _Str& func, const _Str& name);
+private:
+
+private:
+    std::ostream* cppstream_;
 };
 
 NAMESPACE_END(compile)

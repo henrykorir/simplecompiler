@@ -34,9 +34,9 @@ template<typename _K, typename _V, typename _K2I>
 class buckethash
 {
 public:
-	typedef typename _K key;
-	typedef typename _V value;
-	typedef typename value& value_reference;
+	typedef  _K key;
+	typedef  _V value;
+	typedef  value& value_reference;
 private:
 	typedef std::pair<key, value> keyvalue;
 	typedef typename bucket<keyvalue>::iterator bucket_iterator;
@@ -144,7 +144,7 @@ private:
 		return idx;
 	}
 
-	typename bucket_const_iterator _bucket_Locate(size_t kid, const key& k) const
+	bucket_const_iterator _bucket_Locate(size_t kid, const key& k) const
 	{
 		return std::find_if(buckets_[kid].begin(), buckets_[kid].end(),
 			kog::composite_function(kog::mem_value(&keyvalue::first), 
@@ -152,7 +152,7 @@ private:
 		
 	}
 
-	typename bucket_iterator _bucket_Locate(size_t kid, const key& k)
+	bucket_iterator _bucket_Locate(size_t kid, const key& k)
 	{
 		return std::find_if(buckets_[kid].begin(), buckets_[kid].end(),
 			kog::composite_function(kog::mem_value(&keyvalue::first), 

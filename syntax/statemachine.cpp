@@ -17,11 +17,11 @@ state_machine::~state_machine()
 {
 }
 
-bool state_machine::eta(int32 meta)
+bool state_machine::eta(machine_meta* meta)
 {
 	if(automachine::eta(meta))
 	{
-		str_ += (sc::tchar)meta;
+		str_ += (sc::tchar)meta->sid;
 		return true;
 	}
 	return false;

@@ -1,11 +1,16 @@
 # SConscript
 
+import os
 Import('aEnv')
 
 cppfiles = ['xregex.cpp']
 
 libboost = 'boost-dev'
-incboost = r'D:\Program Files\boost'
+
+if os.sys.platform.lower() == 'win32':
+    incboost = r'D:\Program Files\boost'
+else:
+    incboost = ''
 
 aEnv['regexlib'] = ['regex', libboost]
 

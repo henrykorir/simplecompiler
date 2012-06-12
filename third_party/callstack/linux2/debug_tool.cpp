@@ -16,6 +16,6 @@ void stacktrace::frames(std::vector<std::string>& trace)
 	for(size_t i = 0; i < sz; ++i)
 	{
 		trace.push_back(std::string(strings[i]));
-		std::cout<<strings[i]<<std::endl;
+//		std::cout<<strings[i]<<std::endl;
 	}
 }

@@ -40,11 +40,12 @@ void syntaxgenerator::operator()(const grammar* aGrammar, const tstring& outfile
 		// try to output syntax file
 		print_includes();
 		print_grammar();
-		print_symbols();
+		//print_symbols();
 		print_separators();
 		print_keywords();
 		print_statemachines();
 		print_printablechars();
+        print_productions();
 		cppstream_ = NULL;
 		ofs.close();
 	}catch(std::exception& ex){
@@ -432,4 +433,70 @@ void syntaxgenerator::print_grammar()
 		<<newline<<dec
 		<<newline<<"}"
 		<<newline;
+}
+
+void syntaxgenerator::print_productions()
+{
+	const tinygrammar::vecprods& pholder = syntax_->productions();
+    function_parser fp(*cppstream_);
+    for (size_t i = 0; i < pholder.size(); ++ i)
+    {
+        fp(pholder[i].func(), stringX::format("production_func_%d", i));
+    }
+}
+
+#define CONTENT_BEGIN "{"
+#define CONTENT_END "}"
+#define ENTRYV "entry_v"
+#define ENTRYF "entry_f"
+#define CALLF "call"
+#define TRIPLE "triple"
+#define SEP ";"
+
+function_parser& function_parser::operator()(const _Str& func, const _Str& name)
+{
+
+	typedef std::ostream& (*pfun)(std::ostream& os);
+    std::ostream& os = *cppstream_;
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	pfun newline = tabident::newline;
+    os<<newline<<"struct "<<name<<" : public ifunction"
+        <<newline<<"{"<<inc
+        <<newline<<"/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)"
+        <<newline<<"{"<<inc
+     //   <<newline<<"result->content = metas[0]->tfalg;"
+     //   <<newline<<"result->v = metas[0]->v;";
+       ;
+    
+    size_t posb = func.find_first_of(CONTENT_BEGIN);
+    size_t pose = func.find_last_of(CONTENT_END);
+
+    if (posb == _Str::npos || pose == _Str::npos)
+    {
+        //fire("invalidate function, " + func); 
+    }
+    else
+    {
+        stringX::string_split_t<_Str::value_type> ss(func.substr(posb + 1, pose - posb - 2), ";", true);
+        for (stringX::string_split_t<_Str::value_type>::const_iterator iter = ss.begin(); iter != ss.end(); ++ iter)
+        {
+            /*_Str tmp = kog::stringX::trim(*iter);
+            size_t pos_equal = tmp.find('=');
+            if (pos_equal == _Str::npos)
+            {
+                
+            }
+            else
+            {
+                
+            }*/
+            os<<newline<<*iter<<";";
+        }
+    }
+
+    os<<dec<<newline<<"}"<<dec
+        <<newline<<"};";
+        
+    return *this;
 }

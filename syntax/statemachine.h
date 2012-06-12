@@ -16,7 +16,7 @@ public:
 	virtual ~state_machine();
 public:
 	/* overwrite */ virtual void init();
-	/* overwrite */ virtual bool eta(int meta);
+	/* overwrite */ virtual bool eta(machine_meta* meta);
 //public:
 //	class sheetrow : public automachine::sheetrow
 //	{

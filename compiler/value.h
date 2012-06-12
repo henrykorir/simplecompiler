@@ -7,17 +7,21 @@
 #include <macros.h>
 #include <basic_types.h>
 
-NAMESPACE_BEGIN(compile)
+#include "object.h"
 
-struct value
+NAMESPACE_BEGIN(compile)
+NAMESPACE_BEGIN(runtime)
+
+struct value : public object
 {
-	const type* vtype;
-	const symbol* vsym;
-	uint32 address;
-	uint32 size;
-	byte* defvalue;
+    union {
+        uint32 address;
+        byte* initv;
+    };
+    uint32 size;
 };
 
+NAMESPACE_END(runtime)
 NAMESPACE_END(compile)
 
 #endif

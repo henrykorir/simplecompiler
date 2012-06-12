@@ -1,5 +1,6 @@
 #include "lrmachine.h"
 #include <scerror.h>
+#include <logger.h>
 
 using namespace compile;
 
@@ -7,41 +8,70 @@ void lrmachine::init()
 {
 	automachine::init();
 //	EOF(-1): end of the input file
-	pstack_.push(stackitem(sstate_, -1));
+    machine_meta* pmeta = new_meta(-1);
+    ((lrmeta*)pmeta)->state = sstate_;
+	pstack_.push(pmeta);
 }
 
-bool lrmachine::eta(int32 meta)
+automachine::machine_meta* lrmachine::new_meta(int meta)
+{
+	return new lrmeta(meta);
+}
+
+automachine::machine_meta* lrmachine::new_meta(const automachine::machine_meta* meta)
+{
+    return new lrmeta(*((const lrmeta*)meta));
+}
+
+bool lrmachine::eta(machine_meta* meta)
 {
 	if(!automachine::eta(meta)) return false;
 	while(cstate_ < 0)
 	{
-		int32 newMeta = reduce(- (cstate_ + 1));
+		machine_meta* newMeta = reduce(- (cstate_ + 1));
 		if(!eta(newMeta)) return false;
-		if(meta == -1 && cstate_ == accept_state &&
+		if(meta->sid == -1 && cstate_ == accept_state &&
 			pstack_.size() == 1) return true; // accept
 		if(!automachine::eta(meta)) return false;
 	}
 	if(cstate_ == accept_state) // accept, we use state 0 as the accept status
 	{
+        logstring("accept!");
 	}
-	else pstack_.push(stackitem(cstate_, meta));
+	else 
+    {
+        lrmeta* pmeta = (lrmeta*)new_meta(meta);
+        pmeta->state = cstate_;
+        pstack_.push(pmeta);
+    }
 	return true;
 }
 
-int32 lrmachine::reduce(int32 pid)
+lrmachine::machine_meta* lrmachine::reduce(int32 pid)
 {
 	const production& p = pg_->productions().at(pid);
-	const symholder& sholder = pg_->symbols();
+	
+    const symholder& sholder = pg_->symbols();
 	if(pstack_.size() < p.right_size() + 1) fire("invalidate analysis stack!");
+    kog::smart_vector<machine_meta*> rights(p.right_size());
 	for(int32 i = p.right_size(); i; -- i)
 	{
-		if(p.right()[i-1] != pstack_.top().meta)
+		if(p.right()[i-1] != pstack_.top()->sid)
 			fire("reduce error production[%d] need %s but gived %s", pid, 
-					sholder[p.right()[i-1]].name, sholder[pstack_.top().meta].name);
+					sholder[p.right()[i-1]].name, sholder[pstack_.top()->sid].name);
+        rights[i-1] = pstack_.top();
 		pstack_.pop();
 	}
-	cstate_ = pstack_.top().state;
-	return p.left();
+	cstate_ = ((lrmeta*)pstack_.top())->state;
+    
+    machine_meta* pmeta = new_meta(p.left());
+    pmeta->sid = p.left();
+	return _reduce(pid, rights, pmeta);
+}
+
+lrmachine::machine_meta* lrmachine::_reduce(int32 pid, const kog::smart_vector<machine_meta*>& rights, machine_meta* result)
+{
+	return result;
 }
 
 void lrmachine::swap(lrmachine& other) throw()
