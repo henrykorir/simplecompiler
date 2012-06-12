@@ -106,6 +106,16 @@ public:
 		(*this)[6] = _6.idx;	(*this)[7] = _7.idx;
 	}
 	
+    V(IDX _0, IDX _1, IDX _2, IDX _3, IDX _4, IDX _5, IDX _6,
+			IDX _7, IDX _8) : v(9)
+	{
+		(*this)[0] = _0.idx;	(*this)[1] = _1.idx;
+		(*this)[2] = _2.idx;	(*this)[3] = _3.idx;
+		(*this)[4] = _4.idx;	(*this)[5] = _5.idx;
+		(*this)[6] = _6.idx;	(*this)[7] = _7.idx;
+		(*this)[8] = _8.idx;
+	}
+	
 	V(IDX _0, IDX _1, IDX _2, IDX _3, IDX _4, IDX _5, IDX _6,
 			IDX _7, IDX _8, IDX _9, IDX _10, IDX _11, IDX _12) : v(13)
 	{
@@ -172,6 +182,12 @@ public:
 	Aproduction(int32 L, const V& v)
 		: compile::production(*V::symbols(), L, v.get(), v.size())
 	{
+	}
+	
+    Aproduction(int32 L, const V& v, const std::string& funct)
+		: compile::production(*V::symbols(), L, v.get(), v.size())
+	{
+        this->func() = funct;
 	}
 };
 

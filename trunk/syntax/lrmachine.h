@@ -14,19 +14,23 @@ NAMESPACE_BEGIN(compile)
 
 class lrmachine : public automachine
 {
-	struct stackitem
+public:
+	struct lrmeta : public machine_meta
 	{
 		int32 state;
-		int32 meta;
 
-		stackitem(int32 s = -1, int32 m = -1)
-			: state(s)
-			, meta(m)
+        lrmeta(int32 m = -1, int32 s = -1)
+			: machine_meta(m)
+			, state(s)
 		{}
+
+        lrmeta(const lrmeta& other)
+            : machine_meta(other.sid)
+            , state(other.state)
+        {}
 	};
 
-	typedef std::stack<stackitem> analysestack;
-//	typedef kog::smart_vector<lrstate> lrstatearray;
+	typedef std::stack<machine_meta*> analysestack;
 	typedef kog::smart_vector<int32> int32array;
 public:
 	struct pinfo
@@ -47,7 +51,7 @@ public:
 	{}
 public:
 	/* overwrite */ virtual void init();
-	/* overwrite */ virtual bool eta(int meta);
+	/* overwrite */ virtual bool eta(machine_meta* meta);
 public:
 	std::list<pinfoarray>& morelist() 
 	{
@@ -62,8 +66,12 @@ public:
 	enum { accept_state = 0}; // using state 0 as ending state
 protected:
 	// reduce using production[pid]
-	int32 reduce(int32 pid);
-
+	machine_meta* reduce(int32 pid);
+public:
+	virtual machine_meta* new_meta(int meta);
+	virtual machine_meta* new_meta(const machine_meta* meta);
+protected:
+	virtual machine_meta* _reduce(int32 pid, const kog::smart_vector<machine_meta*>& rights, machine_meta* result);
 public:
 	void swap(lrmachine& other) throw();
 private:

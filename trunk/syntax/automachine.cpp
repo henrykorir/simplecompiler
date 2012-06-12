@@ -29,7 +29,7 @@ void automachine::init()
 	cstate_ = sstate_;
 }
 
-bool automachine::eta(int32 meta)
+bool automachine::eta(machine_meta* meta)
 {
 	const sheetrow& row = (*sheet_)[cstate_];
 	sheetrow::const_iterator iterfind = row.end();
@@ -40,16 +40,16 @@ bool automachine::eta(int32 meta)
 		break;
 	case sheetrow::special :
 		iterfind = std::lower_bound(row.begin(), row.end(), 
-			std::make_pair(meta, 0), intpair_less());
+			std::make_pair(meta->sid, 0), intpair_less());
 		break;
 	case sheetrow::exclude:
 		iterfind = std::lower_bound(row.begin(), row.end(), 
-			std::make_pair(meta, 0), intpair_less());
+			std::make_pair(meta->sid, 0), intpair_less());
 		break;
 	default:
 		fire("invalidate sheetrow in machine");
 	}
-	if(!((sheetrow::exclude == row.type()) ^ (iterfind != row.end() && iterfind->first == meta))) return false;
+	if(!((sheetrow::exclude == row.type()) ^ (iterfind != row.end() && iterfind->first == meta->sid))) return false;
 	cstate_ = iterfind->second;
 	return true;
 }

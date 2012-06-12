@@ -4,6 +4,7 @@
 #include <logger.h>
 #include <fstream>
 #include <scerror.h>
+#include <typeinfo>
 
 #include "extract.h"
 #include "lalr1machine.h"
@@ -14,6 +15,11 @@ using namespace compile::doc;
 
 compiler::compiler()
 : keywords(string_2_int::max_int)
+, iml_(new interlanguage())
+{
+}
+
+compiler::~compiler()
 {
 }
 
@@ -48,6 +54,20 @@ int compiler::get_all_machines(std::list<machine>& mlist)
 		
 	return (int32)mlist.size();
 }
+    
+automachine& compiler::get_machine(const std::string& machine_name)
+{
+    std::map<std::string, compile::doc::machine>& ms = instance().machines;
+    std::map<std::string, compile::doc::machine>::iterator iter = ms.find(machine_name);
+    if (iter == ms.end())
+        fire("not found machine, " + machine_name);
+    return *(iter->second.mac);
+}
+    
+compile::interlanguage& compiler::getiml()
+{
+    return *(instance().iml_);
+}
 
 extern void init_grammar(tinygrammar& tig);
 extern void init_machines(std::map<std::string, machine>& machines);
@@ -55,6 +75,7 @@ extern void init_syntax_machine(lalr1machine& lrm);
 extern void init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords);
 extern void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid);
 extern void init_printablechars(kog::smart_vector<sc::int32>& printablechars);
+extern void init_production_functions(kog::smart_vector<ifunction*>& pfuncs);
 
 void compiler::initialization()
 {
@@ -63,10 +84,14 @@ void compiler::initialization()
 	init_keywords(keywords);
 	init_separators(separators, sepsid);
 	init_machines(machines);
-	
-	// 
-	machines["__main__"] = machine(kog::shared_ptr<automachine>(new lalr1machine(tg)), -1);
-	init_syntax_machine(*(dynamic_cast<lalr1machine*>(machines["__main__"].mac.get())));
+
+    kog::smart_vector<ifunction*> tmp_prods;
+    init_production_functions(tmp_prods);
+    
+    // create new machine
+    lalr1machine* lalr1mac = new lalr1machine(tg, tmp_prods);
+	machines["__main__"] = machine(kog::shared_ptr<automachine>(lalr1mac), -1);
+	init_syntax_machine(*lalr1mac);
 }
 
 
@@ -122,7 +147,7 @@ void compiler::check(const std::string& fname)
 	lrmachine& lrm = *(dynamic_cast<lrmachine*>(machines["__main__"].mac.get()));
 	lrm.init();
 
-	logstring("\nstart to run machine...\n");
+	logstring("\nstart to run machine...");
 	for(streamsplit::deqwords::const_iterator iter = words.begin(); iter != words.end(); ++ iter)
 	{
 		switch (iter->wordClass)
@@ -132,8 +157,12 @@ void compiler::check(const std::string& fname)
 				split_separators splits(iter->txt.c_str());
 				for (int32 x = splits.get(); x != -1; x = splits.next())
 				{
-					logstring("%s\t%d\n", splits.buf.c_str(), x);
-					if(!lrm.eta(x))
+					logstring("%s\t%d", splits.buf.c_str(), x);
+                    automachine::machine_meta* tmp_meta = lrm.new_meta(x);
+                    lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
+                    pm->content = &(*iter);
+                    pm->ctype = typesystem::instance().word_type();
+					if(!lrm.eta(tmp_meta))
 						fire("not expected sep!\n");
 				}
 			}
@@ -141,7 +170,11 @@ void compiler::check(const std::string& fname)
 		case -1: // eof
 			{
 				logstring("%s\t%d\n", iter->txt.c_str(), -1);
-				if(!lrm.eta(-1))
+                automachine::machine_meta* tmp_meta = lrm.new_meta(-1);
+                lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
+                pm->content = &(*iter);
+                pm->ctype = typesystem::instance().word_type();
+				if(!lrm.eta(tmp_meta))
 					fire("not expected eof!\n");
 			}
 			break;
@@ -149,14 +182,18 @@ void compiler::check(const std::string& fname)
 			{
 				int32 x = is_keywords(iter->txt);
 				if(x == -1) x = iter->wordClass;
-				logstring("%s\t%d\n", iter->txt.c_str(), x);
-				if(!lrm.eta(x))
+				logstring("%s\t%d", iter->txt.c_str(), x);
+                automachine::machine_meta* tmp_meta = lrm.new_meta(x);
+                lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
+                pm->content = &(*iter);
+                pm->ctype = typesystem::instance().word_type();
+				if(!lrm.eta(tmp_meta))
 					fire("not expected word!\n");
 			}
 		}		
 	}
 
 	if(lrm.isaccepted())
-		logstring("\naccepted!\n");
-	else logstring("\nerror, not accepted!\n");
+		logstring("\naccepted!");
+	else logstring("\nerror, not accepted!");
 }

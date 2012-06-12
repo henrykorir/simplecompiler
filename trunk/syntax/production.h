@@ -25,6 +25,7 @@ public:
 	MEMBER_VARIABLE_GET(int32, right_size, Rs_.size());
 	MEMBER_VARIABLE_GET(const right_array&, right, Rs_);
 	MEMBER_VARIABLE_GET_SET_INDEXER(int32, std::size_t, Rs_);
+    MEMBER_VARIABLE_GET_SET(_Str, func, func_);
 public:
 	void reset_right(const int32* Rs, int N);
 public:
@@ -33,6 +34,7 @@ private:
 	const symholder* holder_;
 	int32 L_;
 	right_array Rs_;
+    _Str func_;
 };
 
 template<typename _Less>

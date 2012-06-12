@@ -101,6 +101,17 @@ private:
 				right[i] = finds(bufs, slist, rightstr[i]);
 			}
 			plist.push_back(production(L, right.get(), right.size()));
+            
+            char ch;
+            if(is>>ch)
+            {
+                is.putback(ch);
+                if (ch == '{')
+                {
+                    std::getline(is, line);
+                    plist.back().func() = line;
+                }
+            }
 		}
 
 		int32 ssid = finds(bufs, slist, start);

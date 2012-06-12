@@ -65,6 +65,15 @@ public:
 		int32 isendings_;
 		void* more_;
 	};
+
+	struct machine_meta
+	{
+		int32 sid;
+
+		machine_meta(int32 meta = -1)
+			: sid(meta)
+		{}
+	};
 public:
 	//typedef kog::smart_vector<gotoitem> sheetrow;
 	typedef kog::smart_vector<sheetrow> sparsesheet;
@@ -75,7 +84,7 @@ public:
 	virtual ~automachine();
 public:
 	virtual void init();
-	virtual bool eta(int meta);
+	virtual bool eta(machine_meta* meta);
 public:
 	bool isaccepted() const
 	{

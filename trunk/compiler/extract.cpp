@@ -101,7 +101,8 @@ private:
 		for(; ; _Meta = _Myios::rdbuf()->snextc())
 		{
 			bool is_ending = nm.isaccepted();
-			if(!nm.eta(_Meta)) 
+			automachine::machine_meta meta_Tmp(_Meta);
+			if(!nm.eta(&meta_Tmp)) 
 			{
 				if(is_ending)
 				{
@@ -135,7 +136,8 @@ private:
 		{
 			state_machine& m = *dynamic_cast<state_machine*>(iter->mac.get());
 			m.init();
-			if(!m.eta(_Meta)) iter = mlist.erase(iter);
+			automachine::machine_meta meta_Tmp(_Meta);
+			if(!m.eta(&meta_Tmp)) iter = mlist.erase(iter);
 			else  { ++ iter; }
 		}
 		switch(mlist.size())
@@ -176,7 +178,7 @@ streamsplit::deqwords& streamsplit::operator()(std::istream& is)
 	{
 		words_.push_back(aword);
 #ifdef DEBUG_OUTPUT
-		logstring("read word: %s\n", aword.txt.c_str());
+		logstring("read word: %s", aword.txt.c_str());
 #endif
 	}
 	bool isdone = iws.eof();

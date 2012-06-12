@@ -64,6 +64,8 @@ class grammar_wrapper : public grammar
 {
 public:
 	void simple_grammar();
+private:
+    void init_funcs(std::vector<std::string>& funcs);
 };
 
 void simplegrammar_test::init_grammar(grammar& g)
@@ -83,7 +85,8 @@ void simplegrammar_test::init_grammar(grammar& g)
  * AValue -> symbol | number
  * FuncCall -> symbol = symbol ( AValue , AValue )
  * PrintFunc -> print ( AValue )
- * Function -> type symbol(type symbol, type symbol) { FunctionContent ReturnExp }
+ * Function -> FunctionHeader { FunctionContent ReturnExp }
+ * FunctionHeader -> type symbol(type symbol, type symbol)
  * FunctionContent -> Expressions | Empty
  * ReturnExp -> return AValue;
  *
@@ -100,12 +103,15 @@ void grammar_wrapper::simple_grammar()
 	symholder& syms = symbols_;
 	vecprods& prods = productions_;
 
+    std::vector<std::string> funcs;
+    init_funcs(funcs);
+
 	whitespaces_ = " \t\r\n";
 	start_symbol_ = 0; // start symbol
 	dthenu_ = true;
 
 	seperators_ = "{}()=*+-/;,";
-	syms.reset(21 + seperators_.size());
+	syms.reset(22 + seperators_.size());
 	syms[0] = Asymbol("Program", 0);
 	syms[1] = Asymbol("AProgramItem", 0);
 	syms[2] = Asymbol("ValueDeclear", 0);
@@ -127,8 +133,9 @@ void grammar_wrapper::simple_grammar()
 	syms[18] = Asymbol("float", keyword, "float");
 	syms[19] = Asymbol("", other_sym, "eplison");
 	syms[20] = Asymbol("Assignment", 0);
+	syms[21] = Asymbol("FunctionHeader", 0);
 	for(size_t i = 0; i < seperators_.size(); ++ i)
-		syms[i + 21] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
+		syms[i + 22] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
 	eplisons() = 19;
 	// reset symbols name string
 	{
@@ -150,35 +157,49 @@ void grammar_wrapper::simple_grammar()
 		std::copy(Asymbol::smacs.begin(), Asymbol::smacs.end(), smacs_.begin());
 	}
 	
-	prods.reset(27);
+	prods.reset(28);
 	V::symbols() = &syms;
-	prods[0] = Aproduction(0, V(1));
-	prods[1] = Aproduction(0, V(1, 0));
-	prods[2] = Aproduction(1, V(3));
-	prods[3] = Aproduction(1, V(7, ";"));
-	prods[4] = Aproduction(2, V(5, 6));
-	prods[5] = Aproduction(4, V(7, ";", 4));
-	prods[6] = Aproduction(4, V(7, ";"));
-	prods[7] = Aproduction(7, V(2));
-	prods[8] = Aproduction(7, V(10));
-	prods[9] = Aproduction(7, V(12));
-	prods[10] = Aproduction(7, V(20));
-	prods[11] = Aproduction(20, V(6, "=", 8));
-	prods[12] = Aproduction(20, V(6, "=", 8, 11, 8));
-	prods[13] = Aproduction(8, V(6));
-	prods[14] = Aproduction(8, V(9));
-	prods[15] = Aproduction(10, V(6, "=", 6, "(", 6, ",", 6, ")"));
-	prods[16] = Aproduction(12, V(13, "(", 8, ")"));
-	prods[17] = Aproduction(3, V(5, 6, "(", 5, 6, ",", 5, 6, ")", "{", 14, 15, "}"));
-	prods[18] = Aproduction(14, V(4));
-	prods[19] = Aproduction(14, V(19));
-	prods[20] = Aproduction(15, V(16, 8, ";"));
-	prods[21] = Aproduction(5, V(17));
-	prods[22] = Aproduction(5, V(18));
-	prods[23] = Aproduction(11, V("+"));
-	prods[24] = Aproduction(11, V("-"));
-	prods[25] = Aproduction(11, V("*"));
-	prods[26] = Aproduction(11, V("/"));
+	prods[0] = Aproduction(0, V(1), funcs[0]); // program -> aprogramitem
+	prods[1] = Aproduction(0, V(1, 0), funcs[1]); // program -> aprogramitem program
+	prods[2] = Aproduction(1, V(3), funcs[2]); // aprogramitem -> funcion
+	prods[3] = Aproduction(1, V(7, ";"), funcs[3]); // aprogramitem -> AExpression ;
+	prods[4] = Aproduction(2, V(5, 6), funcs[4]); // ValueDeclear -> Valuetype symbol
+	prods[5] = Aproduction(4, V(7, ";", 4), funcs[5]); // Expressions -> AExpression ; Exprssions
+	prods[6] = Aproduction(4, V(7, ";"), funcs[6]); // Expressions -> AExpression ;
+	prods[7] = Aproduction(7, V(2), funcs[7]); // AExpression -> ValueDeclear
+	prods[8] = Aproduction(7, V(10), funcs[8]); // AExpression -> FuncCall
+	prods[9] = Aproduction(7, V(12), funcs[9]); // AExpression -> PrintFunc
+	prods[10] = Aproduction(7, V(20), funcs[10]); // AExpression -> Assignment
+	prods[11] = Aproduction(20, V(6, "=", 8), funcs[11]); // Assignment -> symbol = AValue
+	prods[12] = Aproduction(20, V(6, "=", 8, 11, 8), funcs[12]); // Assignment -> symbol = AValue Op AValue
+	prods[13] = Aproduction(8, V(6), funcs[13]); // AValue -> symbol
+	prods[14] = Aproduction(8, V(9), funcs[14]); // AValue -> number
+	prods[15] = Aproduction(10, V(6, "=", 6, "(", 6, ",", 6, ")"), funcs[15]); // FuncCall -> symbol = symbol ( symbol , symbol )
+	prods[16] = Aproduction(12, V(13, "(", 8, ")"), funcs[16]); // PrintFunc -> print ( AValue )
+	prods[17] = Aproduction(3, V(21, "{", 14, 15, "}"), funcs[17]); // Function -> FunctionHeader { FunctionContent ReturnExp }
+	prods[18] = Aproduction(14, V(4), funcs[18]); //FunctionContent -> Expressions
+	prods[19] = Aproduction(14, V(19), funcs[19]); // FunctionContent -> 
+	prods[20] = Aproduction(15, V(16, 8, ";"), funcs[20]); // ReturnExp -> return AValue ;
+	prods[21] = Aproduction(5, V(17), funcs[21]); // Valuetype -> int
+	prods[22] = Aproduction(5, V(18), funcs[22]); // Valuetype -> float
+	prods[23] = Aproduction(11, V("+"), funcs[23]); // Op -> +
+	prods[24] = Aproduction(11, V("-"), funcs[24]); // Op -> -
+	prods[25] = Aproduction(11, V("*"), funcs[25]); // Op -> *
+	prods[26] = Aproduction(11, V("/"), funcs[26]); // Op -> /
+	prods[27] = Aproduction(21, V(5, 6, "(", 5, 6, ",", 5, 6, ")"), funcs[27]); // FunctionHeader -> ValueType symbol ( ValueType symbol , ValueType symbol )
+}
+
+void grammar_wrapper::init_funcs(std::vector<std::string>& funcs)
+{
+    funcs.resize(28);
+    funcs[4] = "{ result->tflag = isv; result->v = regist(metas[0], metas[1]); }";
+    funcs[12] = "{ four_tuple(metas[0], metas[1], metas[2], metas[3], metas[4]); }";
+    funcs[14] = "{ result->v = tovalue(metas[0]); }";
+    funcs[15] = "{ func_call(metas[0], metas[2], metas[4], metas[6]); }";
+    funcs[16] = "{ func_call(NULL, metas[0], metas[2])}";
+    funcs[17] = "{ regist_fun(metas[0], metas[1], metas[3], metas[6], metas[11], metas[12]); }";
+    funcs[20] = "{ return_func(metas[1]); }";
+    funcs[27] = "{ regist_fun(metas[0], metas[1], metas[3], metas[6], metas[11], metas[12]); }";
 }
 
 std::deque<tchar> Asymbol::stringBuf;

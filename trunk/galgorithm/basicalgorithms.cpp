@@ -450,7 +450,7 @@ void eliminate_eplison::rmeplison(const tinygrammar& tig, tinygrammar& tog)
 	{
 		std::deque<symbol> newsymlist(sholder.size() - 1);
 		for(size_t i = 0, j = 0; i < sholder.size(); ++ i)
-			if(i != eid) { newsymlist[j] = sholder[i]; newsymlist[j ++].sid = j; }
+			if(i != eid) { newsymlist[j] = sholder[i]; newsymlist[j].sid = j; ++ j;}
 		tinygrammar tmp(newsymlist.begin(), newsymlist.end(), NewProductions.begin(), NewProductions.end(), oldnewmap[tig.starts()]);
 		tog.swap(tmp);
 	}

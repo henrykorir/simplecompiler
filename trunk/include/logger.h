@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include <macros.h>
 #include <singleton.h>
@@ -113,10 +114,10 @@ private:
 
 #ifdef VISUAL_STDIO
 #define logstring(fmt, ...) \
-	kog::loggermanager::instance().dump(stringX::format(fmt, __VA_ARGS__))
+	kog::loggermanager::instance().dump("[message]" + stringX::format(fmt, __VA_ARGS__) + "\n")
 #else
 #define logstring(fmt, arg...) \
-	kog::loggermanager::instance().dump(stringX::format(fmt, ##arg))
+	kog::loggermanager::instance().dump("[message]" + stringX::format(fmt, ##arg) + "\n")
 #endif
 
 #define logvalue(value) \
