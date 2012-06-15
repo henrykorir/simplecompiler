@@ -5,6 +5,7 @@
 #define _OBJECT_H_SC_
 
 #include <macros.h>
+#include <basic_types.h>
 #include <typeinfo>
 
 NAMESPACE_BEGIN(compile)
@@ -28,6 +29,11 @@ struct object
     template<typename _Ty> const _Ty* as() const
     {
         return dynamic_cast<const _Ty*>(this);
+    }
+
+    virtual _Str to_string() const
+    {
+        return get_type().name();
     }
 };
 

@@ -371,6 +371,13 @@ public:
 	}
 };
 
+template<typename _Elem,
+	typename _Traits = std::char_traits<_Elem>,
+	typename _Ax = std::allocator<_Elem> >
+class basic_stringbuffer : public std::basic_ostringstream<_Elem, _Traits, _Ax>
+{
+};
+
 template<typename _Elem>
 xstring_basic<_Elem> xstringcat(const _Elem* str1, const _Elem* str2)
 {
@@ -379,6 +386,8 @@ xstring_basic<_Elem> xstringcat(const _Elem* str1, const _Elem* str2)
 
 typedef xstring_basic<char> xstring;
 typedef xstring_basic<wchar_t> xwstring;
+typedef basic_stringbuffer<char> stringbuffer;
+typedef basic_stringbuffer<wchar_t> wstringbuffer;
 
 NAMESPACE_END(stringX)
 

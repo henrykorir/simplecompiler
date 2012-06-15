@@ -10,12 +10,12 @@ using namespace compile;
 
 typesystem::typesystem()
 {
-    types_.push_back(new type(0)); // type_type
-    types_.push_back(new type(1)); // operator_type
-    types_.push_back(new type(2)); // function_type
-    types_.push_back(new type(3)); // word_type
-    types_.push_back(new type(4)); // int_type
-    types_.push_back(new type(5)); // double_type
+    types_.push_back(new type(0, 4)); // type_type
+    types_.push_back(new type(1, 4)); // operator_type
+    types_.push_back(new type(2, 4)); // function_type
+    types_.push_back(new type(3, 4)); // word_type
+    types_.push_back(new type(4, sizeof(int32))); // int_type
+    types_.push_back(new type(5, sizeof(double))); // double_type
 }
 
 typesystem::~typesystem()

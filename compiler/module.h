@@ -31,10 +31,10 @@ class codemodule : virtual public module
 {
 public:
     // dst = src1 op src2
-    tuple* new_tuple(operations::op oper, const object* src1, const object* src2, const object* dst);
+    tuple* new_tuple(const operation* oper, const object* src1, const object* src2, const object* dst);
 
     // dst = dst op src
-    tuple* new_tuple(operations::op oper, const object* src, const object* dst);
+    tuple* new_tuple(const operation* oper, const object* src, const object* dst);
 protected:
     std::deque<tuple*> tuples_;
 };

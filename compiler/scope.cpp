@@ -39,7 +39,7 @@ variable* scope::entry_variable(const _Str& vname, const type* vtype, int32 vsco
     {
         case varscope::stack:
             pv = entry(v);
-            new_tuple(operations::newv, pv, NULL, NULL);
+            new_tuple(new operation(operations::newv), pv, NULL, NULL);
             break;
         case varscope::global:
             pv = staticdata_->entry(v);
@@ -76,7 +76,7 @@ variable* scope::entry_value(const _Str& content, const type* canTypes[], int _C
     }
     else
     {
-        v->initv = (byte*)new double(stringX::tovalue<int>(content));
+        v->initv = (byte*)new int(stringX::tovalue<int>(content));
         v->size = sizeof(int);
         var.reset(new variable(name, typesystem::instance().int_type(), this, v));
     }

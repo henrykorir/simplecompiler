@@ -42,6 +42,11 @@ public:
     MEMBER_VARIABLE_GET_SET(value*, initvalue, initv_);
     MEMBER_VARIABLE_GET(const compile::type*, vtype, type_);
     MEMBER_VARIABLE_GET(const scope*, env, env_);
+public:
+    /* overwrite */ virtual _Str to_string() const
+    {
+        return name_;
+    }
 private:
     _Str name_; // name of variable
     union {
