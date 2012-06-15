@@ -33,6 +33,11 @@ public:
 		std::swap(wordClass, aword.wordClass);
 	}
 public:
+    /* overwrite */ virtual _Str to_string() const
+    {
+        return txt;
+    }
+public:
 	_Str txt;
 	short wordstate;
 	short wordClass;

@@ -6,6 +6,7 @@
 
 #include "object.h"
 #include <arrayX.h>
+#include <stringXF.h>
 #include <singleton.h>
 #include <deque>
 #include <basic_types.h>
@@ -16,9 +17,16 @@ struct type : public compile::object
 {
 	int32 tid; // type id
 
-	type(int32 id = -1)
+	type(int32 id = -1, int32 s = 0)
 		: tid(id)
+        , tsize(s)
+        , defvalue(NULL)
 	{}
+
+    /* overwrite */ virtual _Str to_string() const
+    {
+        return stringX::format("type<%d>", tid);
+    }
 
 	byte* defvalue;
 	int32 tsize; // value's default size

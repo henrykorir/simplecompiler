@@ -37,22 +37,23 @@ variable* datamodule::entry(const variable& var)
     return v_new;
 }
 
-tuple* codemodule::new_tuple(operations::op oper, const object* src1, const object* src2, const object* dst)
+tuple* codemodule::new_tuple(const operation* oper, const object* src1, const object* src2, const object* dst)
 {
-    kog::assert::is_true(src1 == NULL || dynamic_cast<const variable*>(src1) != NULL);
-    kog::assert::is_true(src2 == NULL || dynamic_cast<const variable*>(src2) != NULL);
-    kog::assert::is_true(dst == NULL || dynamic_cast<const variable*>(dst) != NULL);
-    logstring("new_tuple");
+    logstring("new_tuple op(%s), src1(%s), src2(%s), dst(%s)", 
+            oper->to_string().c_str(),
+            src1 != NULL ? src1->to_string().c_str() : "<null>",
+            src2 != NULL ? src2->to_string().c_str() : "<null>",
+            dst != NULL ? dst->to_string().c_str() : "<null>");
     four_tuple* pt = new four_tuple();
-    pt->oper = oper;
-    pt->dst = (variable*)(dst == NULL ? NULL : dynamic_cast<const variable*>(dst));
-    pt->src1 = (variable*)(src1 == NULL ? NULL : dynamic_cast<const variable*>(src1));
-    pt->src2 = (variable*)(src2 == NULL ? NULL : dynamic_cast<const variable*>(src2));
+    pt->oper = oper->oper;
+    pt->dst = (variable*)dynamic_cast<const variable*>(dst);
+    pt->src1 = (variable*)dynamic_cast<const variable*>(src1);
+    pt->src2 = (variable*)dynamic_cast<const variable*>(src2);
     tuples_.push_back(pt);
     return pt;
 }
 
-tuple* codemodule::new_tuple(operations::op oper, const object* src, const object* dst)
+tuple* codemodule::new_tuple(const operation* oper, const object* src, const object* dst)
 {
     return new_tuple(oper, dst, src, dst);
 }
