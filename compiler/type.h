@@ -56,7 +56,7 @@ public:
     const type* functiontype_type() const;
     const type* word_type() const;
     const type* int_type() const;
-    const type* double_type() const;
+    const type* float_type() const;
 public:
     const function_type* get_func_type(int32 nparams, const type* params[]) const;
 

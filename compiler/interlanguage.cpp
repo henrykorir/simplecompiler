@@ -18,6 +18,7 @@ interlanguage::interlanguage()
 : main_scope_(new scope())
 {
     current_scope_ = main_scope_.get();
+    all_scopes_.push_back(current_scope_);
 }
 
 
@@ -28,6 +29,7 @@ interlanguage::~interlanguage()
 scope* interlanguage::new_scope()
 {
     scope* psc = new scope(current_scope_);
+    all_scopes_.push_back(current_scope_);
     return current_scope_ = psc;
 }
 

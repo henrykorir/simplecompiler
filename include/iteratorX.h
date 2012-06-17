@@ -235,6 +235,52 @@ protected:
 	}
 };
 
+template<typename _Iter>
+struct iterator_wrap_t
+{
+    iterator_wrap_t(_Iter _First, _Iter _End)
+        : Current_(_First)
+        , Last_(_End)
+    {
+    }
+
+    bool next()
+    {
+        if (Current_ != Last_)
+        {
+            ++ Current_;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    typename _Iter::reference operator*() const
+    {
+        return *Current_;
+    }
+
+    typename _Iter::pointer operator->() const
+    {
+        return Current_.operator->();
+    }
+
+    _Iter Current_;
+    _Iter Last_;
+};
+
+template<typename _Class> iterator_wrap_t<typename _Class::const_iterator> wrap(const _Class& obj)
+{
+    return iterator_wrap_t<typename _Class::const_iterator>(obj.begin(), obj.end());
+}
+
+template<typename _Class> iterator_wrap_t<typename _Class::iterator> wrap(const _Class& obj)
+{
+    return iterator_wrap_t<typename _Class::iterator>(obj.begin(), obj.end());
+}
+
 template<int _Diff, typename _Tx>
 array_iterator<_Tx, _Diff> array_begin(_Tx* _Begin_ptr, typename array_iterator<_Tx, _Diff>::difference_type _Length)
 {
