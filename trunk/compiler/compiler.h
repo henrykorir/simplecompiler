@@ -72,6 +72,7 @@ public:
 public:
 	static bool is_separator(sc::int32 elem);
 	void check(const std::string& fname);
+    void generate_asm(const std::string& asmfile);
 private:
 	sc::int32 is_keywords(const std::string& s) const;
 private:

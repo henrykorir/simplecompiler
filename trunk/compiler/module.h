@@ -13,6 +13,10 @@ NAMESPACE_BEGIN(runtime)
 
 class module
 {
+public:
+    MEMBER_VARIABLE_GET_SET(_Str, name, name_);
+protected:
+    _Str name_;
 };
 
 class datamodule : virtual public module
@@ -35,6 +39,8 @@ public:
 
     // dst = dst op src
     tuple* new_tuple(const operation* oper, const object* src, const object* dst);
+public:
+    MEMBER_VARIABLE_GET(const std::deque<tuple*>&, tuples, tuples_);
 protected:
     std::deque<tuple*> tuples_;
 };

@@ -38,7 +38,7 @@ const type* typesystem::int_type() const
     return types_[4];
 }
 
-const type* typesystem::double_type() const
+const type* typesystem::float_type() const
 {
     return types_[5];
 }

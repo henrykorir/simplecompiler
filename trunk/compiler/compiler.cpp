@@ -8,6 +8,7 @@
 
 #include "extract.h"
 #include "lalr1machine.h"
+#include "asmgenerate.h"
 
 using namespace sc;
 using namespace compile;
@@ -196,4 +197,15 @@ void compiler::check(const std::string& fname)
 	if(lrm.isaccepted())
 		logstring("\naccepted!");
 	else logstring("\nerror, not accepted!");
+}
+    
+void compiler::generate_asm(const std::string& asmfile)
+{
+    std::ofstream asmofs(asmfile.c_str());
+    compile::runtime::asmgenerate asmgen(asmofs);
+    for (size_t i = 0; i < iml_->all_scopes_.size(); ++ i)
+    {
+        asmgen.print(iml_->all_scopes_[i].get());
+    }
+    asmofs.close();
 }

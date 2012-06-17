@@ -17,11 +17,13 @@
 #include "lalr1machine.h"
 #include "scope.h"
 
+//class compiler;
 NAMESPACE_BEGIN(compile)
 
 class interlanguage
 {
 	friend struct split_separators;
+    friend class ::compiler;
 public:
 	typedef compile::automachine automachine;
 	typedef compile::state_machine state_machine;
@@ -40,6 +42,8 @@ public:
     runtime::scope* current_scope() const;
 public:
 	void generate(const std::string& finput_name, const std::string& fotput_name);
+public:
+    //kog::iterator_wrap_t<std::deque<kog::shared_ptr<runtime::scope> >::iterator > 
 private:
     kog::shared_ptr<runtime::scope> main_scope_;
     std::deque<kog::shared_ptr<runtime::scope> > all_scopes_;

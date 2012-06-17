@@ -3,6 +3,7 @@
 Import('aEnv')
 
 cppfiles = ['extract.cpp', 'compiler.cpp', 'lalr1machine.cpp', 'scope.cpp', 'type.cpp', 'module.cpp', 'interlanguage.cpp']
+cppfiles += ['asmgenerate.cpp']
 
 inc = ['../include', '../syntax']
 usedlib = ['syntax']

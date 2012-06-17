@@ -24,7 +24,7 @@ namespace varscope
     };
 }
 
-class scope : public datamodule, public codemodule
+class scope
 {
 public:
     scope();
@@ -35,12 +35,18 @@ public:
     variable* entry_function(const _Str& fname, const type* result_type, int32 nparams, ...);
     variable* entry_variable(const _Str& vname, const type* vtype, int32 vscope = varscope::stack);
 	/* overwrite */ virtual variable* find(const _Str& name);
+    tuple* entry_tuple(const operation* oper, const object* src1, const object* src2, const object* dst);
 public:
     MEMBER_VARIABLE_GET(scope*, parent, parent_);
+    MEMBER_VARIABLE_GET(const datamodule*, stackdata, stackdata_.get());
+    MEMBER_VARIABLE_GET(const datamodule*, staticdata, staticdata_.get());
+    MEMBER_VARIABLE_GET(const codemodule*, code, code_.get());
 private:
     scope* parent_;
     std::vector<scope*> usingList_;
     kog::shared_ptr<datamodule> staticdata_;
+    kog::shared_ptr<datamodule> stackdata_;
+    kog::shared_ptr<codemodule> code_;
     int32 noname_idx_;
 };
 
