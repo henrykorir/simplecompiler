@@ -15,14 +15,16 @@
 #include "automachine.h"
 #include "statemachine.h"
 #include "lalr1machine.h"
+#include "module.h"
 #include "scope.h"
 
 //class compiler;
+struct split_separators;
 NAMESPACE_BEGIN(compile)
 
 class interlanguage
 {
-	friend struct split_separators;
+	friend struct ::split_separators;
     friend class ::compiler;
 public:
 	typedef compile::automachine automachine;
@@ -33,7 +35,7 @@ public:
     virtual ~interlanguage();
 public:
     // create a new scope as sub scope of current scope
-    runtime::scope* new_scope();
+    runtime::scope* push_scope(runtime::scope* s);
     // into a special scope
     runtime::scope* into_scope(runtime::scope* s);
     // outof current scope and make parent as current scope
@@ -45,8 +47,9 @@ public:
 public:
     //kog::iterator_wrap_t<std::deque<kog::shared_ptr<runtime::scope> >::iterator > 
 private:
-    kog::shared_ptr<runtime::scope> main_scope_;
-    std::deque<kog::shared_ptr<runtime::scope> > all_scopes_;
+    runtime::scope* main_scope_;
+    std::deque<runtime::scope*> all_scopes_;
+	//std::deque<runtime::module*> all_modules_;
     runtime::scope* current_scope_;
 };
 

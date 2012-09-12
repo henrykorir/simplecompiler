@@ -13,6 +13,7 @@
 using namespace sc;
 using namespace compile;
 using namespace compile::doc;
+using namespace compile::runtime;
 
 compiler::compiler()
 : keywords(string_2_int::max_int)
@@ -201,11 +202,5 @@ void compiler::check(const std::string& fname)
     
 void compiler::generate_asm(const std::string& asmfile)
 {
-    std::ofstream asmofs(asmfile.c_str());
-    compile::runtime::asmgenerate asmgen(asmofs);
-    for (size_t i = 0; i < iml_->all_scopes_.size(); ++ i)
-    {
-        asmgen.print(iml_->all_scopes_[i].get());
-    }
-    asmofs.close();
+	iml_->generate("tinyg.x", asmfile);
 }

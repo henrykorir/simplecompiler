@@ -20,16 +20,25 @@ lalr1machine::lalr1machine(const tinygrammar& g, const kog::smart_vector<ifuncti
 
 lalr1machine::~lalr1machine()
 {
+    // delete all funcions
+    for (kog::smart_vector<ifunction*>::iterator iter = funcList_.begin(); iter != funcList_.end(); ++ iter)
+    {
+        if (*iter == NULL) continue;
+        delete *iter;
+        *iter = NULL;
+    }
+    funcList_.reset(0);
 }
 
 machine_meta* lalr1machine::_reduce(int32 pid, const kog::smart_vector<machine_meta*>& rights, machine_meta* result)
 {	
-    if (funcList_.size() <= pid || pid < 0)
+    if ((int32)funcList_.size() <= pid || pid < 0)
 	{
 	//	fire("no production function[%d]!", pid);
 	}
     else if(funcList_[pid] != NULL)
     {
+		logstring("reduce product(%d)", pid);
         (*funcList_[pid])(rights.get(), rights.size(), result);
     }
 	return result;

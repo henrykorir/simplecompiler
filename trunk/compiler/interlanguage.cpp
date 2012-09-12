@@ -8,6 +8,7 @@
 
 #include "extract.h"
 #include "lalr1machine.h"
+#include "asmgenerate.h"
 
 using namespace sc;
 using namespace compile;
@@ -15,22 +16,31 @@ using namespace compile::doc;
 using namespace compile::runtime;
 
 interlanguage::interlanguage()
-: main_scope_(new scope())
+: main_scope_(new slicescope())
 {
-    current_scope_ = main_scope_.get();
+	main_scope_->name() = "global_scope";
+    current_scope_ = main_scope_;
     all_scopes_.push_back(current_scope_);
+	logstring("current scope(%s)", main_scope_->name().c_str());
 }
-
 
 interlanguage::~interlanguage()
 { 
+	foreach (scope*& s, all_scopes_.begin(), all_scopes_.end())
+    {
+		//delete s;
+		s = NULL;
+    }
+    all_scopes_.clear();
 }
 
-scope* interlanguage::new_scope()
+scope* interlanguage::push_scope(scope* s)
 {
-    scope* psc = new scope(current_scope_);
-    all_scopes_.push_back(current_scope_);
-    return current_scope_ = psc;
+	logstring("push scope(%s)", s->name().c_str());
+	s->parent() = current_scope_;
+	current_scope_->children().push_back(s);
+    all_scopes_.push_back(s);
+    return current_scope_ = s;
 }
 
 scope* interlanguage::into_scope(runtime::scope* s)
@@ -45,7 +55,10 @@ scope* interlanguage::otof_scope()
     {
         fire("root scope!");
     }
-    return current_scope_ = current_scope_->parent();
+	logstring("out of scope(%s)", current_scope_->name().c_str());
+    current_scope_ = current_scope_->parent();
+	logstring("current scope is %s", current_scope_ == NULL ? "<null>" : current_scope_->name().c_str());
+	return current_scope_;
 }
 
 scope* interlanguage::current_scope() const
@@ -55,62 +68,15 @@ scope* interlanguage::current_scope() const
 
 void interlanguage::generate(const std::string& finput_name, const std::string& fotput_name)
 {
-//    streamsplit wordsplit;
-//    std::ifstream cifs(finput_name.c_str());
-//    if(!cifs.is_open()) fire("can't open file: " + finput_name);
-//	const streamsplit::deqwords& words = wordsplit(cifs);
-//	cifs.close();
-//	
-//	lrmachine& lrm = *(dynamic_cast<lrmachine*>(&compiler::get_machine("__main__")));
-//	lrm.init();
-//
-//	logstring("\nstart to run machine...\n");
-//	for(streamsplit::deqwords::const_iterator iter = words.begin(); iter != words.end(); ++ iter)
-//	{
-//		switch (iter->wordClass)
-//		{
-//		case 0: // separators
-//			{
-//				split_separators splits(iter->txt.c_str());
-//				for (int32 x = splits.get(); x != -1; x = splits.next())
-//				{
-//					logstring("%s\t%d\n", splits.buf.c_str(), x);
-//                    automachine::machine_meta* tmp_meta = lrm.new_meta(x);
-//                    lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
-//                    pm->content = &(*iter);
-//                    pm->ctype = typesystem::instance().word_type();
-//					if(!lrm.eta(tmp_meta))
-//						fire("not expected sep!\n");
-//				}
-//			}
-//			break;
-//		case -1: // eof
-//			{
-//				logstring("%s\t%d\n", iter->txt.c_str(), -1);
-//                automachine::machine_meta* tmp_meta = lrm.new_meta(-1);
-//                lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
-//                pm->content = &(*iter);
-//                pm->ctype = typesystem::instance().word_type();
-//				if(!lrm.eta(tmp_meta))
-//					fire("not expected eof!\n");
-//			}
-//			break;
-//		default:
-//			{
-//				int32 x = is_keywords(iter->txt);
-//				if(x == -1) x = iter->wordClass;
-//				logstring("%s\t%d\n", iter->txt.c_str(), x);
-//                automachine::machine_meta* tmp_meta = lrm.new_meta(x);
-//                lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
-//                pm->content = &(*iter);
-//                pm->ctype = typesystem::instance().word_type();
-//				if(!lrm.eta(tmp_meta))
-//					fire("not expected word!\n");
-//			}
-//		}		
-//	}
-//
-//	if(lrm.isaccepted())
-//		logstring("\naccepted!\n");
-//	else logstring("\nerror, not accepted!\n");
+	module m(finput_name, main_scope_);
+	std::ofstream ofile(fotput_name.c_str());
+	if (!ofile) fire("can't open file: " + fotput_name);
+	asmgenerate asmg(ofile);
+	//asmg.print(&m);
+	//
+	foreach (scope* ps, all_scopes_.begin(), all_scopes_.end())
+	{
+		asmg.print(ps);
+	}
+	ofile.close();
 }

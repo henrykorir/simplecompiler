@@ -34,7 +34,7 @@ public:
     };
 public:
 	lalr1machine();
-	lalr1machine(const tinygrammar& g, const kog::smart_vector<ifunction*>& funclist);
+	lalr1machine(const tinygrammar& g, const kog::smart_vector<ifunction*>& funclist); // all funcion will delete when ~lalr1machine
 	virtual ~lalr1machine();
 public:
     /* overwrite */ virtual machine_meta* new_meta(int meta);

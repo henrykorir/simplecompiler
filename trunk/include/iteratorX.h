@@ -35,9 +35,9 @@ public:
 	typedef array_iterator<typename mpl::remove_const<_Tx>::type> nonconst_type;
 	typedef array_iterator<typename mpl::add_const<_Tx>::type> const_type;
 
-//#ifdef MSVCR
-//	typedef _STD _Range_checked_iterator_tag _Checked_iterator_category;
-//#endif
+#if (defined MSVCR) || (defined VISUAL_STDIO)
+	typedef _STD _Range_checked_iterator_tag _Checked_iterator_category;
+#endif
 
 public:
 

@@ -8,10 +8,12 @@ aEnv = Environment(ENV = os.environ)
 
 debug_ccflags = ''
 if os.sys.platform.lower() == 'win32':
+	aEnv['boost_inc'] = r'D:\Work\libs\boost_1_50_0'
 	aEnv.Append(CCFLAGS = '/D WIN32')
-	aEnv.Append(CCFLAGS = '/D UNICODE /D VISUAL_STDIO /EHsc /MT /D DEBUG_OUTPUT')
-	debug_ccflags = '/D _DEBUG'
+	aEnv.Append(CCFLAGS = '/D UNICODE /D VISUAL_STDIO /EHsc /MTd /D DEBUG_OUTPUT')
+	debug_ccflags = '/D _DEBUG /D DEBUG'
 else:
+	aEnv['boost_inc'] = ''
 	debug_ccflags = '-g -rdynamic'
 
 if int(ARGUMENTS.get('debug', 0)):

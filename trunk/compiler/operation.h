@@ -84,6 +84,15 @@ struct operation : object
     operations::op oper;
 };
 
+struct internal_call : object
+{
+	internal_call(const _Str& call_name)
+		: call_name_(call_name)
+	{}
+
+	_Str call_name_;
+};
+
 NAMESPACE_END(runtime)
 NAMESPACE_END(compile)
 

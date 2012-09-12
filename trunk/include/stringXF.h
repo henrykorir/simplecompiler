@@ -225,6 +225,7 @@ struct string_split_t
                     posE_ = _next(posB_);
                 }while(ref_->isre_ && posE_ == posB_ && posE_ != ref_->main_.length());
             }
+			return *this;
         }
 
         _Const_iterator operator++(int)

@@ -10,6 +10,10 @@
 #define MEMBER_VARIABLE_SET(_Result, _Fun, _mVal) \
 	_Result _Fun() {return (_mVal);}
 
+#define MEMBER_VARIABLE_REF MEMBER_VARIABLE_SET
+//#define MEMBER_VARIABLE_REF(_Result, _Fun, _mVal) \
+//	_Result _Fun() {return (_mVal);}
+
 #define MEMBER_VARIABLE_GET_SET(_Result, _Fun, _mVal) \
 	_Result& _Fun() {return (_mVal);} \
 	_Result const& _Fun() const {return (_mVal);}

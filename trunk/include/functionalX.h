@@ -629,5 +629,50 @@ std::vector<size_t> index_sort(_InIt _First, _InIt _Last, _Pr _pr)
 	return _Idx;
 }
 
+// help class
+template<size_t _Iter_size>
+struct __range_foreach
+{
+	// end used for make sure iter type is same
+	template<typename _Iter>
+	__range_foreach(_Iter cur, _Iter end) 
+	{
+		memcpy(xxx, &cur, _Iter_size);
+		//new (xxx)_Iter(cur);
+		first = true;
+	}
+
+	template<typename _Iter>
+	bool hasNext(_Iter _End) const
+	{
+		return *((_Iter*)xxx) != _End;
+	}
+
+	// param is used for return type
+	template<typename _Iter>
+	_Iter moveNext(_Iter) 
+	{
+		return (*((_Iter*)xxx))++;
+	}
+
+	operator bool()
+	{
+		bool b = first;
+		first = false;
+		return b;
+	}
+
+	char xxx[_Iter_size];
+	bool first;
+};
+
+#ifdef foreach
+#error 'exist foreach'
+#else
+#define foreach(_Value, _First, _End) \
+	for (kog::__range_foreach<sizeof(_First)> __r_1__(_First, _End); __r_1__; ) \
+		for (int __c_1__ = 1, __b_1__ = 1; __c_1__ && __r_1__.hasNext(_End); (__c_1__ = (__b_1__ == 0) ? 1 : 0), (__b_1__ = 1)) \
+			for (_Value = *__r_1__.moveNext(_End); __c_1__ --; -- __b_1__)
+#endif
 NAMESPACE_END(kog)
 #endif

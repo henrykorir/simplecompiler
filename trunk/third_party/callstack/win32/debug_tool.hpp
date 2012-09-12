@@ -5,13 +5,13 @@
  * @remarks
 **/
 
-#pragma once
+#ifndef _DEBUG_TOOL_H_
+#define _DEBUG_TOOL_H_
 
 #include <list>
 #include <string>
 
 //#include <boost/tr1/tr1/memory>
-#include <shared_ptr.h>
 
 namespace dbsoft
 {
@@ -26,12 +26,16 @@ namespace dbsoft
 		typedef std::string						       func_name;
 		typedef std::list< func_name >                 func_name_list;
 		typedef func_name_list::const_iterator         const_iterator;
-		typedef kog::shared_ptr<callstack>        callstack_ptr;
+		typedef std::auto_ptr<callstack>        callstack_ptr;
 
 		friend class detail::callstack_Imp;
 
 	public:
 		callstack();
+		~callstack();
+	private:
+		callstack(const callstack&);
+		callstack& operator=(const callstack&);
 	public:
 		const_iterator  begin() const;
 		const_iterator  end() const;
@@ -45,6 +49,7 @@ namespace dbsoft
 
 	private:
 		//std::tr1::shared_ptr<detail::callstack_Imp>         m_spImp;
-		kog::shared_ptr<detail::callstack_Imp> m_spImp;
+		detail::callstack_Imp* m_spImp;
 	};	
 }
+#endif

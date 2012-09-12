@@ -50,7 +50,7 @@ public:
 		
 				os<<sholder[p.left()].name<<" -> ";
 				
-				for(size_t j = 0; j < p.right_size(); ++ j)
+				for(int32 j = 0; j < p.right_size(); ++ j)
 				{
 					if(dot == j) os<<".";
 					os<<sholder[p[j]].name<<" ";

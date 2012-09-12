@@ -5,12 +5,11 @@ Import('aEnv')
 
 cppfiles = ['xregex.cpp']
 
-libboost = 'boost-dev'
-
 if os.sys.platform.lower() == 'win32':
-    incboost = r'D:\Program Files\boost'
+	libboost = ''
 else:
-    incboost = ''
+	libboost = 'boost-dev'
+incboost = aEnv['boost_inc']
 
 aEnv['regexlib'] = ['regex', libboost]
 

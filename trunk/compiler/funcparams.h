@@ -4,13 +4,13 @@
 #ifndef _FUNCTION_PARAMS_H_SC_
 #define _FUNCTION_PARAMS_H_SC_
 
-#include <object.h>
+#include "object.h"
 #include <cstdarg>
 
 NAMESPACE_BEGIN(compile)
 NAMESPACE_BEGIN(runtime)
 
-struct funcparamlist : public object
+struct funcparamlist : public variable 
 {
     typedef kog::smart_vector<object*> vec_params;
 

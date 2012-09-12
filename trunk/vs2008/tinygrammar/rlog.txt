@@ -1,0 +1,30 @@
+symbol_to_eplison, Wset = { , FunctionContent }
+[simplegrammar_test::run_test] tmp grammar
+grammar:Program
+Program -> AProgramItem
+Program -> AProgramItem Program
+AProgramItem -> Function
+AProgramItem -> Expressions ;
+ValueDeclear -> Valuetype symbol
+Expressions -> AExpression ; Expressions
+Expressions -> AExpression ;
+AExpression -> ValueDeclear
+AExpression -> FuncCall
+AExpression -> PrintFunc
+AExpression -> Assignment
+Assignment -> symbol = AValue
+Assignment -> symbol = AValue Op AValue
+AValue -> symbol
+AValue -> number
+FuncCall -> symbol = symbol ( symbol , symbol )
+PrintFunc -> print ( AValue )
+Function -> Valuetype symbol ( Valuetype symbol , Valuetype symbol ) { FunctionContent ReturnExp }
+Function -> Valuetype symbol ( Valuetype symbol , Valuetype symbol ) { ReturnExp }
+FunctionContent -> Expressions
+ReturnExp -> return AValue ;
+Valuetype -> int
+Valuetype -> float
+Op -> +
+Op -> -
+Op -> *
+Op -> /

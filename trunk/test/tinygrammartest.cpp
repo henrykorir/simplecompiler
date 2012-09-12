@@ -85,10 +85,11 @@ void simplegrammar_test::init_grammar(grammar& g)
  * AValue -> symbol | number
  * FuncCall -> symbol = symbol ( AValue , AValue )
  * PrintFunc -> print ( AValue )
- * Function -> FunctionHeader { FunctionContent ReturnExp }
+ * Function -> FunctionBegin FunctionContent ReturnExp }
  * FunctionHeader -> type symbol(type symbol, type symbol)
  * FunctionContent -> Expressions | Empty
  * ReturnExp -> return AValue;
+ * FunctionBegin -> FunctionHeader {
  *
  * whitespace: " \t\r\n"
  * Seperators: "{}()=*+-/;,"
@@ -110,8 +111,9 @@ void grammar_wrapper::simple_grammar()
 	start_symbol_ = 0; // start symbol
 	dthenu_ = true;
 
+	const int unTermCount = 23;
 	seperators_ = "{}()=*+-/;,";
-	syms.reset(22 + seperators_.size());
+	syms.reset(23 + seperators_.size());
 	syms[0] = Asymbol("Program", 0);
 	syms[1] = Asymbol("AProgramItem", 0);
 	syms[2] = Asymbol("ValueDeclear", 0);
@@ -134,8 +136,9 @@ void grammar_wrapper::simple_grammar()
 	syms[19] = Asymbol("", other_sym, "eplison");
 	syms[20] = Asymbol("Assignment", 0);
 	syms[21] = Asymbol("FunctionHeader", 0);
+	syms[22] = Asymbol("FunctionBegin", 0);
 	for(size_t i = 0; i < seperators_.size(); ++ i)
-		syms[i + 22] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
+		syms[i + unTermCount] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
 	eplisons() = 19;
 	// reset symbols name string
 	{
@@ -157,7 +160,7 @@ void grammar_wrapper::simple_grammar()
 		std::copy(Asymbol::smacs.begin(), Asymbol::smacs.end(), smacs_.begin());
 	}
 	
-	prods.reset(28);
+	prods.reset(29);
 	V::symbols() = &syms;
 	prods[0] = Aproduction(0, V(1), funcs[0]); // program -> aprogramitem
 	prods[1] = Aproduction(0, V(1, 0), funcs[1]); // program -> aprogramitem program
@@ -176,7 +179,7 @@ void grammar_wrapper::simple_grammar()
 	prods[14] = Aproduction(8, V(9), funcs[14]); // AValue -> number
 	prods[15] = Aproduction(10, V(6, "=", 6, "(", 6, ",", 6, ")"), funcs[15]); // FuncCall -> symbol = symbol ( symbol , symbol )
 	prods[16] = Aproduction(12, V(13, "(", 8, ")"), funcs[16]); // PrintFunc -> print ( AValue )
-	prods[17] = Aproduction(3, V(21, "{", 14, 15, "}"), funcs[17]); // Function -> FunctionHeader { FunctionContent ReturnExp }
+	prods[17] = Aproduction(3, V(22, 14, 15, "}"), funcs[17]); // Function -> FunctionBegin FunctionContent ReturnExp }
 	prods[18] = Aproduction(14, V(4), funcs[18]); //FunctionContent -> Expressions
 	prods[19] = Aproduction(14, V(19), funcs[19]); // FunctionContent -> 
 	prods[20] = Aproduction(15, V(16, 8, ";"), funcs[20]); // ReturnExp -> return AValue ;
@@ -187,6 +190,7 @@ void grammar_wrapper::simple_grammar()
 	prods[25] = Aproduction(11, V("*"), funcs[25]); // Op -> *
 	prods[26] = Aproduction(11, V("/"), funcs[26]); // Op -> /
 	prods[27] = Aproduction(21, V(5, 6, "(", 5, 6, ",", 5, 6, ")"), funcs[27]); // FunctionHeader -> ValueType symbol ( ValueType symbol , ValueType symbol )
+	prods[28] = Aproduction(22, V(21, "{"), funcs[28]); // FunctionBegin -> FunctionHeader {
 }
 
 void grammar_wrapper::init_funcs(std::vector<std::string>& funcs)
