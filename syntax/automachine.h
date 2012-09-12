@@ -88,7 +88,7 @@ public:
 public:
 	bool isaccepted() const
 	{
-		return sheet_->at(cstate_).endings();
+		return sheet_->at(cstate_).endings() != 0;
 	}
 public:
 	MEMBER_VARIABLE_GET_SET(sparsesheet, sheet, *sheet_);

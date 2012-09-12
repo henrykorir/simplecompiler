@@ -48,7 +48,7 @@ void eclosure::operator()(const tinygrammar& tig, closure_array& closures)
 	
 	// depth first visist graph
 	closures.reset(sholder.size());
-	for (int32 i = 0; i < sholder.size(); ++ i)
+	for (size_t i = 0; i < sholder.size(); ++ i)
 	{
 		if(sholder[i].ist) continue;
 		std::stack<int32> visitstack;
@@ -69,7 +69,7 @@ void eclosure::operator()(const tinygrammar& tig, closure_array& closures)
 
 		int32 n = (int32)std::count(isvisited.begin(), isvisited.end(), 1);
 		iclosure.reset(n);
-		for (int32 v = 0, j = 0; v < sholder.size(); ++ v)
+		for (size_t v = 0, j = 0; v < sholder.size(); ++ v)
 		{
 			if(isvisited[v]) iclosure[j ++] = v;
 		}

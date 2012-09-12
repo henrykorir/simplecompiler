@@ -1,0 +1,41 @@
+grammar:Program
+Program -> AProgramItem Program
+ValueDeclear -> valuetype symbol
+Expression -> AExpression Expression
+AExpression -> symbol = AValue ;
+AExpression -> symbol = AValue op AValue ;
+AExpression -> FuncCall ;
+AExpression -> Print ;
+FuncCall -> symbol = ( symbol , symbol )
+Print -> printF ( AValue )
+Function -> valuetype symbol ( valuetype symbol , valuetype symbol ) { FunctionContent ReturnExp }
+Function -> valuetype symbol ( valuetype symbol , valuetype symbol ) { ReturnExp }
+FunctionContent -> Expression FunctionContent
+FunctionContent -> ValueDeclear FunctionContent
+ReturnExp -> Return AValue ;
+Program -> valuetype symbol
+Program -> AExpression Expression
+Program -> symbol = AValue ;
+Program -> symbol = AValue op AValue ;
+Program -> FuncCall ;
+Program -> Print ;
+Program -> valuetype symbol ( valuetype symbol , valuetype symbol ) { FunctionContent ReturnExp }
+Program -> valuetype symbol ( valuetype symbol , valuetype symbol ) { ReturnExp }
+AProgramItem -> valuetype symbol
+AProgramItem -> AExpression Expression
+AProgramItem -> symbol = AValue ;
+AProgramItem -> symbol = AValue op AValue ;
+AProgramItem -> FuncCall ;
+AProgramItem -> Print ;
+AProgramItem -> valuetype symbol ( valuetype symbol , valuetype symbol ) { FunctionContent ReturnExp }
+AProgramItem -> valuetype symbol ( valuetype symbol , valuetype symbol ) { ReturnExp }
+Expression -> symbol = AValue ;
+Expression -> symbol = AValue op AValue ;
+Expression -> FuncCall ;
+Expression -> Print ;
+FunctionContent -> valuetype symbol
+FunctionContent -> AExpression Expression
+FunctionContent -> symbol = AValue ;
+FunctionContent -> symbol = AValue op AValue ;
+FunctionContent -> FuncCall ;
+FunctionContent -> Print ;

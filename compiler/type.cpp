@@ -15,7 +15,7 @@ typesystem::typesystem()
     types_.push_back(new type(2, 4)); // function_type
     types_.push_back(new type(3, 4)); // word_type
     types_.push_back(new type(4, sizeof(int32))); // int_type
-    types_.push_back(new type(5, sizeof(double))); // double_type
+    types_.push_back(new type(5, sizeof(float))); // float_type
 }
 
 typesystem::~typesystem()

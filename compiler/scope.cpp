@@ -1,81 +1,158 @@
 #include "scope.h"
 #include <cstdarg>
 #include <memory>
+#include <typeinfo>
 #include <stringX.h>
+#include <functionalX.h>
 #include <logger.h>
 
 using namespace compile;
 using namespace compile::runtime;
 
 scope::scope()
-: noname_idx_(0)
+: parent_(NULL)
+, noname_idx_(0)
+, bytes_(0)
+, stype_(varscope::sunknown)
 {
-    staticdata_ = kog::shared_ptr<datamodule>(new datamodule());
-    stackdata_ = kog::shared_ptr<datamodule>(new datamodule());
-    code_ = kog::shared_ptr<codemodule>(new codemodule());
 }
 
-scope::scope(scope* parent)
+scope::scope(scope* parent, int32 stype, bool isInherit)
 : noname_idx_(0)
 , parent_(parent)
-, staticdata_(parent->staticdata_)
+, stype_(stype)
+, bytes_(0)
 {
-    stackdata_ = kog::shared_ptr<datamodule>(new datamodule());
-    code_ = kog::shared_ptr<codemodule>(new codemodule());
+	if (isInherit && NULL != parent_)
+	{
+		// inherit all using scopes from parent
+		usingList_ = parent_->usingList_;
+		// parent is also using
+		usingList_.push_back(parent_);
+	}
 }
 
 scope::~scope()
 {
 }
 
-variable* scope::find(const _Str& name)
+variable* scope::find_here(const _Str& name) const
 {
-    variable* p = stackdata_->find(name);
-    if (p == NULL && staticdata_.get() != NULL)
-    {
-        p = staticdata_->find(name);
-    }
-    return p ? p : (parent_ ? parent_->find(name) : NULL);
+	std::deque<variable*>* vars = NULL;
+	if (name.size() > 4 && name.find("##") == 0 && name.rfind("##") == name.size() - 2)
+	{
+		session_map::const_iterator iter = sessions_.find(typeid(rodata_session).name());
+		if (iter != sessions_.end())
+		{
+			rodata_session* rs = compile::as<rodata_session>(iter->second);
+			vars = rs != NULL ? &(rs->variables()) : NULL;
+		}
+		else logstring("scope(%s) not found %s", name_.c_str(), typeid(rodata_session).name());
+	}
+	else
+	{
+		session_map::const_iterator iter = sessions_.find(typeid(data_session).name());
+		if (iter != sessions_.end())
+		{
+			data_session* ds = compile::as<data_session>(iter->second);
+			vars = ds != NULL ? &ds->variables() : NULL;
+		}
+		else logstring("scope(%s) not found %s", name_.c_str(), typeid(data_session).name());
+	}
+	if (vars == NULL) return NULL;
+
+	foreach (variable* var, vars->begin(), vars->end())
+	{
+		if (var->name() == name)
+			return var;
+	}
+
+	return NULL;
 }
 
-variable* scope::entry_variable(const _Str& vname, const type* vtype, int32 vscope)
+variable* scope::find(const _Str& name)
+{
+	logstring("try to find %s in scope(%s)", name.c_str(), this->name_.c_str());
+	symboltable::const_iterator iter = reg_table_.find(name);
+	if (iter != reg_table_.end())
+	{
+		return iter->second; 
+	}
+	// find it
+	variable* p = NULL;
+	if (NULL == (p = find_here(name)))
+	{
+		// try to find in using list
+		foreach (scope* sp, usingList_.begin(), usingList_.end())
+		{
+			variable* q = sp->find(name);
+			if (q != NULL)
+			{
+				p = q;
+				break;
+			}
+		}
+	}
+
+	if (p != NULL && p->env() == this)
+	{
+		reg_table_.insert(std::make_pair(name, p));
+	}
+	else if (p != NULL && p->env() != this)
+	{
+		refList_.push_back((scope*)p->env());
+	}
+
+	return p;
+}
+
+template<typename _SessionType>
+_SessionType* ref_session(scope* sp, scope::session_map& smap)
+{
+	const _Str sname = typeid(_SessionType).name();
+	scope::session_map::iterator iter = smap.find(sname);
+	_SessionType* psession = NULL;
+	if (iter == smap.end())
+	{
+		psession = new _SessionType(sp);
+		smap[sname] = psession;
+		if (psession->name() != typeid(_SessionType).name())
+			fire("session name is not equal");
+		logstring("scope(%s) create new session[%s]", sp->name().c_str(), psession->name().c_str());
+		//smap.insert(std::make_pair(sname, psession));
+	}
+	else 
+	{
+		psession = as<_SessionType>(iter->second);
+	}
+	return psession;
+}
+
+variable* scope::entry_variable(const _Str& vname, const type* vtype, int ass_type, int32 vscope)
 { 
-    logstring("entry_variable, name %s", vname.c_str());
-    variable v(vname, vtype, this, -1);
-    variable* pv = NULL;
-    switch(vscope)
-    {
-        case varscope::stack:
-            pv = stackdata_->entry(v);
-            code_->new_tuple(new operation(operations::newv), pv, NULL, NULL);
-            break;
-        case varscope::global:
-            pv = staticdata_->entry(v);
-            break;
-    }
+    logstring("scope(%s): entry_variable, name %s", name_.c_str(), vname.c_str());
+    //variable v(vname, vtype, this);
+    variable* pv = new variable(vname, vtype, this);
+	ref_session<data_session>(this, sessions_)->insert(pv);
+	
     return pv;
 }
     
-variable* scope::entry_function(const _Str& fname, const type* result_type, int32 nparams, ...)
+variable* scope::entry_function(int ass_type, const _Str& fname, function_type* ftype)
 {
-    va_list argptr;
-	va_start(argptr, nparams);
-    const type* p1 = va_arg(argptr, const type*);
-    const function_type* ft = typesystem::instance().new_func_type(nparams, &p1, result_type);
-    va_end(argptr);
-    
-    logstring("entry_function, name %s", fname.c_str());
+    logstring("scope(%s): entry_function, name %s", name_.c_str(), fname.c_str());
 
-    variable v(fname, ft, this, -1);
-    return staticdata_->entry(v);
+	variable* pv = new variable(fname, ftype, this);
+	ref_session<data_session>(this, sessions_)->insert(pv);
+	return pv;
 }
 
 variable* scope::entry_value(const _Str& content, const type* canTypes[], int _C)
 {
-    logstring("entry_value, content %s", content.c_str());
+    logstring("scope(%s): entry_value, content %s", name_.c_str(), content.c_str());
     std::auto_ptr<variable> var;
     value* v = new value();
-    _Str name = stringX::format("noname_var%d", noname_idx_ ++);
+	_Str name = stringX::format("##noname_var%d$$", noname_idx_ ++);
     if (content.find('.') != _Str::npos)
     {
         v->initv = (byte*)new double(stringX::tovalue<double>(content));
@@ -89,14 +166,18 @@ variable* scope::entry_value(const _Str& content, const type* canTypes[], int _C
         var.reset(new variable(name, typesystem::instance().int_type(), this, v));
     }
 
-    return staticdata_->entry(*var);
+	ref_session<rodata_session>(this, sessions_)->insert(var.get());
+
+	return var.release();
 }
 
 tuple* scope::entry_tuple(const operation* oper, const object* src1, const object* src2, const object* dst)
 {
-    if (code_.get() != NULL)
-    {
-        return code_->new_tuple(oper, src1, src2, dst);
-    }
-    return NULL;
+	four_tuple* p = new four_tuple();
+	p->dst = (variable*)compile::as<variable>(dst);
+	p->oper = oper->oper;
+	p->src1 = (variable*)compile::as<variable>(src1);
+	p->src2 = (variable*)compile::as<variable>(src2);
+	ref_session<text_session>(this, sessions_)->tuples().push_back(p);
+    return p;
 }

@@ -4,7 +4,7 @@
 #ifndef _ASM_GENERATE_H_SC_
 #define _ASM_GENERATE_H_SC_
 
-#include "scope.h"
+#include "module.h"
 
 NAMESPACE_BEGIN(compile);
 NAMESPACE_BEGIN(runtime);
@@ -15,6 +15,9 @@ public:
     asmgenerate(std::ostream& os);
 public:
     void print(scope* s);
+	void print(module* m);
+protected:
+	void print_code(const _Str& name, text_session* ss);
 private:
     std::ostream* os_;
 };

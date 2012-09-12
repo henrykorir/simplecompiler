@@ -127,7 +127,7 @@ private:
 	{
 		using namespace compile;
 		// find special symbol, if not found create new symbol
-		for(int i = 0; i < slist.size(); ++ i)
+		for(size_t i = 0; i < slist.size(); ++ i)
 		{
 			if(slist[i].name == s) return slist[i].sid;
 		}
@@ -170,7 +170,7 @@ public:
 			const production& p = prods[i];
 			os_<<sholder.at(p.left()).name<<" -> ";
 			os_<<sholder.at(p[0]).name;
-			for(size_t  j = 1; j < p.right_size(); ++ j)
+			for(int32  j = 1; j < p.right_size(); ++ j)
 			{
 				os_<<' '<<sholder.at(p[j]).name;
 			}

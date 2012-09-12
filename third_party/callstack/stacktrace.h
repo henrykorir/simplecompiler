@@ -59,6 +59,8 @@ namespace callstack{
 		trace()
 		{
 			kog::stacktrace::frames(stack_);
+            if (!stack_.empty())
+                stack_.erase(stack_.begin());
 		}
 	public:
 		const_iterator begin() const { return stack_.begin(); }

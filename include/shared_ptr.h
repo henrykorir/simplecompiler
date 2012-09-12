@@ -33,7 +33,7 @@ class shared_ptr {
 
 		/* special case, null pointer (nil-code) */
 		static unsigned* nil() { static unsigned nil_counter(1); return &nil_counter; }
-		
+
 		void decref() { if (--(*count) == 0) { delete ptr; delete count; }} 
 		void incref() { ++(*count); }
 		

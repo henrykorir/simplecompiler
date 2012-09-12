@@ -12,7 +12,7 @@ void init_grammar(tinygrammar& tig)
 {
 	//// create symbols list: 
 	std::deque<symbol> slist;
-	slist.resize(32);
+	slist.resize(33);
 	{
 		slist[0].sid = 0;
 		slist[0].funcs = NULL;
@@ -163,87 +163,94 @@ void init_grammar(tinygrammar& tig)
 		
 		slist[21].sid = 21;
 		slist[21].funcs = NULL;
-		slist[21].Lname = 1;
+		slist[21].Lname = 13;
 		slist[21].Lfuncs = 0;
-		slist[21].ist = 1;
-		slist[21].name = "{";
+		slist[21].ist = 0;
+		slist[21].name = "FunctionBegin";
 		
 		slist[22].sid = 22;
 		slist[22].funcs = NULL;
 		slist[22].Lname = 1;
 		slist[22].Lfuncs = 0;
 		slist[22].ist = 1;
-		slist[22].name = "}";
+		slist[22].name = "{";
 		
 		slist[23].sid = 23;
 		slist[23].funcs = NULL;
 		slist[23].Lname = 1;
 		slist[23].Lfuncs = 0;
 		slist[23].ist = 1;
-		slist[23].name = "(";
+		slist[23].name = "}";
 		
 		slist[24].sid = 24;
 		slist[24].funcs = NULL;
 		slist[24].Lname = 1;
 		slist[24].Lfuncs = 0;
 		slist[24].ist = 1;
-		slist[24].name = ")";
+		slist[24].name = "(";
 		
 		slist[25].sid = 25;
 		slist[25].funcs = NULL;
 		slist[25].Lname = 1;
 		slist[25].Lfuncs = 0;
 		slist[25].ist = 1;
-		slist[25].name = "=";
+		slist[25].name = ")";
 		
 		slist[26].sid = 26;
 		slist[26].funcs = NULL;
 		slist[26].Lname = 1;
 		slist[26].Lfuncs = 0;
 		slist[26].ist = 1;
-		slist[26].name = "*";
+		slist[26].name = "=";
 		
 		slist[27].sid = 27;
 		slist[27].funcs = NULL;
 		slist[27].Lname = 1;
 		slist[27].Lfuncs = 0;
 		slist[27].ist = 1;
-		slist[27].name = "+";
+		slist[27].name = "*";
 		
 		slist[28].sid = 28;
 		slist[28].funcs = NULL;
 		slist[28].Lname = 1;
 		slist[28].Lfuncs = 0;
 		slist[28].ist = 1;
-		slist[28].name = "-";
+		slist[28].name = "+";
 		
 		slist[29].sid = 29;
 		slist[29].funcs = NULL;
 		slist[29].Lname = 1;
 		slist[29].Lfuncs = 0;
 		slist[29].ist = 1;
-		slist[29].name = "/";
+		slist[29].name = "-";
 		
 		slist[30].sid = 30;
 		slist[30].funcs = NULL;
 		slist[30].Lname = 1;
 		slist[30].Lfuncs = 0;
 		slist[30].ist = 1;
-		slist[30].name = ";";
+		slist[30].name = "/";
 		
 		slist[31].sid = 31;
 		slist[31].funcs = NULL;
 		slist[31].Lname = 1;
 		slist[31].Lfuncs = 0;
 		slist[31].ist = 1;
-		slist[31].name = ",";
+		slist[31].name = ";";
+		
+		slist[32].sid = 32;
+		slist[32].funcs = NULL;
+		slist[32].Lname = 1;
+		slist[32].Lfuncs = 0;
+		slist[32].ist = 1;
+		slist[32].name = ",";
 		
 	}
 	symholder tmpholder(slist.begin(), slist.end());
 	tmpholder.make_index();
 	//// create productions
 	tinygrammar::vecprods plist;
-	plist.reset(28);
+	plist.reset(29);
 	{
 		int32 tmpv_0[] = {1};
 		plist[0] = production(0, tmpv_0, sizeof(tmpv_0)/sizeof(int32));
@@ -254,16 +261,16 @@ void init_grammar(tinygrammar& tig)
 		int32 tmpv_2[] = {3};
 		plist[2] = production(1, tmpv_2, sizeof(tmpv_2)/sizeof(int32));
 		
-		int32 tmpv_3[] = {7, 30};
+		int32 tmpv_3[] = {7, 31};
 		plist[3] = production(1, tmpv_3, sizeof(tmpv_3)/sizeof(int32));
 		
 		int32 tmpv_4[] = {5, 6};
 		plist[4] = production(2, tmpv_4, sizeof(tmpv_4)/sizeof(int32));
 		
-		int32 tmpv_5[] = {7, 30, 4};
+		int32 tmpv_5[] = {7, 31, 4};
 		plist[5] = production(4, tmpv_5, sizeof(tmpv_5)/sizeof(int32));
 		
-		int32 tmpv_6[] = {7, 30};
+		int32 tmpv_6[] = {7, 31};
 		plist[6] = production(4, tmpv_6, sizeof(tmpv_6)/sizeof(int32));
 		
 		int32 tmpv_7[] = {2};
@@ -278,10 +285,10 @@ void init_grammar(tinygrammar& tig)
 		int32 tmpv_10[] = {19};
 		plist[10] = production(7, tmpv_10, sizeof(tmpv_10)/sizeof(int32));
 		
-		int32 tmpv_11[] = {6, 25, 8};
+		int32 tmpv_11[] = {6, 26, 8};
 		plist[11] = production(19, tmpv_11, sizeof(tmpv_11)/sizeof(int32));
 		
-		int32 tmpv_12[] = {6, 25, 8, 11, 8};
+		int32 tmpv_12[] = {6, 26, 8, 11, 8};
 		plist[12] = production(19, tmpv_12, sizeof(tmpv_12)/sizeof(int32));
 		
 		int32 tmpv_13[] = {6};
@@ -290,22 +297,22 @@ void init_grammar(tinygrammar& tig)
 		int32 tmpv_14[] = {9};
 		plist[14] = production(8, tmpv_14, sizeof(tmpv_14)/sizeof(int32));
 		
-		int32 tmpv_15[] = {6, 25, 6, 23, 6, 31, 6, 24};
+		int32 tmpv_15[] = {6, 26, 6, 24, 6, 32, 6, 25};
 		plist[15] = production(10, tmpv_15, sizeof(tmpv_15)/sizeof(int32));
 		
-		int32 tmpv_16[] = {13, 23, 8, 24};
+		int32 tmpv_16[] = {13, 24, 8, 25};
 		plist[16] = production(12, tmpv_16, sizeof(tmpv_16)/sizeof(int32));
 		
-		int32 tmpv_17[] = {20, 21, 14, 15, 22};
+		int32 tmpv_17[] = {21, 14, 15, 23};
 		plist[17] = production(3, tmpv_17, sizeof(tmpv_17)/sizeof(int32));
 		
-		int32 tmpv_18[] = {20, 21, 15, 22};
+		int32 tmpv_18[] = {21, 15, 23};
 		plist[18] = production(3, tmpv_18, sizeof(tmpv_18)/sizeof(int32));
 		
 		int32 tmpv_19[] = {4};
 		plist[19] = production(14, tmpv_19, sizeof(tmpv_19)/sizeof(int32));
 		
-		int32 tmpv_20[] = {16, 8, 30};
+		int32 tmpv_20[] = {16, 8, 31};
 		plist[20] = production(15, tmpv_20, sizeof(tmpv_20)/sizeof(int32));
 		
 		int32 tmpv_21[] = {17};
@@ -314,20 +321,23 @@ void init_grammar(tinygrammar& tig)
 		int32 tmpv_22[] = {18};
 		plist[22] = production(5, tmpv_22, sizeof(tmpv_22)/sizeof(int32));
 		
-		int32 tmpv_23[] = {27};
+		int32 tmpv_23[] = {28};
 		plist[23] = production(11, tmpv_23, sizeof(tmpv_23)/sizeof(int32));
 		
-		int32 tmpv_24[] = {28};
+		int32 tmpv_24[] = {29};
 		plist[24] = production(11, tmpv_24, sizeof(tmpv_24)/sizeof(int32));
 		
-		int32 tmpv_25[] = {26};
+		int32 tmpv_25[] = {27};
 		plist[25] = production(11, tmpv_25, sizeof(tmpv_25)/sizeof(int32));
 		
-		int32 tmpv_26[] = {29};
+		int32 tmpv_26[] = {30};
 		plist[26] = production(11, tmpv_26, sizeof(tmpv_26)/sizeof(int32));
 		
-		int32 tmpv_27[] = {5, 6, 23, 5, 6, 31, 5, 6, 24};
+		int32 tmpv_27[] = {5, 6, 24, 5, 6, 32, 5, 6, 25};
 		plist[27] = production(20, tmpv_27, sizeof(tmpv_27)/sizeof(int32));
+		
+		int32 tmpv_28[] = {20, 22};
+		plist[28] = production(21, tmpv_28, sizeof(tmpv_28)/sizeof(int32));
 		
 	}
 	
@@ -345,17 +355,17 @@ public:
 	void make()
 	{
 		link r = new_node();
-		r->children['{']->v = 21;
-		r->children['}']->v = 22;
-		r->children['(']->v = 23;
-		r->children[')']->v = 24;
-		r->children['=']->v = 25;
-		r->children['*']->v = 26;
-		r->children['+']->v = 27;
-		r->children['-']->v = 28;
-		r->children['/']->v = 29;
-		r->children[';']->v = 30;
-		r->children[',']->v = 31;
+		r->children['{']->v = 22;
+		r->children['}']->v = 23;
+		r->children['(']->v = 24;
+		r->children[')']->v = 25;
+		r->children['=']->v = 26;
+		r->children['*']->v = 27;
+		r->children['+']->v = 28;
+		r->children['-']->v = 29;
+		r->children['/']->v = 30;
+		r->children[';']->v = 31;
+		r->children[',']->v = 32;
 		reset_root(r);
 	}
 	
@@ -600,7 +610,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	kog::shared_ptr<automachine> ptr_m(new state_machine);
 	automachine& m = *ptr_m;
 	automachine::sparsesheet& sheet = m.sheet();
-	sheet.reset(68);
+	sheet.reset(67);
 	automachine::sheetrow::value_type* ptr = NULL;
 	
 	sheet[0].reset(0);
@@ -608,7 +618,7 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[0].endings(1);
 	ptr = sheet[0].get();
 	
-	sheet[1].reset(14);
+	sheet[1].reset(15);
 	sheet[1].type(1);
 	sheet[1].endings(0);
 	ptr = sheet[1].get();
@@ -626,17 +636,18 @@ void init_syntax_machine(lalr1machine& lrm)
 		*(ptr ++) = std::make_pair(18, 12);
 		*(ptr ++) = std::make_pair(19, 13);
 		*(ptr ++) = std::make_pair(20, 14);
+		*(ptr ++) = std::make_pair(21, 15);
 	
-	sheet[2].reset(15);
+	sheet[2].reset(16);
 	sheet[2].type(1);
 	sheet[2].endings(0);
 	ptr = sheet[2].get();
 		*(ptr ++) = std::make_pair(-1, -1);
-		*(ptr ++) = std::make_pair(0, 15);
-		*(ptr ++) = std::make_pair(1, 16);
+		*(ptr ++) = std::make_pair(0, 16);
+		*(ptr ++) = std::make_pair(1, 17);
 		*(ptr ++) = std::make_pair(2, 3);
 		*(ptr ++) = std::make_pair(3, 4);
-		*(ptr ++) = std::make_pair(5, 17);
+		*(ptr ++) = std::make_pair(5, 5);
 		*(ptr ++) = std::make_pair(6, 6);
 		*(ptr ++) = std::make_pair(7, 7);
 		*(ptr ++) = std::make_pair(10, 8);
@@ -646,12 +657,13 @@ void init_syntax_machine(lalr1machine& lrm)
 		*(ptr ++) = std::make_pair(18, 12);
 		*(ptr ++) = std::make_pair(19, 13);
 		*(ptr ++) = std::make_pair(20, 14);
+		*(ptr ++) = std::make_pair(21, 15);
 	
 	sheet[3].reset(1);
 	sheet[3].type(1);
 	sheet[3].endings(0);
 	ptr = sheet[3].get();
-		*(ptr ++) = std::make_pair(30, -8);
+		*(ptr ++) = std::make_pair(31, -8);
 	
 	sheet[4].reset(5);
 	sheet[4].type(1);
@@ -673,31 +685,31 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[6].type(1);
 	sheet[6].endings(0);
 	ptr = sheet[6].get();
-		*(ptr ++) = std::make_pair(25, 19);
+		*(ptr ++) = std::make_pair(26, 19);
 	
 	sheet[7].reset(1);
 	sheet[7].type(1);
 	sheet[7].endings(0);
 	ptr = sheet[7].get();
-		*(ptr ++) = std::make_pair(30, 20);
+		*(ptr ++) = std::make_pair(31, 20);
 	
 	sheet[8].reset(1);
 	sheet[8].type(1);
 	sheet[8].endings(0);
 	ptr = sheet[8].get();
-		*(ptr ++) = std::make_pair(30, -9);
+		*(ptr ++) = std::make_pair(31, -9);
 	
 	sheet[9].reset(1);
 	sheet[9].type(1);
 	sheet[9].endings(0);
 	ptr = sheet[9].get();
-		*(ptr ++) = std::make_pair(30, -10);
+		*(ptr ++) = std::make_pair(31, -10);
 	
 	sheet[10].reset(1);
 	sheet[10].type(1);
 	sheet[10].endings(0);
 	ptr = sheet[10].get();
-		*(ptr ++) = std::make_pair(23, 21);
+		*(ptr ++) = std::make_pair(24, 21);
 	
 	sheet[11].reset(1);
 	sheet[11].type(1);
@@ -715,30 +727,49 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[13].type(1);
 	sheet[13].endings(0);
 	ptr = sheet[13].get();
-		*(ptr ++) = std::make_pair(30, -11);
+		*(ptr ++) = std::make_pair(31, -11);
 	
 	sheet[14].reset(1);
 	sheet[14].type(1);
 	sheet[14].endings(0);
 	ptr = sheet[14].get();
-		*(ptr ++) = std::make_pair(21, 22);
+		*(ptr ++) = std::make_pair(22, 22);
 	
-	sheet[15].reset(1);
+	sheet[15].reset(14);
 	sheet[15].type(1);
 	sheet[15].endings(0);
 	ptr = sheet[15].get();
-		*(ptr ++) = std::make_pair(-1, -2);
+		*(ptr ++) = std::make_pair(2, 3);
+		*(ptr ++) = std::make_pair(4, 23);
+		*(ptr ++) = std::make_pair(5, 24);
+		*(ptr ++) = std::make_pair(6, 25);
+		*(ptr ++) = std::make_pair(7, 26);
+		*(ptr ++) = std::make_pair(10, 8);
+		*(ptr ++) = std::make_pair(12, 9);
+		*(ptr ++) = std::make_pair(13, 10);
+		*(ptr ++) = std::make_pair(14, 27);
+		*(ptr ++) = std::make_pair(15, 28);
+		*(ptr ++) = std::make_pair(16, 29);
+		*(ptr ++) = std::make_pair(17, 11);
+		*(ptr ++) = std::make_pair(18, 12);
+		*(ptr ++) = std::make_pair(19, 13);
 	
-	sheet[16].reset(15);
+	sheet[16].reset(1);
 	sheet[16].type(1);
 	sheet[16].endings(0);
 	ptr = sheet[16].get();
+		*(ptr ++) = std::make_pair(-1, -2);
+	
+	sheet[17].reset(16);
+	sheet[17].type(1);
+	sheet[17].endings(0);
+	ptr = sheet[17].get();
 		*(ptr ++) = std::make_pair(-1, -1);
-		*(ptr ++) = std::make_pair(0, 15);
-		*(ptr ++) = std::make_pair(1, 16);
+		*(ptr ++) = std::make_pair(0, 16);
+		*(ptr ++) = std::make_pair(1, 17);
 		*(ptr ++) = std::make_pair(2, 3);
 		*(ptr ++) = std::make_pair(3, 4);
-		*(ptr ++) = std::make_pair(5, 17);
+		*(ptr ++) = std::make_pair(5, 5);
 		*(ptr ++) = std::make_pair(6, 6);
 		*(ptr ++) = std::make_pair(7, 7);
 		*(ptr ++) = std::make_pair(10, 8);
@@ -748,27 +779,22 @@ void init_syntax_machine(lalr1machine& lrm)
 		*(ptr ++) = std::make_pair(18, 12);
 		*(ptr ++) = std::make_pair(19, 13);
 		*(ptr ++) = std::make_pair(20, 14);
-	
-	sheet[17].reset(1);
-	sheet[17].type(1);
-	sheet[17].endings(0);
-	ptr = sheet[17].get();
-		*(ptr ++) = std::make_pair(6, 23);
+		*(ptr ++) = std::make_pair(21, 15);
 	
 	sheet[18].reset(2);
 	sheet[18].type(1);
 	sheet[18].endings(0);
 	ptr = sheet[18].get();
-		*(ptr ++) = std::make_pair(23, 24);
-		*(ptr ++) = std::make_pair(30, -5);
+		*(ptr ++) = std::make_pair(24, 30);
+		*(ptr ++) = std::make_pair(31, -5);
 	
 	sheet[19].reset(3);
 	sheet[19].type(1);
 	sheet[19].endings(0);
 	ptr = sheet[19].get();
-		*(ptr ++) = std::make_pair(6, 25);
-		*(ptr ++) = std::make_pair(8, 26);
-		*(ptr ++) = std::make_pair(9, 27);
+		*(ptr ++) = std::make_pair(6, 31);
+		*(ptr ++) = std::make_pair(8, 32);
+		*(ptr ++) = std::make_pair(9, 33);
 	
 	sheet[20].reset(5);
 	sheet[20].type(1);
@@ -784,216 +810,146 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[21].type(1);
 	sheet[21].endings(0);
 	ptr = sheet[21].get();
-		*(ptr ++) = std::make_pair(6, 28);
-		*(ptr ++) = std::make_pair(8, 29);
-		*(ptr ++) = std::make_pair(9, 30);
+		*(ptr ++) = std::make_pair(6, 34);
+		*(ptr ++) = std::make_pair(8, 35);
+		*(ptr ++) = std::make_pair(9, 36);
 	
-	sheet[22].reset(14);
+	sheet[22].reset(5);
 	sheet[22].type(1);
 	sheet[22].endings(0);
 	ptr = sheet[22].get();
-		*(ptr ++) = std::make_pair(2, 3);
-		*(ptr ++) = std::make_pair(4, 31);
-		*(ptr ++) = std::make_pair(5, 32);
-		*(ptr ++) = std::make_pair(6, 33);
-		*(ptr ++) = std::make_pair(7, 34);
-		*(ptr ++) = std::make_pair(10, 8);
-		*(ptr ++) = std::make_pair(12, 9);
-		*(ptr ++) = std::make_pair(13, 10);
-		*(ptr ++) = std::make_pair(14, 35);
-		*(ptr ++) = std::make_pair(15, 36);
-		*(ptr ++) = std::make_pair(16, 37);
-		*(ptr ++) = std::make_pair(17, 11);
-		*(ptr ++) = std::make_pair(18, 12);
-		*(ptr ++) = std::make_pair(19, 13);
+		*(ptr ++) = std::make_pair(6, -29);
+		*(ptr ++) = std::make_pair(13, -29);
+		*(ptr ++) = std::make_pair(16, -29);
+		*(ptr ++) = std::make_pair(17, -29);
+		*(ptr ++) = std::make_pair(18, -29);
 	
-	sheet[23].reset(2);
+	sheet[23].reset(1);
 	sheet[23].type(1);
 	sheet[23].endings(0);
 	ptr = sheet[23].get();
-		*(ptr ++) = std::make_pair(23, 24);
-		*(ptr ++) = std::make_pair(30, -5);
+		*(ptr ++) = std::make_pair(16, -20);
 	
-	sheet[24].reset(3);
+	sheet[24].reset(1);
 	sheet[24].type(1);
 	sheet[24].endings(0);
 	ptr = sheet[24].get();
-		*(ptr ++) = std::make_pair(5, 38);
-		*(ptr ++) = std::make_pair(17, 11);
-		*(ptr ++) = std::make_pair(18, 12);
+		*(ptr ++) = std::make_pair(6, 37);
 	
-	sheet[25].reset(6);
+	sheet[25].reset(1);
 	sheet[25].type(1);
 	sheet[25].endings(0);
 	ptr = sheet[25].get();
-		*(ptr ++) = std::make_pair(23, 39);
-		*(ptr ++) = std::make_pair(26, -14);
-		*(ptr ++) = std::make_pair(27, -14);
-		*(ptr ++) = std::make_pair(28, -14);
-		*(ptr ++) = std::make_pair(29, -14);
-		*(ptr ++) = std::make_pair(30, -14);
+		*(ptr ++) = std::make_pair(26, 38);
 	
-	sheet[26].reset(6);
+	sheet[26].reset(1);
 	sheet[26].type(1);
 	sheet[26].endings(0);
 	ptr = sheet[26].get();
-		*(ptr ++) = std::make_pair(11, 40);
-		*(ptr ++) = std::make_pair(26, 41);
-		*(ptr ++) = std::make_pair(27, 42);
-		*(ptr ++) = std::make_pair(28, 43);
-		*(ptr ++) = std::make_pair(29, 44);
-		*(ptr ++) = std::make_pair(30, -12);
+		*(ptr ++) = std::make_pair(31, 39);
 	
-	sheet[27].reset(5);
+	sheet[27].reset(2);
 	sheet[27].type(1);
 	sheet[27].endings(0);
 	ptr = sheet[27].get();
-		*(ptr ++) = std::make_pair(26, -15);
-		*(ptr ++) = std::make_pair(27, -15);
-		*(ptr ++) = std::make_pair(28, -15);
-		*(ptr ++) = std::make_pair(29, -15);
-		*(ptr ++) = std::make_pair(30, -15);
+		*(ptr ++) = std::make_pair(15, 40);
+		*(ptr ++) = std::make_pair(16, 29);
 	
 	sheet[28].reset(1);
 	sheet[28].type(1);
 	sheet[28].endings(0);
 	ptr = sheet[28].get();
-		*(ptr ++) = std::make_pair(24, -14);
+		*(ptr ++) = std::make_pair(23, 41);
 	
-	sheet[29].reset(1);
+	sheet[29].reset(3);
 	sheet[29].type(1);
 	sheet[29].endings(0);
 	ptr = sheet[29].get();
-		*(ptr ++) = std::make_pair(24, 45);
+		*(ptr ++) = std::make_pair(6, 42);
+		*(ptr ++) = std::make_pair(8, 43);
+		*(ptr ++) = std::make_pair(9, 44);
 	
-	sheet[30].reset(1);
+	sheet[30].reset(3);
 	sheet[30].type(1);
 	sheet[30].endings(0);
 	ptr = sheet[30].get();
-		*(ptr ++) = std::make_pair(24, -15);
+		*(ptr ++) = std::make_pair(5, 45);
+		*(ptr ++) = std::make_pair(17, 11);
+		*(ptr ++) = std::make_pair(18, 12);
 	
-	sheet[31].reset(1);
+	sheet[31].reset(6);
 	sheet[31].type(1);
 	sheet[31].endings(0);
 	ptr = sheet[31].get();
-		*(ptr ++) = std::make_pair(16, -20);
+		*(ptr ++) = std::make_pair(24, 46);
+		*(ptr ++) = std::make_pair(27, -14);
+		*(ptr ++) = std::make_pair(28, -14);
+		*(ptr ++) = std::make_pair(29, -14);
+		*(ptr ++) = std::make_pair(30, -14);
+		*(ptr ++) = std::make_pair(31, -14);
 	
-	sheet[32].reset(1);
+	sheet[32].reset(6);
 	sheet[32].type(1);
 	sheet[32].endings(0);
 	ptr = sheet[32].get();
-		*(ptr ++) = std::make_pair(6, 46);
+		*(ptr ++) = std::make_pair(11, 47);
+		*(ptr ++) = std::make_pair(27, 48);
+		*(ptr ++) = std::make_pair(28, 49);
+		*(ptr ++) = std::make_pair(29, 50);
+		*(ptr ++) = std::make_pair(30, 51);
+		*(ptr ++) = std::make_pair(31, -12);
 	
-	sheet[33].reset(1);
+	sheet[33].reset(5);
 	sheet[33].type(1);
 	sheet[33].endings(0);
 	ptr = sheet[33].get();
-		*(ptr ++) = std::make_pair(25, 47);
+		*(ptr ++) = std::make_pair(27, -15);
+		*(ptr ++) = std::make_pair(28, -15);
+		*(ptr ++) = std::make_pair(29, -15);
+		*(ptr ++) = std::make_pair(30, -15);
+		*(ptr ++) = std::make_pair(31, -15);
 	
 	sheet[34].reset(1);
 	sheet[34].type(1);
 	sheet[34].endings(0);
 	ptr = sheet[34].get();
-		*(ptr ++) = std::make_pair(30, 48);
+		*(ptr ++) = std::make_pair(25, -14);
 	
-	sheet[35].reset(2);
+	sheet[35].reset(1);
 	sheet[35].type(1);
 	sheet[35].endings(0);
 	ptr = sheet[35].get();
-		*(ptr ++) = std::make_pair(15, 49);
-		*(ptr ++) = std::make_pair(16, 37);
+		*(ptr ++) = std::make_pair(25, 52);
 	
 	sheet[36].reset(1);
 	sheet[36].type(1);
 	sheet[36].endings(0);
 	ptr = sheet[36].get();
-		*(ptr ++) = std::make_pair(22, 50);
+		*(ptr ++) = std::make_pair(25, -15);
 	
-	sheet[37].reset(3);
+	sheet[37].reset(1);
 	sheet[37].type(1);
 	sheet[37].endings(0);
 	ptr = sheet[37].get();
-		*(ptr ++) = std::make_pair(6, 51);
-		*(ptr ++) = std::make_pair(8, 52);
-		*(ptr ++) = std::make_pair(9, 53);
+		*(ptr ++) = std::make_pair(31, -5);
 	
-	sheet[38].reset(1);
+	sheet[38].reset(3);
 	sheet[38].type(1);
 	sheet[38].endings(0);
 	ptr = sheet[38].get();
-		*(ptr ++) = std::make_pair(6, 54);
+		*(ptr ++) = std::make_pair(6, 31);
+		*(ptr ++) = std::make_pair(8, 53);
+		*(ptr ++) = std::make_pair(9, 33);
 	
-	sheet[39].reset(1);
+	sheet[39].reset(12);
 	sheet[39].type(1);
 	sheet[39].endings(0);
 	ptr = sheet[39].get();
-		*(ptr ++) = std::make_pair(6, 55);
-	
-	sheet[40].reset(3);
-	sheet[40].type(1);
-	sheet[40].endings(0);
-	ptr = sheet[40].get();
-		*(ptr ++) = std::make_pair(6, 51);
-		*(ptr ++) = std::make_pair(8, 56);
-		*(ptr ++) = std::make_pair(9, 53);
-	
-	sheet[41].reset(2);
-	sheet[41].type(1);
-	sheet[41].endings(0);
-	ptr = sheet[41].get();
-		*(ptr ++) = std::make_pair(6, -26);
-		*(ptr ++) = std::make_pair(9, -26);
-	
-	sheet[42].reset(2);
-	sheet[42].type(1);
-	sheet[42].endings(0);
-	ptr = sheet[42].get();
-		*(ptr ++) = std::make_pair(6, -24);
-		*(ptr ++) = std::make_pair(9, -24);
-	
-	sheet[43].reset(2);
-	sheet[43].type(1);
-	sheet[43].endings(0);
-	ptr = sheet[43].get();
-		*(ptr ++) = std::make_pair(6, -25);
-		*(ptr ++) = std::make_pair(9, -25);
-	
-	sheet[44].reset(2);
-	sheet[44].type(1);
-	sheet[44].endings(0);
-	ptr = sheet[44].get();
-		*(ptr ++) = std::make_pair(6, -27);
-		*(ptr ++) = std::make_pair(9, -27);
-	
-	sheet[45].reset(1);
-	sheet[45].type(1);
-	sheet[45].endings(0);
-	ptr = sheet[45].get();
-		*(ptr ++) = std::make_pair(30, -17);
-	
-	sheet[46].reset(1);
-	sheet[46].type(1);
-	sheet[46].endings(0);
-	ptr = sheet[46].get();
-		*(ptr ++) = std::make_pair(30, -5);
-	
-	sheet[47].reset(3);
-	sheet[47].type(1);
-	sheet[47].endings(0);
-	ptr = sheet[47].get();
-		*(ptr ++) = std::make_pair(6, 25);
-		*(ptr ++) = std::make_pair(8, 57);
-		*(ptr ++) = std::make_pair(9, 27);
-	
-	sheet[48].reset(12);
-	sheet[48].type(1);
-	sheet[48].endings(0);
-	ptr = sheet[48].get();
 		*(ptr ++) = std::make_pair(2, 3);
-		*(ptr ++) = std::make_pair(4, 58);
-		*(ptr ++) = std::make_pair(5, 32);
+		*(ptr ++) = std::make_pair(4, 54);
+		*(ptr ++) = std::make_pair(5, 24);
 		*(ptr ++) = std::make_pair(6, 6);
-		*(ptr ++) = std::make_pair(7, 34);
+		*(ptr ++) = std::make_pair(7, 26);
 		*(ptr ++) = std::make_pair(10, 8);
 		*(ptr ++) = std::make_pair(12, 9);
 		*(ptr ++) = std::make_pair(13, 10);
@@ -1002,98 +958,158 @@ void init_syntax_machine(lalr1machine& lrm)
 		*(ptr ++) = std::make_pair(18, 12);
 		*(ptr ++) = std::make_pair(19, 13);
 	
-	sheet[49].reset(1);
-	sheet[49].type(1);
-	sheet[49].endings(0);
-	ptr = sheet[49].get();
-		*(ptr ++) = std::make_pair(22, 59);
+	sheet[40].reset(1);
+	sheet[40].type(1);
+	sheet[40].endings(0);
+	ptr = sheet[40].get();
+		*(ptr ++) = std::make_pair(23, 55);
 	
-	sheet[50].reset(5);
-	sheet[50].type(1);
-	sheet[50].endings(0);
-	ptr = sheet[50].get();
+	sheet[41].reset(5);
+	sheet[41].type(1);
+	sheet[41].endings(0);
+	ptr = sheet[41].get();
 		*(ptr ++) = std::make_pair(-1, -19);
 		*(ptr ++) = std::make_pair(6, -19);
 		*(ptr ++) = std::make_pair(13, -19);
 		*(ptr ++) = std::make_pair(17, -19);
 		*(ptr ++) = std::make_pair(18, -19);
 	
-	sheet[51].reset(1);
+	sheet[42].reset(1);
+	sheet[42].type(1);
+	sheet[42].endings(0);
+	ptr = sheet[42].get();
+		*(ptr ++) = std::make_pair(31, -14);
+	
+	sheet[43].reset(1);
+	sheet[43].type(1);
+	sheet[43].endings(0);
+	ptr = sheet[43].get();
+		*(ptr ++) = std::make_pair(31, 56);
+	
+	sheet[44].reset(1);
+	sheet[44].type(1);
+	sheet[44].endings(0);
+	ptr = sheet[44].get();
+		*(ptr ++) = std::make_pair(31, -15);
+	
+	sheet[45].reset(1);
+	sheet[45].type(1);
+	sheet[45].endings(0);
+	ptr = sheet[45].get();
+		*(ptr ++) = std::make_pair(6, 57);
+	
+	sheet[46].reset(1);
+	sheet[46].type(1);
+	sheet[46].endings(0);
+	ptr = sheet[46].get();
+		*(ptr ++) = std::make_pair(6, 58);
+	
+	sheet[47].reset(3);
+	sheet[47].type(1);
+	sheet[47].endings(0);
+	ptr = sheet[47].get();
+		*(ptr ++) = std::make_pair(6, 42);
+		*(ptr ++) = std::make_pair(8, 59);
+		*(ptr ++) = std::make_pair(9, 44);
+	
+	sheet[48].reset(2);
+	sheet[48].type(1);
+	sheet[48].endings(0);
+	ptr = sheet[48].get();
+		*(ptr ++) = std::make_pair(6, -26);
+		*(ptr ++) = std::make_pair(9, -26);
+	
+	sheet[49].reset(2);
+	sheet[49].type(1);
+	sheet[49].endings(0);
+	ptr = sheet[49].get();
+		*(ptr ++) = std::make_pair(6, -24);
+		*(ptr ++) = std::make_pair(9, -24);
+	
+	sheet[50].reset(2);
+	sheet[50].type(1);
+	sheet[50].endings(0);
+	ptr = sheet[50].get();
+		*(ptr ++) = std::make_pair(6, -25);
+		*(ptr ++) = std::make_pair(9, -25);
+	
+	sheet[51].reset(2);
 	sheet[51].type(1);
 	sheet[51].endings(0);
 	ptr = sheet[51].get();
-		*(ptr ++) = std::make_pair(30, -14);
+		*(ptr ++) = std::make_pair(6, -27);
+		*(ptr ++) = std::make_pair(9, -27);
 	
 	sheet[52].reset(1);
 	sheet[52].type(1);
 	sheet[52].endings(0);
 	ptr = sheet[52].get();
-		*(ptr ++) = std::make_pair(30, 60);
+		*(ptr ++) = std::make_pair(31, -17);
 	
-	sheet[53].reset(1);
+	sheet[53].reset(6);
 	sheet[53].type(1);
 	sheet[53].endings(0);
 	ptr = sheet[53].get();
-		*(ptr ++) = std::make_pair(30, -15);
+		*(ptr ++) = std::make_pair(11, 47);
+		*(ptr ++) = std::make_pair(27, 48);
+		*(ptr ++) = std::make_pair(28, 49);
+		*(ptr ++) = std::make_pair(29, 50);
+		*(ptr ++) = std::make_pair(30, 51);
+		*(ptr ++) = std::make_pair(31, -12);
 	
 	sheet[54].reset(1);
 	sheet[54].type(1);
 	sheet[54].endings(0);
 	ptr = sheet[54].get();
-		*(ptr ++) = std::make_pair(31, 61);
+		*(ptr ++) = std::make_pair(16, -6);
 	
-	sheet[55].reset(1);
+	sheet[55].reset(5);
 	sheet[55].type(1);
 	sheet[55].endings(0);
 	ptr = sheet[55].get();
-		*(ptr ++) = std::make_pair(31, 62);
-	
-	sheet[56].reset(1);
-	sheet[56].type(1);
-	sheet[56].endings(0);
-	ptr = sheet[56].get();
-		*(ptr ++) = std::make_pair(30, -13);
-	
-	sheet[57].reset(6);
-	sheet[57].type(1);
-	sheet[57].endings(0);
-	ptr = sheet[57].get();
-		*(ptr ++) = std::make_pair(11, 40);
-		*(ptr ++) = std::make_pair(26, 41);
-		*(ptr ++) = std::make_pair(27, 42);
-		*(ptr ++) = std::make_pair(28, 43);
-		*(ptr ++) = std::make_pair(29, 44);
-		*(ptr ++) = std::make_pair(30, -12);
-	
-	sheet[58].reset(1);
-	sheet[58].type(1);
-	sheet[58].endings(0);
-	ptr = sheet[58].get();
-		*(ptr ++) = std::make_pair(16, -6);
-	
-	sheet[59].reset(5);
-	sheet[59].type(1);
-	sheet[59].endings(0);
-	ptr = sheet[59].get();
 		*(ptr ++) = std::make_pair(-1, -18);
 		*(ptr ++) = std::make_pair(6, -18);
 		*(ptr ++) = std::make_pair(13, -18);
 		*(ptr ++) = std::make_pair(17, -18);
 		*(ptr ++) = std::make_pair(18, -18);
 	
-	sheet[60].reset(1);
+	sheet[56].reset(1);
+	sheet[56].type(1);
+	sheet[56].endings(0);
+	ptr = sheet[56].get();
+		*(ptr ++) = std::make_pair(23, -21);
+	
+	sheet[57].reset(1);
+	sheet[57].type(1);
+	sheet[57].endings(0);
+	ptr = sheet[57].get();
+		*(ptr ++) = std::make_pair(32, 60);
+	
+	sheet[58].reset(1);
+	sheet[58].type(1);
+	sheet[58].endings(0);
+	ptr = sheet[58].get();
+		*(ptr ++) = std::make_pair(32, 61);
+	
+	sheet[59].reset(1);
+	sheet[59].type(1);
+	sheet[59].endings(0);
+	ptr = sheet[59].get();
+		*(ptr ++) = std::make_pair(31, -13);
+	
+	sheet[60].reset(3);
 	sheet[60].type(1);
 	sheet[60].endings(0);
 	ptr = sheet[60].get();
-		*(ptr ++) = std::make_pair(22, -21);
+		*(ptr ++) = std::make_pair(5, 62);
+		*(ptr ++) = std::make_pair(17, 11);
+		*(ptr ++) = std::make_pair(18, 12);
 	
-	sheet[61].reset(3);
+	sheet[61].reset(1);
 	sheet[61].type(1);
 	sheet[61].endings(0);
 	ptr = sheet[61].get();
-		*(ptr ++) = std::make_pair(5, 63);
-		*(ptr ++) = std::make_pair(17, 11);
-		*(ptr ++) = std::make_pair(18, 12);
+		*(ptr ++) = std::make_pair(6, 63);
 	
 	sheet[62].reset(1);
 	sheet[62].type(1);
@@ -1105,31 +1121,25 @@ void init_syntax_machine(lalr1machine& lrm)
 	sheet[63].type(1);
 	sheet[63].endings(0);
 	ptr = sheet[63].get();
-		*(ptr ++) = std::make_pair(6, 65);
+		*(ptr ++) = std::make_pair(25, 65);
 	
 	sheet[64].reset(1);
 	sheet[64].type(1);
 	sheet[64].endings(0);
 	ptr = sheet[64].get();
-		*(ptr ++) = std::make_pair(24, 66);
+		*(ptr ++) = std::make_pair(25, 66);
 	
 	sheet[65].reset(1);
 	sheet[65].type(1);
 	sheet[65].endings(0);
 	ptr = sheet[65].get();
-		*(ptr ++) = std::make_pair(24, 67);
+		*(ptr ++) = std::make_pair(31, -16);
 	
 	sheet[66].reset(1);
 	sheet[66].type(1);
 	sheet[66].endings(0);
 	ptr = sheet[66].get();
-		*(ptr ++) = std::make_pair(30, -16);
-	
-	sheet[67].reset(1);
-	sheet[67].type(1);
-	sheet[67].endings(0);
-	ptr = sheet[67].get();
-		*(ptr ++) = std::make_pair(21, -28);
+		*(ptr ++) = std::make_pair(22, -28);
 	
 	m.sstate() = 1;
 	m.swap(lrm);
@@ -1303,6 +1313,12 @@ struct production_func_26 : public ifunction
 	}
 };
 struct production_func_27 : public ifunction
+{
+	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
+	{
+	}
+};
+struct production_func_28 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{

@@ -52,7 +52,7 @@ lrmachine::machine_meta* lrmachine::reduce(int32 pid)
 	const production& p = pg_->productions().at(pid);
 	
     const symholder& sholder = pg_->symbols();
-	if(pstack_.size() < p.right_size() + 1) fire("invalidate analysis stack!");
+	if((int32)pstack_.size() < p.right_size() + 1) fire("invalidate analysis stack!");
     kog::smart_vector<machine_meta*> rights(p.right_size());
 	for(int32 i = p.right_size(); i; -- i)
 	{
@@ -66,7 +66,15 @@ lrmachine::machine_meta* lrmachine::reduce(int32 pid)
     
     machine_meta* pmeta = new_meta(p.left());
     pmeta->sid = p.left();
-	return _reduce(pid, rights, pmeta);
+	machine_meta* presult = _reduce(pid, rights, pmeta);
+
+    for (size_t i = 0; i < rights.size(); ++ i)
+    {
+        delete rights[i];
+        rights[i] = NULL;
+    }
+    rights.reset(0);
+    return presult;
 }
 
 lrmachine::machine_meta* lrmachine::_reduce(int32 pid, const kog::smart_vector<machine_meta*>& rights, machine_meta* result)

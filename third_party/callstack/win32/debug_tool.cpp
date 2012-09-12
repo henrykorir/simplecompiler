@@ -28,6 +28,7 @@ namespace dbsoft
 
 		public:
 			callstack_Imp();
+			~callstack_Imp() {}
 
 		public:
 			const_iterator begin() const
@@ -295,6 +296,15 @@ FakeFuncCall:
 	
 	callstack::callstack():m_spImp( new detail::callstack_Imp() )
 	{		
+	}
+
+	callstack::~callstack()
+	{
+		if (m_spImp != NULL)
+		{
+			delete m_spImp;
+			m_spImp = NULL;
+		}
 	}
 
 	callstack::const_iterator callstack::begin() const

@@ -3,10 +3,7 @@
 import os
 Import('aEnv')
 
-if os.sys.platform.lower() == 'win32':
-    incboost = r'D:\Program Files\boost'
-else:
-    incboost = ''
+incboost = aEnv['boost_inc']
 aEnv.Library(target = 'unittest', source = ['unittest.cpp'], CPPPATH=['../include'])
 
 
@@ -14,21 +11,24 @@ UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace']
 UTinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm', incboost]
 UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace']
 
-aEnv.Program(target= 'docsplit', source = ['splitwords.cpp', 'usefullmachines.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
-aEnv.Program(target= 'gensyntax', source = ['tinygrammartest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
-aEnv.Program(target= 'regex2nfa', source = ['regexnfatest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
-aEnv.Program(target= 'basicga', source = ['basicalgorithmtest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
-aEnv.Program(target= 'firstfollow', source = ['firstfollowtest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
-aEnv.Program(target= 'nfa2dfa', source = ['nfa2dfatest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
-aEnv.Program(target= 'lrmachine', source = ['lrmachinetest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
 if int(ARGUMENTS.get('tinyg', 0)):
     #gfile = 'output/tinyg/tinyg.cpp'
     gfiles = ['tinyg.cpp', 'tinygprodfuncs.cpp']
     aEnv.Program(target= 'tinycompiler', source = ['tinygrammar-compiler.cpp'] + gfiles, LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+else:
+	aEnv.Program(target= 'callstack', source = ['callstacktest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+	aEnv.Program(target= 'docsplit', source = ['splitwords.cpp', 'usefullmachines.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+	aEnv.Program(target= 'gensyntax', source = ['tinygrammartest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+	aEnv.Program(target= 'regex2nfa', source = ['regexnfatest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+	aEnv.Program(target= 'basicga', source = ['basicalgorithmtest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+	aEnv.Program(target= 'firstfollow', source = ['firstfollowtest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+	aEnv.Program(target= 'nfa2dfa', source = ['nfa2dfatest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
+	aEnv.Program(target= 'lrmachine', source = ['lrmachinetest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+

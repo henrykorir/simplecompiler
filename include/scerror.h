@@ -9,6 +9,7 @@
 
 #include <basic_types.h>
 #include <stringX.h>
+#include <functionalX.h>
 #include <shared_ptr.h>
 #include "../third_party/callstack/stacktrace.h"
 
@@ -36,9 +37,10 @@ public:
 	tstring trace_message() const
 	{
 		tstring msg;
-		for (kog::callstack::trace::const_iterator iter = trace_->begin(); iter != trace_->end(); ++ iter)
+		foreach (const std::string& frame, trace_->begin(), trace_->end())
+		//for (kog::callstack::trace::const_iterator iter = ; iter != ; ++ iter)
 		{
-			msg += *iter + "\n";
+			msg += frame + "\n";
 		}
 		return msg;
 	}

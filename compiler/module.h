@@ -7,6 +7,10 @@
 #include <basic_types.h>
 #include "variable.h"
 #include "tuple.h"
+#include "scope.h"
+#include <memory>
+#include <shared_ptr.h>
+
 
 NAMESPACE_BEGIN(compile)
 NAMESPACE_BEGIN(runtime)
@@ -14,35 +18,18 @@ NAMESPACE_BEGIN(runtime)
 class module
 {
 public:
-    MEMBER_VARIABLE_GET_SET(_Str, name, name_);
-protected:
-    _Str name_;
-};
-
-class datamodule : virtual public module
-{
+	module(const _Str& name);
+	module(const _Str& name, scope* scp);
+	~module();
 public:
-	bool isexist(const _Str& name);
-    virtual variable* find(const _Str& name);
-	virtual variable* entry(const variable& v);
-protected:
-    variable* find_here(const _Str& name);
-protected:
-    std::deque<variable*> varlist_;
-};
+	MEMBER_VARIABLE_GET(const _Str&, name, name_);
+	MEMBER_VARIABLE_REF(scope*, root_scope, rootScope_.get());
+private:
+	// root scope(global scope)
+	kog::shared_ptr<scope> rootScope_;
 
-class codemodule : virtual public module
-{
-public:
-    // dst = src1 op src2
-    tuple* new_tuple(const operation* oper, const object* src1, const object* src2, const object* dst);
-
-    // dst = dst op src
-    tuple* new_tuple(const operation* oper, const object* src, const object* dst);
-public:
-    MEMBER_VARIABLE_GET(const std::deque<tuple*>&, tuples, tuples_);
-protected:
-    std::deque<tuple*> tuples_;
+	// filename of the module
+	_Str name_;
 };
 
 NAMESPACE_END(runtime);
