@@ -81,7 +81,7 @@ public:
 	// if the scope is a function, return statck size
 	// else if is class/struct, return size of its member variables
 	// else if is global scope, return size of all static data
-	MEMBER_VARIABLE_GET(size_t, bytes, bytes_);
+	MEMBER_VARIABLE_GET_SET(size_t, bytes, bytes_);
 
 	MEMBER_VARIABLE_REF(std::deque<scope*>&, children, children_);
 

@@ -18,6 +18,7 @@ public:
 	void print(module* m);
 protected:
 	void print_code(const _Str& name, text_session* ss);
+	void print_printasm();
 private:
     std::ostream* os_;
 };

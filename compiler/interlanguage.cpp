@@ -18,7 +18,8 @@ using namespace compile::runtime;
 interlanguage::interlanguage()
 : main_scope_(new slicescope())
 {
-	main_scope_->name() = "global_scope";
+	//main_scope_->name() = "global_scope";
+	main_scope_->name() = "main";
     current_scope_ = main_scope_;
     all_scopes_.push_back(current_scope_);
 	logstring("current scope(%s)", main_scope_->name().c_str());
@@ -72,11 +73,11 @@ void interlanguage::generate(const std::string& finput_name, const std::string& 
 	std::ofstream ofile(fotput_name.c_str());
 	if (!ofile) fire("can't open file: " + fotput_name);
 	asmgenerate asmg(ofile);
-	//asmg.print(&m);
+	asmg.print(&m);
 	//
-	foreach (scope* ps, all_scopes_.begin(), all_scopes_.end())
-	{
-		asmg.print(ps);
-	}
+	//foreach (scope* ps, all_scopes_.begin(), all_scopes_.end())
+	//{
+	//	asmg.print(ps);
+	//}
 	ofile.close();
 }

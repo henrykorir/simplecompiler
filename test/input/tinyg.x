@@ -15,12 +15,10 @@ float g(float x, float y)
 
 float test(int m, int n)
 {
-	int c;
-	c = f(m, n);
-	float d;
-	d = m;
 	float e;
-	e = c;
+	float d;
+	e = 1.0;
+	d = 2.0;
 	d = g(e, d);
 	return d;
 }
