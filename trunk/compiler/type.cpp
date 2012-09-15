@@ -84,6 +84,7 @@ const function_type* typesystem::new_func_type(int32 nparams, const type* params
         function_type* pft = new function_type((int32)types_.size());
         pft->return_type = return_type;
         pft->params_type.reset(nparams);
+		pft->tsize = 4;
         std::copy(params, params + nparams, pft->params_type.begin());
         pfound = pft;
     }

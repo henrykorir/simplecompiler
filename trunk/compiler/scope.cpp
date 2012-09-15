@@ -155,8 +155,8 @@ variable* scope::entry_value(const _Str& content, const type* canTypes[], int _C
 	_Str name = stringX::format("##noname_var%d$$", noname_idx_ ++);
     if (content.find('.') != _Str::npos)
     {
-        v->initv = (byte*)new double(stringX::tovalue<double>(content));
-        v->size = sizeof(double);
+        v->initv = (byte*)new float(stringX::tovalue<float>(content));
+        v->size = sizeof(float);
         var.reset(new variable(name, typesystem::instance().float_type(), this, v));
     }
     else

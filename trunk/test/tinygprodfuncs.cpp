@@ -44,12 +44,41 @@ struct prod_func4 : public ifunction
         const type* vt = as<type>(m0->content);
 		variable* var = s->entry_variable(as<word>(m1->content)->txt, vt, 0); // new variable
 		// set address of current value
-		var->more() = (void*)"4(%ebp)";
+		s->bytes() += var->vtype()->tsize;
+		const _Str& tmp = stringX::format("-%d(%%ebp)", s->bytes());
+		std::auto_ptr<char> buf(new char[tmp.size() + 1]);
+		memcpy(buf.get(), tmp.c_str(), tmp.size() + 1);
+		var->more() = (void*)buf.release();
 
         ot->content = var;
         ot->ctype = vt;
         return result;
     }
+};
+
+// Assignment -> symbol = AValue
+struct prod_func11 : public ifunction
+{
+    /*overwrite*/ virtual automachine::machine_meta* operator()(automachine::machine_meta*const* metas, int C, automachine::machine_meta* result)
+    {
+        interlanguage& iml = compiler::getiml();
+        scope* s = iml.current_scope();
+        const lalr1meta* m0 = (const lalr1meta*)(metas[0]);
+        const lalr1meta* m2 = (const lalr1meta*)(metas[2]);
+        lalr1meta* ot = (lalr1meta*)(result);
+
+		const _Str& symbol_name = as<word>(m0->content)->txt;
+		const variable* vdst = s->find(symbol_name);
+		const variable* vsrc = as<variable>(m2->content);
+		if (vdst == NULL) fire("undefined symbol " + symbol_name);
+		else if(vdst->vtype() != vsrc->vtype()) fire("can't assign a %s to %s", vsrc->vtype()->to_string().c_str(), vdst->vtype()->to_string().c_str());
+
+        operation assign_op(operations::assign);
+        s->entry_tuple(&assign_op, vsrc, NULL, vdst);
+
+		ot->content = vdst;
+		ot->ctype = vdst->vtype();
+	}
 };
 
 // Assignment -> symbol = AValue Op AValue
@@ -112,7 +141,13 @@ struct prod_func14 : public ifunction
 
         variable* v = s->entry_value(as<word>(m0->content)->txt, canTypes, 2);
 		if (NULL == v) fire("invalidate value " + as<word>(m0->content)->txt);
-		v->more() = (void*)".LC1";
+		static int ii = 2;
+
+		const _Str& tmp = stringX::format(".LC%d", ii++);
+		std::auto_ptr<char> buf(new char[tmp.size() + 1]);
+		memcpy(buf.get(), tmp.c_str(), tmp.size() + 1);
+		v->more() = (void*)buf.release();
+
         ot->content = v;
         ot->ctype = v->vtype();
 
@@ -354,6 +389,7 @@ struct prod_func28 : public ifunction
 		function_type* ft = (function_type*)fvar->vtype();
 		funcscope* ns = new funcscope(s, ft);
 		ns->name() = fvar->name();
+		ns->bytes() = 0;
 		delete fvar;
 		iml.push_scope(ns);
 
@@ -362,13 +398,18 @@ struct prod_func28 : public ifunction
 
 		kog::smart_vector<_Str>* pv = (kog::smart_vector<_Str>*)ft->more;
 
+		((variable*)ns->return_var())->more() = (void*)"8(%ebp)";
 		// entry params
+		size_t bytes = 12;
 		for(size_t i = 0; i < ft->params_type.size(); ++ i)
 		{
 			variable* v = ns->entry_variable((*pv)[i], ft->params_type[i], varscope::vparam);
-			v->more() = (void*)"-4(%ebp)";
+			const _Str& tmp = stringX::format("%d(%%ebp)", bytes);
+			std::auto_ptr<char> buf(new char[tmp.size() + 1]);
+			memcpy(buf.get(), tmp.c_str(), tmp.size() + 1);
+			v->more() = (void*)buf.release();
+			bytes += v->vtype()->tsize;
 		}
-		((variable*)ns->return_var())->more() = (void*)"4(%ebp)";
 
 		ot->content = m0->content;
 		ot->ctype = m0->ctype;
@@ -391,7 +432,7 @@ void init_production_functions(kog::smart_vector<ifunction*>& pfuncs)
     pfuncs[8] = new prod_func_default();
     pfuncs[9] = new prod_func_default();
     pfuncs[10] = new prod_func_default();
-    pfuncs[11] = new prod_func_default();
+    pfuncs[11] = new prod_func11();
     pfuncs[12] = new prod_func12();
     pfuncs[13] = new prod_func13();
     pfuncs[14] = new prod_func14();

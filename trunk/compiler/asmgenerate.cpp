@@ -18,8 +18,9 @@ void asmgenerate::print(module* m)
 {
 	logstring("asm.print(module)");
     kog::oindentstream os(*os_); 
-	os<<kog::newline<<".file "<<m->name();
+	os<<"\t.file \""<<m->name()<<"\"";
 
+	print_printasm();
 	// build refence graph
 	// not do now
 	
@@ -72,47 +73,45 @@ void asmgenerate::print(scope* ps)
     using kog::newline;
 	typedef std::pair<_Str, session*> session_map;
 	logstring("count of sessions is %d", ps->sessions().size());
-	size_t ii = 0;
 	//foreach (const session_map& si, ps->sessions().begin(), ps->sessions().end())
-	for (scope::session_map::const_iterator iter = ps->sessions().begin(); iter != ps->sessions().end(); ++ iter)
-	//while(ii == 0)
+	scope::session_map::const_iterator iter = ps->sessions().find(typeid(rodata_session).name());
+	if (iter != ps->sessions().end())
 	{
-		//if (++ii > ps->sessions().size()) break;
 		session* ss = iter->second;
-		logstring("ss%s", typeid(*ss).name());
 		_Str sname = ss->name();//iter->first;
-		//const session_map& si = *iter;
-		logstring("print session[%s]", sname.c_str());
-		if (sname == typeid(rodata_session).name())
-		{
-			//os<<newline<<".session .rodata"<<inctab;
+		logstring("print section[%s]", sname.c_str());
 
-			//const std::deque<variable*>& vars = as<rodata_session>(si.second)->variables();
-			//foreach (const variable* v, vars.begin(), vars.end())
-			//{
-			//	os<<newline<<(const char*)v->more()<<":"<<inctab
-			//		<<newline<<".byte "<<byte2str(v->initVar()->initv, v->initVar()->size)<<dectab;
-			//}
-		}
-		else if(sname == typeid(data_session).name())
+		os<<newline<<".section .rodata"<<inctab;
+		const std::deque<variable*>& vars = as<rodata_session>(ss)->variables();
+		foreach (const variable* v, vars.begin(), vars.end())
 		{
-    	//    os<<newline<<".section .data"<<inctab;
-		//	const std::deque<variable*>& vars = as<data_session>(si.second)->variables();
-		//	foreach (const variable* v, vars.begin(), vars.end())
-		//	{
-		//		os<<newline<<(const char*)v->more()<<inctab
-		//			<<newline<<".byte "<<varpos(v)<<dectab;
-		//	}
+			os<<newline<<(const char*)v->more()<<":"<<inctab
+				<<newline<<".byte "<<byte2str(v->initVar()->initv, v->initVar()->size)<<dectab;
 		}
-		else if(sname == typeid(text_session).name())
-		{
-			//print_code(ps->name(), as<text_session>(si.second));
-			print_code(ps->name(), as<text_session>(ss));
-		}
-		else
-		{
-			logstring("unknown session");
-		}
+		os<<dectab;
+	}
+
+	iter = ps->sessions().find(typeid(text_session).name());
+	if (iter != ps->sessions().end())
+	{
+		session* ss = iter->second;
+		_Str sname = ss->name();//iter->first;
+		logstring("print session[%s]", sname.c_str());
+		print_code(ps->name(), as<text_session>(ss));
+	}
+	iter = ps->sessions().find(typeid(data_session).name());
+	if (iter != ps->sessions().end())
+	{
+		session* ss = iter->second;
+		_Str sname = ss->name();//iter->first;
+		logstring("print session[%s]", sname.c_str());
+	//  os<<newline<<".section .data"<<inctab;
+	//	const std::deque<variable*>& vars = as<data_session>(si.second)->variables();
+	//	foreach (const variable* v, vars.begin(), vars.end())
+	//	{
+	//		os<<newline<<(const char*)v->more()<<inctab
+	//			<<newline<<".byte "<<varpos(v)<<dectab;
+	//	}
 	}
 
 	os<<newline;
@@ -130,14 +129,17 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
     using kog::dectab;
     using kog::newline;
 
+	static int lfb_i = 2;
 	logstring("asm.print code");
 	//os<<newline<<".section .code"
-	os<<newline<<".text"
+	os<<inctab<<newline<<".text"
 		<<newline<<".global "<<name
-		<<newline<<".type "<<name<<", @function"
-		<<newline<<name<<":"<<inctab
+		<<newline<<".type "<<name<<", @function"<<dectab
+		<<newline<<name<<":"
+		<<newline<<".LFB"<<lfb_i++<<":"<<inctab
 		<<newline<<"pushl %ebp"
-		<<newline<<"movl %esp, %ebp";
+		<<newline<<"movl %esp, %ebp"
+		<<newline<<"subl $"<<ts->env()->bytes()<<", %esp";
 	bool is_init_float = false;
     for (std::deque<tuple*>::const_iterator iter = ts->tuples().begin(); iter != ts->tuples().end(); ++ iter)
     {
@@ -145,6 +147,21 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
         four_tuple* pt = (four_tuple*)(*iter);
         switch (pt->oper)
         {
+		case assign:
+			logstring("asm.print code: assign");
+			if (pt->src1->vtype()->tsize != 4 || pt->dst->vtype()->tsize != 4)
+				fire("only support size 4 assign");
+			if (((const char*)pt->src1->more())[0] == '.')
+			{
+				os<<newline<<"movl $"<<varpos(pt->src1)<<", %eax"
+					<<newline<<"movl (%eax), %ebx"
+					<<newline<<"movl %ebx, "<<varpos(pt->dst);
+			}
+			else
+			{
+				os<<newline<<"movl "<<varpos(pt->src1)<<", "<<varpos(pt->dst);
+			}
+			break;
         case plus:
 			logstring("asm.print code: plus");
             if (pt->src1->vtype() != pt->src2->vtype())
@@ -191,7 +208,7 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
             {
                 os<<newline<<"movl "<<varpos(pt->src1)<<", %eax";
                 os<<newline<<"movl "<<varpos(pt->src2)<<", %ebx";
-                os<<newline<<"mull %eax, %ebx";
+                os<<newline<<"imul %eax, %ebx";
                 os<<newline<<"movl %ebx, "<<varpos(pt->dst);
             }
             else if(pt->src2->vtype() == typesystem::instance().float_type())
@@ -248,7 +265,7 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 				// os<<newline<<"call "<<src1->name();
 				// here src1->more: function name
 				os<<newline<<"call "<<varpos(pt->src1)
-					<<newline<<"subl $"<<ssize<<", %esp"; // pop params and return value's address
+					<<newline<<"addl $"<<ssize<<", %esp"; // pop params and return value's address
 			}
 
             break;
@@ -266,8 +283,8 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 				// using given funcscope, to find detect return value is void?
 				//  is not void, movl return value to given address
                 os<<newline<<"movl "<<varpos(pt->src1)<<", %eax"
-					<<newline<<"lea "<<varpos(return_value)<<", %ebx"
-					<<newline<<"movl %eax (%ebx)" // move to return value
+					<<newline<<"movl "<<varpos(return_value)<<", %ebx"
+					<<newline<<"movl %eax, (%ebx)" // move to return value
 					<<newline<<"leave"
                 	<<newline<<"ret";
             }
@@ -287,6 +304,7 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 					os<<newline<<"pushl "<<varpos(pt->src2)
 						<<newline<<"call print_float";
 				}
+				os<<newline<<"addl $"<<pt->src2->vtype()->tsize<<", %esp";
 			}
 			break;
         default:
@@ -294,9 +312,54 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
         }
 		logstring("finish asm.print an operation");
 	}
-	os<<newline<<dectab
-		<<std::endl;
+	os<<dectab;
 	logstring("finish asm.print scope(%s)'s code", name.c_str());
 }
 
+void asmgenerate::print_printasm()
+{
+    kog::oindentstream os(*os_); 
+    using kog::inctab;
+    using kog::dectab;
+    using kog::newline;
 
+	// print_int
+	os<<inctab<<newline<<".section .rodata"<<dectab
+		<<newline<<".LC_kog0:"<<inctab
+		<<newline<<".string \"%d\\n\""
+		<<newline<<".text "
+		<<newline<<".global print_int"
+		<<newline<<".type print_int, @function"<<dectab
+		<<newline<<"print_int:"
+		<<newline<<".LFB0:"<<inctab
+		<<newline<<"pushl %ebp"
+		<<newline<<"movl %esp, %ebp"
+		<<newline<<"movl 8(%ebp), %eax"
+		<<newline<<"pushl %eax"
+		<<newline<<"movl $.LC_kog0, %eax"
+		<<newline<<"pushl %eax"
+		<<newline<<"call printf"
+		<<newline<<"leave"
+		<<newline<<"ret"<<dectab
+		<<std::endl;
+
+	os<<inctab<<newline<<".section .rodata"<<dectab
+		<<newline<<".LC_kog1:"<<inctab
+		<<newline<<".string \"%f\\n\""
+		<<newline<<".text "
+		<<newline<<".global print_float"
+		<<newline<<".type print_float, @function"<<dectab
+		<<newline<<"print_float:"
+		<<newline<<".LFB1:"<<inctab
+		<<newline<<"pushl %ebp"
+		<<newline<<"movl %esp, %ebp"
+		<<newline<<"subl $12, %esp"
+		<<newline<<"flds 8(%ebp)"
+		<<newline<<"fstpl -8(%ebp)"
+		<<newline<<"movl $.LC_kog1, %eax"
+		<<newline<<"movl %eax, -12(%ebp)"
+		<<newline<<"call printf"
+		<<newline<<"leave"
+		<<newline<<"ret"<<dectab
+		<<std::endl;
+}
