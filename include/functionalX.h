@@ -500,6 +500,7 @@ protected:
 	_Fz _fz;
 };
 
+// new function is f: x -> fy(fx(x))
 template<typename _Fx, typename _Fy>
 composite_function_t<_Fx, _Fy> composite_function(const _Fx& fx, const _Fy& fy)
 {
@@ -628,6 +629,68 @@ std::vector<size_t> index_sort(_InIt _First, _InIt _Last, _Pr _pr)
 	}
 	return _Idx;
 }
+
+template<typename _Tx, typename _Less = std::less<_Tx> >
+struct pointer_less : public std::binary_function<const _Tx*, const _Tx*, bool>
+{
+	bool operator()(const _Tx* v1, const _Tx* v2) const
+	{
+		_Less less;
+		return less(*v1, *v2);
+	}
+};
+
+template<typename _Tx, typename _Equal = std::equal_to<_Tx> >
+struct pointer_equal : public std::binary_function<const _Tx*, const _Tx*, bool>
+{
+	bool operator()(const _Tx* v1, const _Tx* v2) const
+	{
+		_Equal eq;
+		return eq(*v1, *v2);
+	}
+};
+
+// compaire two pairs p1 < p2 ?: std::pair<_Tx, _Ty>
+template<typename _Tx, typename _Ty, 
+	typename _LessX = std::less<_Tx>, 
+	typename _LessY = std::less<_Ty> >
+struct pair_less : 
+	public std::binary_function<
+		const std::pair<_Tx, _Ty>, 
+		const std::pair<_Tx, _Ty>, bool>
+{
+	typedef std::pair<_Tx, _Ty> pair_type;
+	bool operator()(const pair_type& p1, const pair_type& p2) const
+	{
+		_LessX lx;
+		_LessY ly;
+		return lx(p1.first, p2.first) ||
+			(!lx(p2.first, p1.first) && ly(p1.second, p2.second));
+	}
+};
+
+// compaire two pairs p1 == p2 ? : std::pair<_Tx, _Ty>
+template<typename _Tx, typename _Ty, 
+	typename _EqualX = std::equal_to<_Tx>, 
+	typename _EqualY = std::equal_to<_Ty> >
+struct pair_equal : 
+	public std::binary_function<
+		const std::pair<_Tx, _Ty>, 
+		const std::pair<_Tx, _Ty>, bool>
+{
+	typedef std::pair<_Tx, _Ty> pair_type;
+	bool operator()(const pair_type& p1, const pair_type& p2) const
+	{
+		_EqualX eqx;
+		_EqualY eqy;
+		return eqx(p1.first, p2.first) && eqy(p1.second, p2.second);
+	}
+};
+
+//template<typename _PairType,
+//	typename _LessX = std::less<typename _PairType::first_type>,
+//	typename _LessY = std::less<typename _PairType::second_type> >
+//struct pair_less<typename _PairType::first_type, typename _PairType::second_type, _LessX, _LessY>;
 
 // help class
 template<size_t _Iter_size>

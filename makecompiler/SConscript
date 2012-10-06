@@ -2,8 +2,8 @@
 
 Import('aEnv')
 
-cppfiles = ['gensyntax.cpp', 'compilermake.cpp']
-inc = ['../include', '../syntax', '../galgorithm']
+cppfiles = ['gensyntax.cpp', 'compilermake.cpp', 'compilersyntax.cpp']
+inc = ['../include', '../syntax', '../galgorithm', '../third_party']
 usedlib = ['ga', 'syntax']
 usedlibpath = ['../syntax', '../galgorithm']
 

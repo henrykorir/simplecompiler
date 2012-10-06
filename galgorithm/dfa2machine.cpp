@@ -2,6 +2,7 @@
 #include <deque>
 #include <scerror.h>
 #include <stringX.h>
+#include <logger.h>
 
 using namespace compile;
 using namespace compile::ga;
@@ -11,12 +12,9 @@ void dfa2machine::operator()(const tinygrammar& tig, automachine& mot)
 	// make sure tig is dfa grammar
 	make_sure_dfa(tig);
 
-	const tinygrammar::vecprods& prods = tig.productions();
-	const symholder& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
 
-//	const int32 scount = std::count_if(sholder.begin(), sholder.end(), 
-//			kog::composite_function(kog::mem_value(&symbol::sid), 
-//				std::bind2nd(std::equal_to<int8>(), int8(0))));
 	kog::smart_vector<int32> ms(sholder.size(), -1);
 	int32 scount = 0;
 	for(size_t i = 0; i < sholder.size(); ++ i) // j=0: the start state, j=1: the end state
@@ -63,6 +61,23 @@ void dfa2machine::operator()(const tinygrammar& tig, automachine& mot)
 	mtmp.sstate() = ms[tig.starts()];
 	mot.swap(mtmp);
 	mot.init();
+
+	// debug output
+	logstring("generate machine result");
+	logstring("start is %d", mot.sstate());
+	std::ostream& os = kog::loggermanager::instance().get_logger().getos();
+	size_t ir = 0;
+	foreach (const automachine::sheetrow& r, mot.sheet().begin(), mot.sheet().end())
+	{
+		os<<stringX::format("row[%d] %s \n\t", ir++, r.endings() ? "ending" : "");
+		foreach (const automachine::gotoitem& it, r.begin(), r.end())
+		{
+			if (std::isprint(it.first, std::locale("")))
+				os<<stringX::format("('%c',%d) ", (char)it.first, it.second);
+			else os<<stringX::format("(%d,%d) ", it.first, it.second);
+		}
+		os<<std::endl;
+	}
 }
 
 void dfa2machine::make_sure_dfa(const tinygrammar& tig) const
@@ -70,8 +85,8 @@ void dfa2machine::make_sure_dfa(const tinygrammar& tig) const
 // make sure the input grammar is dfa and eplison is not in the grammar, and there is no single production
 	if(tig.endings() == -1) fire("dfa2m, input grammar's ending symbol can't be -1");
 	if(tig.eplisons() != -1) fire("dfa2m, input grammar can't contain eplison!");
-	const tinygrammar::vecprods& pholder = tig.productions();
-	const symholder& sholder = tig.symbols();
+	const prodholder_proxy& pholder = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
 	for(size_t i = 0; i < pholder.size(); ++ i)
 	{
 		const production& p = pholder[i];

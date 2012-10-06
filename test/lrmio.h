@@ -34,8 +34,8 @@ public:
 
 	std::ostream& output_state(std::ostream& os, const compile::lrmachine& m)
 	{
-		const compile::symholder& sholder = m.tinyg().symbols();
-		const compile::tinygrammar::vecprods& pholder = m.tinyg().productions();
+		const compile::symholder_proxy& sholder = m.tinyg().symbols();
+		const compile::prodholder_proxy& pholder = m.tinyg().productions();
 
 		const compile::automachine::sparsesheet& sheet = m.sheet();
 		for (size_t i = 0; i < sheet.size(); ++ i)
@@ -50,7 +50,7 @@ public:
 		
 				os<<sholder[p.left()].name<<" -> ";
 				
-				for(int32 j = 0; j < p.right_size(); ++ j)
+				for(sc::int32 j = 0; j < p.right_size(); ++ j)
 				{
 					if(dot == j) os<<".";
 					os<<sholder[p[j]].name<<" ";
@@ -64,7 +64,7 @@ public:
 
 	std::ostream& output_table(std::ostream& os, const compile::lrmachine& m)
 	{
-		const compile::symholder& sholder = m.tinyg().symbols();
+		const compile::symholder_proxy& sholder = m.tinyg().symbols();
 		const compile::automachine::sparsesheet& sheet = m.sheet();
 		for (size_t i = 0; i < sheet.size(); ++ i)
 		{

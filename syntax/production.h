@@ -13,13 +13,14 @@ NAMESPACE_BEGIN(compile)
 
 class production
 {
+	friend class tinygrammar;
 public:
 	typedef kog::smart_vector<int32> right_array;
 public:
 	production();
-	production(const symholder& syms);
+	production(const symholder_proxy& syms);
 	production(int32 L, const int32* Rs, int32 N);
-	production(const symholder& syms, int32 L, const int32* Rs, int32 N);
+	production(const symholder_proxy& syms, int32 L, const int32* Rs, int32 N);
 public:
 	MEMBER_VARIABLE_GET_SET(int32, left, L_);
 	MEMBER_VARIABLE_GET(int32, right_size, Rs_.size());
@@ -28,10 +29,13 @@ public:
     MEMBER_VARIABLE_GET_SET(_Str, func, func_);
 public:
 	void reset_right(const int32* Rs, int N);
+
+	// convert production to string
+	tstring to_string() const;
 public:
 	void swap(production& other);
 private:
-	const symholder* holder_;
+	symholder_proxy holder_;
 	int32 L_;
 	right_array Rs_;
     _Str func_;
@@ -125,6 +129,9 @@ typedef pleft_cmp<std::less<int32> > pleft_less;
 typedef pfirstright_cmp<std::less<int32> > pfirstright_less;
 //typedef p_cmp<std::less<int32>, std::logical_or<bool> > p_less;
 typedef p_cmp<std::equal_to<int32>, std::logical_and<bool> > p_equal;
+
+typedef std::vector<production> production_holder;
+typedef kog::smart_vector<production> prodholder_proxy;
 
 NAMESPACE_END(compile)
 #endif

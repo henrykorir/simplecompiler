@@ -37,10 +37,11 @@ public:
 			std::getline(is, line);
 			line = stringX::trim(line);
 			if(line.empty()) continue;
-			std::string::size_type pos = line.find(':');
 			
-			if(pos != std::string::npos)
+			
+			if(is_new_grammar_start(line))
 			{
+				std::string::size_type pos = line.find(':');
 				std::string::size_type pos2 = line.find(',', pos);
 				std::string p1 = stringX::trim(line.substr(0, pos));
 				std::string p2;
@@ -72,7 +73,15 @@ public:
 		}
 		return *this;
 	}
-
+private:
+	bool is_new_grammar_start(const std::string& line)
+	{
+		if (std::count(line.begin(), line.end(), ':') != 1) return false;
+		std::string::size_type pos = line.find(':');
+		if (stringX::tolower(stringX::trim(line.substr(0, pos))) == "grammar")
+			return true;
+		return false;
+	}
 private:
 	void read_grammar(std::istream& is, compile::tinygrammar& g, const std::string& start, const std::string& eplison, const std::string& ending) const
 	{
@@ -90,9 +99,23 @@ private:
 			std::getline(is, line);
 			line = stringX::trim(line);
 			if(line.empty()) break;
+			else if (line[0] == '#') continue;
 			std::string::size_type pos = line.find("->");
-			if(pos == std::string::npos) throw std::runtime_error("invalidate production: " + line);
-			
+			if(pos == std::string::npos)
+			{
+				pos = line.find(':');
+				if (pos != std::string::npos)
+				{
+					std::string p1, p2;
+					p1 = stringX::tolower(stringX::trim(line.substr(0, pos)));
+					//if (p1 == "")
+				}
+				else
+				{
+					throw std::runtime_error("invalidate production: " + line);
+				}
+			}
+
 			int32 L = finds(bufs, slist, stringX::trim(line.substr(0, pos)));
 			std::vector<std::string> rightstr = stringX::split(line.substr(pos + 2), std::string(" "), true);
 			kog::smart_vector<int32> right(rightstr.size());
@@ -162,19 +185,20 @@ public:
 	gwriter& operator<<(const compile::tinygrammar& tg)
 	{
 		using namespace compile;
-		const tinygrammar::vecprods& prods = tg.productions();
-		const symholder& sholder = tg.symbols();
+		const prodholder_proxy& prods = tg.productions();
+		const symholder_proxy& sholder = tg.symbols();
 		os_<<"grammar:"<<sholder[tg.starts()].name<<"\n";
 		for(size_t i = 0; i < prods.size(); ++ i)
 		{
 			const production& p = prods[i];
 			os_<<sholder.at(p.left()).name<<" -> ";
 			os_<<sholder.at(p[0]).name;
-			for(int32  j = 1; j < p.right_size(); ++ j)
+			for(int32 j = 1; j < p.right_size(); ++ j)
 			{
 				os_<<' '<<sholder.at(p[j]).name;
 			}
-			os_<<"\n";
+			//os_<<"\n";
+			os_<<std::endl;
 		}
 		return *this;
 	}

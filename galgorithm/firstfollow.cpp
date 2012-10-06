@@ -13,8 +13,8 @@ using namespace compile::ga;
 
 void firstset::operator()(const tinygrammar& tig, vecintset& sets)
 {
-	const symholder& sholder = tig.symbols();
-	const tinygrammar::vecprods& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
 
 	const size_t M = prods.size();
 	const size_t N = sholder.size();
@@ -26,7 +26,7 @@ void firstset::operator()(const tinygrammar& tig, vecintset& sets)
 
 	size_t idxEmpty = -5;
 	try{
-		idxEmpty = sholder.index("");
+		idxEmpty = tig.index("");
 	}catch(...){
 	}
 	for(size_t i = 0; i != N; ++ i)
@@ -121,8 +121,8 @@ void firstset::operator()(const tinygrammar& tig, vecintset& sets)
 void followset::operator()(const tinygrammar& tig, const vecintset& FirstSets, vecintset& FollowSets)
 {
 	typedef std::vector<std::list<size_t> > UIntListVector; 
-	const symholder& sholder = tig.symbols();
-	const tinygrammar::vecprods& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
 	const size_t M = prods.size();
 	const size_t N = sholder.size();
 
@@ -131,7 +131,7 @@ void followset::operator()(const tinygrammar& tig, const vecintset& FirstSets, v
 	std::vector<int> IsProdUsed(M);
 	std::vector<int> IsTerminate(N);
 
-	size_t idxEmpty = sholder.index("");
+	size_t idxEmpty = tig.index("");
 	size_t idxStart = tig.starts();
 	int32 idxEnd = tig.endings();
 	for(size_t i = 0; i != N; ++ i)

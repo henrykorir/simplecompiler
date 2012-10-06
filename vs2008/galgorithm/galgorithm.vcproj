@@ -141,6 +141,10 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{00A0D4E1-16FC-46FE-995B-58F930515202}"
+			RelativePathToProject=".\syntax\syntax.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -150,6 +154,10 @@
 			>
 			<File
 				RelativePath="..\..\galgorithm\basicalgorithms.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\galgorithm\combinemachines.cpp"
 				>
 			</File>
 			<File
@@ -184,6 +192,10 @@
 			>
 			<File
 				RelativePath="..\..\galgorithm\basicalgorithms.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\galgorithm\combinemachines.h"
 				>
 			</File>
 			<File

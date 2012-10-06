@@ -6,6 +6,7 @@
 
 #include <macros.h>
 #include <arrayX.h>
+#include <functionalX.h>
 #include "production.h"
 #include "symbol.h"
 #include "automachine.h"
@@ -18,43 +19,58 @@ class tinygrammar
 {
 	friend class syntaxgenerator;
 public:
-	typedef kog::smart_vector<production> vecprods;
+	//typedef std::vector<production> production_holder;
+	//typedef kog::smart_vector<production> prodholder_proxy;
+	//typedef std::vector<symbol> symbol_holder;
+	//typedef kog::smart_vector<symbol> symholder_proxy;
+	typedef std::map<tstring, int32> symbol_table;
 public:
 	tinygrammar();
 	template<typename _Iter_Sym, typename _Iter_Prod>
 	tinygrammar(_Iter_Sym _First_Sym, _Iter_Sym _Last_Sym, _Iter_Prod _First_Prod, _Iter_Prod _Last_Prod, int32 _Start, int32 _Eplison = -1, int32 _Ending = -1)
-	: symbols_(_First_Sym, _Last_Sym)
-	, productions_(_First_Prod, _Last_Prod)
-	, start_symbol_(_Start)
-	, eplison_symbol_(_Eplison)
-	, ending_symbol_(_Ending)
+		: symbols_(_First_Sym, _Last_Sym)
+		, productions_(_First_Prod, _Last_Prod)
+		, start_symbol_(_Start)
+		, eplison_symbol_(_Eplison)
+		, ending_symbol_(_Ending)
 	{
-		symbols_.make_index();
+		reset_symbol_string();
+		make_index();
 	}
 	tinygrammar(const tinygrammar& other);
 	virtual ~tinygrammar();
 public:
-	MEMBER_VARIABLE_GET_SET(symholder, symbols, symbols_);
-	MEMBER_VARIABLE_GET_SET(vecprods, productions, productions_);
-	MEMBER_VARIABLE_GET_SET(int32, starts, start_symbol_);
-	MEMBER_VARIABLE_GET_SET(int32, eplisons, eplison_symbol_);
-	MEMBER_VARIABLE_GET_SET(int32, endings, ending_symbol_);
+	int32 index(const tstring& name) const;
+public:
+	symholder_proxy symbols() const;
+	prodholder_proxy productions() const;
+	MEMBER_VARIABLE_GET(int32, starts, start_symbol_);
+	MEMBER_VARIABLE_GET(int32, eplisons, eplison_symbol_);
+	MEMBER_VARIABLE_GET(int32, endings, ending_symbol_);
+	MEMBER_VARIABLE_GET(int32, anys, any_symbol_);
 public:
 	void swap(tinygrammar& other) throw();
 protected:
-	vecprods productions_; // productions
-	symholder symbols_; // all symbols
+	void make_index();
+private:
+	void reset_symbol_string();
+protected:
+	static std::allocator<tchar> alloc_;
+	production_holder productions_; // productions
+	symbol_table nameIndexer_; // indexer
+	symbol_holder symbols_; // all symbols
 	int32 start_symbol_; // start symbol sid
 	int32 eplison_symbol_; // eplison symbol sid: -1 not in grammar
 	int32 ending_symbol_; // ending symbol sid: -1 no
+	int32 any_symbol_; // any(.) symbol's sid: -1 no
 };
 
-class grammar : protected tinygrammar
+class grammar : public tinygrammar
 {
 	friend class syntaxgenerator;
 public:
-	typedef kog::smart_vector<std::pair<tstring, int32> > vecsmacs; // first: symbol.sid, second: regex string
-	typedef kog::smart_vector<std::pair<tstring, int32> > veckeywords;
+	typedef std::vector<kog::triple<tstring, int32, bool> > vecsmacs; // first: symbol.sid, second: regex string, third: is_direct?
+	typedef std::vector<std::pair<tstring, int32> > veckeywords;
 public:
 	grammar();
 	explicit grammar(const tinygrammar& atinyG);
@@ -69,6 +85,11 @@ public:
 		smac = 3,	// symbol match state machine
 		other_sym
 	};
+public:
+	MEMBER_VARIABLE_GET/*_SET*/(int32, starts, start_symbol_);
+	MEMBER_VARIABLE_GET/*_SET*/(int32, eplisons, eplison_symbol_);
+	MEMBER_VARIABLE_GET/*_SET*/(int32, endings, ending_symbol_);
+	MEMBER_VARIABLE_GET(const tstring&, whitespaces, whitespaces_);
 public:
 	const tinygrammar& gettinyg() const
 	{
@@ -87,4 +108,5 @@ protected:
 };
 
 NAMESPACE_END(compile)
+
 #endif

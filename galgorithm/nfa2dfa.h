@@ -16,10 +16,13 @@ NAMESPACE_BEGIN(ga)
 class nfa2dfa : public grammar_algorithm
 {
 public:
+	// because this algorithm will move all terminate symbol before all non-terminate symbol
+	// terminate symbol's sid will changed.
+	// so, please let all termimate's(exclude eplison, it will remove by algorithm) sid is less than non-terminate symbol
 	nfa2dfa(const tinygrammar& gin, tinygrammar& gout)
-	: grammar_algorithm("nfa2dfa")
-	, gin_(&gin)
-	, got_(&gout)
+		: grammar_algorithm("nfa2dfa")
+		, gin_(&gin)
+		, got_(&gout)
 	{}
 
 public:

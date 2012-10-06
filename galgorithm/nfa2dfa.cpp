@@ -22,13 +22,13 @@ using namespace compile::ga;
 
 void nfa2dfa::make_sure_rg(const tinygrammar& tig)
 {
-	const tinygrammar::vecprods& prods = tig.productions();
-	const symholder sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
 
 	for(size_t i = 0; i < prods.size(); ++ i)
 	{
 		const production& p = prods[i];
-		if(p.right_size() != 1 && p.right_size() != 2)
+		if(!(p.right_size() == 1 || p.right_size() == 2))
 			fire("not a left grammar!");
 		else if(p.right_size() == 2 && !(sholder[p[0]].ist && !sholder[p[1]].ist))
 			fire("not a left grammar!");
@@ -41,7 +41,7 @@ void nfa2dfa::operator()(const tinygrammar& minput, tinygrammar& motput)
 	tinygrammar tg1, tg2;
 	todfa(minput, tg1);
 #ifdef DEBUG_OUTPUT
-	logstring("\n[nfa2dfa] \n");
+	logstring("[nfa2dfa] temporary result, dfa");
 	gwriter gw(kog::loggermanager::instance().get_logger().getos());
 	gw<<tg1;
 #endif
@@ -54,12 +54,13 @@ void nfa2dfa::operator()(const tinygrammar& minput, tinygrammar& motput)
 void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 {
 	/// get e-closure
-	const tinygrammar::vecprods& prods = tig.productions();
-	const symholder& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
 
 	kog::smart_vector<int32> ist(sholder.size());
 	const int32 virtual_ending = sholder.size();
 	kog::smart_vector<std::set<int32> > eClosures(sholder.size() + 1);
+	// init eclosure, e-closure(i) = {i}, i is non-terminate
 	for (size_t i = 0; i < sholder.size(); ++ i) 
 		if(!(ist[i] = sholder[i].ist)) eClosures[i].insert(i);
 	kog::smart_vector<const production*> plist;
@@ -68,37 +69,49 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 	// sort by production left
 	kog::depointer_t<const production> dpp;
 	std::sort(plist.begin(), plist.end(), kog::composite_function(dpp, dpp, pleft_less()));
+	// indexer in production list of left non-terminate
+	//  ntpi[i] is first production: symbol[i] -> ...
 	kog::smart_vector<int32> ntpi(sholder.size(), -1);
 	for(size_t i = 0; i < plist.size(); ++ i)
 		if(ntpi[plist[i]->left()] == -1) ntpi[plist[i]->left()] = i;
 	// e-closure
-	kog::smart_vector<int32> updated(sholder.size(), 1);
-	while(std::find(updated.begin(), updated.end(), 1) != updated.end())
+	kog::smart_vector<int32> updated(sholder.size(), 1); // mark who is updated
+	while(std::find(updated.begin(), updated.end(), 1) != updated.end()) // until don't update
 	{
-		kog::smart_vector<int32> tmpv(updated.size(), 0);
+		kog::smart_vector<int32> tmpv(updated.size(), 0); // buffer, switch with updated
 		for(size_t i = 0; i < prods.size(); ++ i)
 		{
 			const int32 l = prods[i].left();
 			const int32 r0 = prods[i].right().at(0);
 			int osize = eClosures[l].size();
-			if(ist[r0] && r0 != tig.eplisons() && r0 != tig.endings()) continue;
-			else if(r0 == tig.endings() && prods[i].right_size() == 1)
+			if(ist[r0] && r0 != tig.eplisons() && r0 != tig.endings()) continue; // normal teriminate
+			else if(r0 == tig.endings() && prods[i].right_size() == 1) // ending 
 				eClosures[l].insert(virtual_ending);
-			else if(r0 == tig.eplisons())
+			else if(r0 == tig.eplisons()) // A -> eplision .
 			{
 				if(prods[i].right_size() == 1) eClosures[l].insert(virtual_ending);
-				else if(updated[prods[i].right()[1]])
+				else if (ist[prods[i].right()[1]]) fire("A -> eplision a");
+				else if (updated[prods[i].right()[1]])
 				{
+					// combine e-closure(l) and e-closure(r1)
+					//   e-closure(l) += e-closure(r1)
 					int32 r1 = prods[i].right()[1];
 					eClosures[l].insert(eClosures[r1].begin(), eClosures[r1].end());
 				}
 			}
-			else if(updated[r0]) eClosures[l].insert(eClosures[r0].begin(), eClosures[r0].end());
-			tmpv[l] = eClosures[l].size() != osize;
+			else if(updated[r0]) 
+			{
+				// A -> B, don't need check B is terminate, because eClosures[terminate] is empty
+				//   eClosures[l] += eClosures[r0]
+				eClosures[l].insert(eClosures[r0].begin(), eClosures[r0].end());
+			}
+			tmpv[l] |= eClosures[l].size() != osize; // is updated?
 		}
+		// copy all
 		updated.swap(tmpv);
 	}
 
+	// reorder symbol's index, move all terminate symbol to front and delete eplison
 	std::deque<symbol> slist;
 	kog::smart_vector<int32> sidmap(sholder.size(), -1);
 	for(size_t i = 0, j = 0; i < sholder.size(); ++ i)
@@ -107,9 +120,12 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		{
 			sidmap[i] = j ++;
 			slist.push_back(sholder[i]);
-			slist.back().sid = sidmap[i];
+			slist.back().sid = sidmap[i]; // update sid
 		}
 	}
+	
+	// if original grammar has ending symbol, use it as the ending symbol of new grammar
+	// if not, create a new symbol as ending symbol
 	const char ending_sym_buffer[2] = {-1, '\0'};
 	const int32 endings = tig.endings() != -1 ? sidmap[tig.endings()] : (int32)slist.size();
 	if(tig.endings() == -1)
@@ -124,12 +140,13 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		slist.push_back(asym);
 	}
 
-	const int32 first_nontsid = (int32)slist.size();
+	// create new non-terminate symbols and producitons
+	const int32 first_nontsid = (int32)slist.size(); // first non-terminate
 	std::list<std::set<int32> > newS;
 	std::list<production> newP;
 	std::queue<std::pair<int32, std::set<int32>*> > squeue;
-	newS.push_back(eClosures[tig.starts()]);
-	squeue.push(std::make_pair(first_nontsid, &newS.back()));
+	newS.push_back(eClosures[tig.starts()]); // new start symbol
+	squeue.push(std::make_pair(first_nontsid, &newS.back())); // init queue
 	while(!squeue.empty())
 	{
 		std::set<int32>* cs = squeue.front().second;
@@ -138,8 +155,9 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		std::vector<std::pair<int32, int32> > t;
 		for(std::set<int32>::const_iterator iter = cs->begin(); iter != cs->end(); ++ iter)
 		{
-			int32 x = ntpi[*iter];
+			int32 x = ntpi[*iter]; // first production start from symbol[*iter]
 			if (x == -1) fire("can't be -1");
+			// process all productions start from *iter
 			for (size_t v = x; v < plist.size() && plist[v]->left() == *iter; ++ v)
 			{
 				int32 r0 = plist[v]->right().at(0);
@@ -162,7 +180,7 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 			std::set<int32> s;
 			int32 xx = t[i].first;
 			size_t j = i;
-			while(j < t.size() && t[j].first == xx)
+			while(j < t.size() && t[j].first == xx) // newS -> xx S
 			{
 				s.insert(t[j].second);
 				++ j;
@@ -170,30 +188,41 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 			i = j;
 			// [i, j)
 			// get e-closure of the new state
-			while(true)
-			{
-				size_t osize = s.size();
+			size_t osize_S = 0;
+			do{
+				osize_S = s.size();
 				std::set<int32> tmps(s);
 				for(std::set<int32>::const_iterator iter = s.begin(); iter != s.end(); ++ iter)
 				{
 					tmps.insert(eClosures[*iter].begin(), eClosures[*iter].end());
 				}
 				tmps.swap(s);
-				if(s.find(0) != s.end()) 
-				{
-					s.erase(s.find(0));
-				}
-				if(osize == s.size()) break;
-			}
+
+				// ???? why remove symbol who's sid=0, so i comment it
+				//if(s.find(0) != s.end()) 
+				//{
+				//	s.erase(s.find(0));
+				//}
+			}while(osize_S != s.size());
 			// so we can try to create a new state or find an exist state
 			int32 fidx = (int32)std::distance(newS.begin(), std::find(newS.begin(), newS.end(), s));
 			if(fidx == newS.size()) 
 			{
-			//	std::set<int32>::iterator iters = s.find(-1);
-			//	if(iters != s.end()) s.erase(iters);
+				// create a new state
 				newS.push_back(s);
+				// new state to be expand
 				squeue.push(std::make_pair(fidx + first_nontsid, &newS.back()));
 			}
+#ifdef DEBUG_OUTPUT
+			{
+				//logstring("[nfa2dfa] new production");
+				std::ostream& os = kog::loggermanager::instance().get_logger().getos();
+				std::copy(cs->begin(), cs->end(), std::ostream_iterator<int32>(os<<"{ ", " "));
+				os<<"} -> "<<sholder[xx].name<<" { ";
+				std::copy(s.begin(), s.end(), std::ostream_iterator<int32>(os, " "));
+				os<<"}"<<std::endl;
+			}
+#endif
 			// make a new production
 			int R[2] = {sidmap[xx], fidx + first_nontsid};
 			newP.push_back(production(newL, R, 2));
@@ -204,6 +233,7 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		}
 	}
 
+	// create new non-terminate symbol
 	std::list<std::string> tmpSlist;
 	for(size_t i = 0; i < newS.size(); ++ i)
 	{
@@ -215,8 +245,8 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		slist.push_back(asym);
 	}
 
-	tinygrammar mac(slist.begin(), slist.end(), newP.begin(), newP.end(), first_nontsid);
-	mac.endings() = endings;
+	tinygrammar mac(slist.begin(), slist.end(), newP.begin(), newP.end(), 
+		first_nontsid, -1, endings);
 	mac.swap(tog);
 }
 
@@ -224,9 +254,8 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 {
 	/// mini status, input grammar must be a dfa
 	//  	because tig is dfa, so A -> a, A is an ending symbol
-	typedef tinygrammar::vecprods prodholder;
-	const symholder& sholder = tig.symbols();
-	const prodholder& pholder = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
+	const prodholder_proxy& pholder = tig.productions();
 
 	// init: two parition, {1} non-ending symbol, {0} ending-symbol
 	std::deque<std::set<int32> > pi(2);
@@ -288,9 +317,10 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 		}
 #ifdef DEBUG_OUTPUT
 		{
-			logstring("pi = { ");
+			logstring("mini_status, pi");
 			const char* sep = "";
 			std::ostream& os = kog::loggermanager::instance().get_logger().getos();
+			os<<"pi = { ";
 			for(std::deque<std::set<int32> >::const_iterator iter = pi.begin(); iter != pi.end(); ++ iter, sep = ", ")
 			{
 				std::copy(iter->begin(), iter->end(), std::ostream_iterator<int32>(os<<sep<<"{ ", " "));
@@ -307,7 +337,7 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 	// first we count how many terminate symbol
 	const int32 first_nontsid = std::count_if(sholder.begin(), sholder.end(),
 			kog::composite_function(kog::mem_value(&symbol::ist), std::bind2nd(std::not_equal_to<int8>(), int8(0))))
-		- (tig.eplisons() >= 0 && tig.eplisons() < sholder.size() ? 1 : 0); // don't count eplison
+		- ((tig.eplisons() >= 0 && tig.eplisons() < (int32)sholder.size()) ? 1 : 0); // don't count eplison
 	for(size_t i = 0, j = 0; i < sholder.size(); ++ i)
 	{
 		if(sholder[i].ist && i != tig.eplisons()) // we also don't use eplison here too
@@ -434,14 +464,16 @@ void nfa2dfa::split(const std::vector<const production*>& t, kog::smart_vector<i
 			s.resize(x + ns);
 			//bool is_ending = s[newSid].find(virtual_ending) != s[newSid].end();
 			s[newSid].clear();
+			int32 tmpSid = smap[get_r1(t[i], virtual_ending)];
 			for(size_t k = i; k < j; ++ k) // rnewSiize() - 1eset s[smap[ts[0]]]
 			{
-				if(smap[get_r1(t[k], virtual_ending)] == newSid) s[newSid].insert(t[k]->left());
+				if(smap[get_r1(t[k], virtual_ending)] == tmpSid) 
+					s[newSid].insert(t[k]->left());
 			}
 			
 			for(std::set<int32>::const_iterator iter = ts.begin(); iter != ts.end(); ++ iter)
 			{
-				if(*iter == newSid) continue;
+				if(*iter == tmpSid) continue;
 				for(size_t k = i; k < j; ++ k)
 				{
 					if(smap[get_r1(t[k], virtual_ending)] == *iter)

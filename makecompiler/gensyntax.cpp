@@ -1,4 +1,5 @@
 #include "gensyntax.h"
+#include "compilersyntax.h"
 #include <fstream>
 #include <set>
 
@@ -11,12 +12,16 @@
 #include <basicalgorithms.h>
 #include <scerror.h>
 #include <logger.h>
+#include <symbolmachine.h>
+#include <combinemachines.h>
 
 //#define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
 #include <logger.h>
 #include "../test/gio.h"
 #endif
+
+#define NEWLINE_FLUSH
 
 using namespace compile;
 using namespace compile::ga;
@@ -95,11 +100,11 @@ bool syntaxgenerator::is_token_keyword(const tchar* name) const
 
 void syntaxgenerator::print_symbols()
 {
-	const symholder& sholder = syntax_->symbols();
+	const symholder_proxy& sholder = syntax_->symbols();
 	std::ostream& os = *cppstream_;
 	static int32 v = 0;
 	tstring buf;
-	for (symholder::const_iterator iter = sholder.begin(); iter != sholder.end(); ++ iter)
+	for (symholder_proxy::const_iterator iter = sholder.begin(); iter != sholder.end(); ++ iter)
 	{
 		// system define symbol, no support now, so the name is empty
 		const tchar* name = iter->name;
@@ -134,7 +139,11 @@ public:
 	static std::ostream& newline(std::ostream& os)
 	{
 		int i = tabs;
+#ifdef NEWLINE_FLUSH
+		os<<std::endl;
+#else
 		os<<"\n";
+#endif
 		while(i-- > 0) os<<"\t";
 		return os;
 	}
@@ -175,10 +184,14 @@ void syntaxgenerator::print_includes()
 		<<newline<<"#include <type.h>"
 		<<newline<<"#include <treemaker.h>"
 		<<newline<<"#include <deque>"
+		<<newline<<"#include <lalr1machine.h>"
 		<<newline
 		<<newline<<"using namespace sc;"
 		<<newline<<"using namespace compile;"
 		<<newline<<"using namespace compile::doc;"
+		<<newline<<"using namespace compile::runtime;"
+		<<newline
+		<<newline<<"typedef lalr1machine::lalr1meta lalr1meta;"
 		<<newline;
 }
 
@@ -199,7 +212,7 @@ void syntaxgenerator::print_separators()
 	for (tstring::const_iterator iter  = syntax_->seperators_.begin(); iter != syntax_->seperators_.end(); ++ iter)
 	{
 		tstring tmp(1, *iter);
-		os<<newline<<"r->children["<<getstring(tmp, '\'')<<"]->v = "<<syntax_->gettinyg().symbols().index(tmp)<<";";
+		os<<newline<<"r->children["<<getstring(tmp, '\'')<<"]->v = "<<syntax_->gettinyg().index(tmp)<<";";
 	}
 	os<<newline<<"reset_root(r);"<<dec
 		<<newline<<"}"
@@ -255,6 +268,7 @@ void syntaxgenerator::print_printablechars()
 
 void syntaxgenerator::print_statemachines()
 {
+	logstring("[start] syntaxgenerator::print_statemachines");
 	// print some informations
 	tabident inc(tabident::inctab);
 	tabident dec(tabident::dectab);
@@ -264,13 +278,32 @@ void syntaxgenerator::print_statemachines()
 	os<<newline<<"void init_machines(std::map<std::string, machine>& machines)"
 		<<newline<<"{"<<inc;
 	
-	const symholder& sholder = syntax_->symbols();
+	const symholder_proxy& sholder = syntax_->symbols();
 	const grammar::vecsmacs& smacs = syntax_->smacs_;
+#ifdef COMBINE_REGEX_MACHINES
+	symbolmachine mout;
+	kog::smart_vector<statemachine> inputmacs(smacs.size());
+	for (size_t i = 0; i < smacs.size(); ++ i)
+	{
+		regex_str_to_machine(smacs[i].first, inputmacs);
+	}
+	kog::smart_vector<automachine*> pmacs(smacs.size());
+	for (size_t i = 0; i < smacs.size(); ++ i) pmacs[i] = &inputmacs[i];
+	combine_machines combinemacs(pmacs.get(), pmacs.size(), mout);
+	combinemacs.invoke();
+	s<<newline<<newline<<"{"<<inc
+		<<newline<<"kog::shared_ptr<automachine> ptr_m(new state_machine);"
+		<<newline<<"automachine& m = *ptr_m;";
+	print_machine(os, mout);
+	os<<newline<<"machines[\"symbol_machine\"] = machine(ptr_m, -1);"<<dec
+		<<newline<<"}";
+#else
 	for(size_t i = 0; i < smacs.size(); ++ i)
 	{
+		logstring("print regex string machine (%s)", smacs[i].first.c_str());
 		state_machine mac;
 //		state_machine::construct_fromstring(smacs[i].first, mac);
-		regex_str_to_machine(smacs[i].first, mac);
+		regex_str_to_machine(smacs[i].first, mac, smacs[i].third);
 
 		os<<newline<<newline<<"{"<<inc
 			<<newline<<"kog::shared_ptr<automachine> ptr_m(new state_machine);"
@@ -279,10 +312,12 @@ void syntaxgenerator::print_statemachines()
 		os<<newline<<"machines[\""<<sholder[smacs[i].second].name<<"\"] = machine(ptr_m, "<<smacs[i].second<<");"<<dec
 			<<newline<<"}";
 	}
+#endif
 	os<<newline<<dec
 		<<newline<<"}"
 		<<newline;
 
+	logstring("print lr machine");
 	// print lr machine
 	lrmachine lrm;
 	lranalyse lra(*syntax_, lrm);
@@ -296,6 +331,7 @@ void syntaxgenerator::print_statemachines()
 		<<newline<<dec
 		<<newline<<"}"
 		<<newline;
+	logstring("[finish] syntaxgenerator::print_statemachines");
 }
 
 void syntaxgenerator::print_machine(std::ostream& os, const compile::automachine& mac)
@@ -304,7 +340,7 @@ void syntaxgenerator::print_machine(std::ostream& os, const compile::automachine
 	tabident dec(tabident::dectab);
 	typedef std::ostream& (*pfun)(std::ostream& os);
 	pfun newline = tabident::newline;
-	const symholder& sholder = syntax_->symbols();
+	const symholder_proxy& sholder = syntax_->symbols();
 
 	// print state machines
 	
@@ -318,6 +354,7 @@ void syntaxgenerator::print_machine(std::ostream& os, const compile::automachine
 			<<newline<<"sheet["<<r<<"].reset("<<mac.sheet()[r].size()<<");"
 			<<newline<<"sheet["<<r<<"].type("<<mac.sheet()[r].type()<<");"
 			<<newline<<"sheet["<<r<<"].endings("<<mac.sheet()[r].endings()<<");"
+			<<newline<<"sheet["<<r<<"].code("<<mac.sheet()[r].code()<<");"
 			<<newline<<"ptr = sheet["<<r<<"].get();"<<inc;
 		for(state_machine::sheetrow::const_iterator iter = mac.sheet()[r].begin(); iter != mac.sheet()[r].end(); ++ iter)
 		{
@@ -329,15 +366,15 @@ void syntaxgenerator::print_machine(std::ostream& os, const compile::automachine
 		<<newline<<"m.sstate() = "<<mac.sstate()<<";";
 }
 	
-void syntaxgenerator::regex_str_to_machine(const std::string& regexstr, automachine& m)
+void syntaxgenerator::regex_str_to_machine(const std::string& regexstr, automachine& m, bool is_directly)
 {
 	grammar nfa, dfa;
-	ga::regex2nfa r2n(regexstr, nfa);
+	ga::regex2nfa r2n(regexstr, nfa, is_directly);
 	ga::nfa2dfa n2d(nfa, dfa);
 	ga::dfa2machine d2m(dfa, m);
 
 #ifdef DEBUG_OUTPUT
-	logstring("\n[syntaxgenerator::regex_str_to_machine]\n");
+	logstring("[syntaxgenerator::regex_str_to_machine]");
 	std::ostream& ofslog = kog::loggermanager::instance().get_logger().getos();
 	gwriter gofs(ofslog);
 	r2n.invoke();
@@ -380,8 +417,8 @@ void syntaxgenerator::print_grammar()
 	typedef std::ostream& (*pfun)(std::ostream& os);
 	std::ostream& os = *cppstream_;
 	pfun newline = tabident::newline;
-	const symholder& sholder = syntax_->symbols();
-	const tinygrammar::vecprods& pholder = syntax_->productions();
+	const symholder_proxy& sholder = syntax_->symbols();
+	const prodholder_proxy& pholder = syntax_->productions();
 
 	const tinygrammar& tig = syntax_->gettinyg();
 
@@ -403,10 +440,8 @@ void syntaxgenerator::print_grammar()
 			<<newline;
 	}
 	os<<dec<<newline<<"}"
-		<<newline<<"symholder tmpholder(slist.begin(), slist.end());"
-		<<newline<<"tmpholder.make_index();"
 		<<newline<<"//// create productions"
-		<<newline<<"tinygrammar::vecprods plist;"
+		<<newline<<"prodholder_proxy plist;"
 		<<newline<<"plist.reset("<<pholder.size()<<");"
 		<<newline<<"{"<<inc;
 	for (size_t i = 0; i < pholder.size(); ++ i)
@@ -425,11 +460,11 @@ void syntaxgenerator::print_grammar()
 	}
 	os<<dec<<newline<<"}"
 		<<newline
-		<<newline<<"tig.symbols().swap(tmpholder);"
-		<<newline<<"tig.productions().swap(plist);"
-		<<newline<<"tig.starts() = "<<syntax_->starts()<<";"
-		<<newline<<"tig.eplisons() = "<<syntax_->eplisons()<<";"
-		<<newline<<"tig.endings() = "<<syntax_->endings()<<";"
+		<<newline<<"tinygrammar tmptinyg(slist.begin(), slist.end(),"<<inc
+		<<newline<<"plist.begin(), plist.end(), "
+		<<newline<<syntax_->starts()<<", "
+			<<syntax_->eplisons()<<", "
+			<<syntax_->endings()<<");"<<dec
 		<<newline<<dec
 		<<newline<<"}"
 		<<newline;
@@ -437,12 +472,38 @@ void syntaxgenerator::print_grammar()
 
 void syntaxgenerator::print_productions()
 {
-	const tinygrammar::vecprods& pholder = syntax_->productions();
+	bool using_gs = dynamic_cast<const compiler_grammar*>(syntax_) != NULL;
+	const prodholder_proxy& pholder = syntax_->productions();
     function_parser fp(*cppstream_);
     for (size_t i = 0; i < pholder.size(); ++ i)
     {
-        fp(pholder[i].func(), stringX::format("production_func_%d", i));
+		if (using_gs)
+		{
+			const compiler_grammar* cg = dynamic_cast<const compiler_grammar*>(syntax_);
+			//const compiler_grammar::prodmoreinfos&
+			fp(pholder[i].to_string(), cg->prodmoreinfos()[i], stringX::format("production_func_%d", i));
+		}
+		else
+		{
+			fp(pholder[i].to_string(), pholder[i].func(), stringX::format("production_func_%d", i));
+		}
     }
+
+	// print init_production function
+	std::ostream& os = *cppstream_;
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	typedef std::ostream& (*pfun)(std::ostream& os);
+	pfun newline = tabident::newline;
+	os<<newline<<newline<<"void init_production_functions(kog::smart_vector<ifunction*>& pfuncs)"
+		<<newline<<"{"<<inc
+		<<newline<<"pfuncs.reset("<<pholder.size()<<");";
+	for (size_t i = 0; i < pholder.size(); ++ i)
+	{
+		os<<newline<<"pfuncs["<<i<<"] = new production_func_"<<i<<"();";
+	}
+	os<<newline<<dec
+		<<newline<<"}";
 }
 
 #define CONTENT_BEGIN "{"
@@ -453,22 +514,28 @@ void syntaxgenerator::print_productions()
 #define TRIPLE "triple"
 #define SEP ";"
 
-function_parser& function_parser::operator()(const _Str& func, const _Str& name)
+function_parser& function_parser::operator()(const _Str& comment, const _Str& func, const _Str& name)
 {
-
 	typedef std::ostream& (*pfun)(std::ostream& os);
     std::ostream& os = *cppstream_;
 	tabident inc(tabident::inctab);
 	tabident dec(tabident::dectab);
 	pfun newline = tabident::newline;
-    os<<newline<<"struct "<<name<<" : public ifunction"
+    os<<newline<<"//"<<comment
+		<<newline<<"struct "<<name<<" : public ifunction"
         <<newline<<"{"<<inc
         <<newline<<"/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)"
         <<newline<<"{"<<inc
-     //   <<newline<<"result->content = metas[0]->tfalg;"
-     //   <<newline<<"result->v = metas[0]->v;";
+		//<<newline<<"const lalr1meta* m0 = (const lalr1meta*)(metas[0]);"
+		//<<newline<<"lalr1meta* ot = (lalr1meta*)(result);"
+		//<<newline<<"ot->content = m0->content;"
+		//<<newline<<"ot->ctype = m0->ctype;"
+		//<<newline<<"return result;"
+        //<<newline<<"result->content = metas[0]->content;"
+        //<<newline<<"result->v = metas[0]->v;";
        ;
     
+
     size_t posb = func.find_first_of(CONTENT_BEGIN);
     size_t pose = func.find_last_of(CONTENT_END);
 
@@ -481,22 +548,36 @@ function_parser& function_parser::operator()(const _Str& func, const _Str& name)
         stringX::string_split_t<_Str::value_type> ss(func.substr(posb + 1, pose - posb - 2), ";", true);
         for (stringX::string_split_t<_Str::value_type>::const_iterator iter = ss.begin(); iter != ss.end(); ++ iter)
         {
-            /*_Str tmp = kog::stringX::trim(*iter);
-            size_t pos_equal = tmp.find('=');
-            if (pos_equal == _Str::npos)
-            {
-                
-            }
-            else
-            {
-                
-            }*/
             os<<newline<<*iter<<";";
         }
     }
 
     os<<dec<<newline<<"}"<<dec
-        <<newline<<"};";
+        <<newline<<"};\n";
+        
+    return *this;
+}
+
+function_parser& function_parser::operator()(const _Str& comment, const compiler_grammar::prodinfo_t& infos, const _Str& name)
+{
+	typedef std::ostream& (*pfun)(std::ostream& os);
+    std::ostream& os = *cppstream_;
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	pfun newline = tabident::newline;
+    os<<newline<<"//"<<comment
+		<<newline<<"struct "<<name<<" : public ifunction"
+        <<newline<<"{"<<inc
+        <<newline<<"/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)"
+        <<newline<<"{"<<inc;
+
+	foreach(const tstring& pinfo, infos.content.begin(), infos.content.end())
+	{
+		os<<newline<<pinfo<<";";
+	}
+
+    os<<dec<<newline<<"}"<<dec
+        <<newline<<"};\n";
         
     return *this;
 }

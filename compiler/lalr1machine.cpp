@@ -38,7 +38,8 @@ machine_meta* lalr1machine::_reduce(int32 pid, const kog::smart_vector<machine_m
 	}
     else if(funcList_[pid] != NULL)
     {
-		logstring("reduce product(%d)", pid);
+		prodholder_proxy pholder = tinyg().productions();
+		logstring("reduce product(%d): %s", pid, pholder.at(pid).to_string().c_str());
         (*funcList_[pid])(rights.get(), rights.size(), result);
     }
 	return result;
@@ -46,7 +47,7 @@ machine_meta* lalr1machine::_reduce(int32 pid, const kog::smart_vector<machine_m
 
 machine_meta* lalr1machine::new_meta(int32 meta)
 {
-    machine_meta* pmeta = new lalr1meta;
+	machine_meta* pmeta = alloc_.allocate(1);
     pmeta->sid = meta;
     return pmeta;
 }
@@ -54,6 +55,8 @@ machine_meta* lalr1machine::new_meta(int32 meta)
 machine_meta* lalr1machine::new_meta(const machine_meta* meta)
 {
     kog::assert::is_true(meta != NULL);
-    //kog::assert::is_true(dynamic_cast<const lalr1meta*>(meta) != NULL);
-    return new lalr1meta(*((const lalr1meta*)meta));
+
+	machine_meta* pmeta = alloc_.allocate(1);
+	*pmeta = *((const lalr1meta*)meta);
+    return pmeta;
 }

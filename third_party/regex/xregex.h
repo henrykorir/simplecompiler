@@ -45,7 +45,6 @@ public:
 public:
 	static bool is_interge(const tstring& str);
 	static bool is_id(const tstring& str);
-
 public:
 	static bool is_match(const tstring& regex_str, const tstring& content);
 	static tstring replace_all(const tstring& regex_str, 

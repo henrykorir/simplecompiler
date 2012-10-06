@@ -11,10 +11,10 @@ NAMESPACE_BEGIN(kog)
 struct assert
 {
     template<typename _Tx>
-    static void are_equal(const _Tx& v1, const _Tx& v2)
+    static void are_equal(const _Tx& expect, const _Tx& actual)
     {
 #if (defined _DEBUG) || (defined DEBUG)
-        if (v1 != v2)
+        if (!(expect == actual))
         {
             fire("not equal!");
         }
@@ -30,6 +30,9 @@ struct assert
         }
 #endif
     }
+
+	
+	
 };
 
 NAMESPACE_END(kog)

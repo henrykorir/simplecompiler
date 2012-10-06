@@ -163,6 +163,10 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{CA4EBBC9-99FD-4C99-9BF7-FE76CBCBB72F}"
+			RelativePathToProject=".\galgorithm\galgorithm.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter

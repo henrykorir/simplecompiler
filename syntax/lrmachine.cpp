@@ -51,7 +51,7 @@ lrmachine::machine_meta* lrmachine::reduce(int32 pid)
 {
 	const production& p = pg_->productions().at(pid);
 	
-    const symholder& sholder = pg_->symbols();
+    symholder_proxy sholder = pg_->symbols();
 	if((int32)pstack_.size() < p.right_size() + 1) fire("invalidate analysis stack!");
     kog::smart_vector<machine_meta*> rights(p.right_size());
 	for(int32 i = p.right_size(); i; -- i)
