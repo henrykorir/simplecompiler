@@ -11,11 +11,18 @@ UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace']
 UTinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm', incboost]
 UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace']
 
+if int(ARGUMENTS.get('parseg', 0)):
+    cppfiles = ['syntaxgeneratortest.cpp']
+    aEnv.Program(target = 'parsesyntax', source = cppfiles, LIBS = UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
+
 if int(ARGUMENTS.get('tinyg', 0)):
     #gfile = 'output/tinyg/tinyg.cpp'
     gfiles = ['tinyg.cpp', 'tinygprodfuncs.cpp']
     aEnv.Program(target= 'tinycompiler', source = ['tinygrammar-compiler.cpp'] + gfiles, LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-else:
+if int(ARGUMENTS.get('cexp', 0)):
+    #gfiles = ['tinyg.cpp', 'tinygprodfuncs.cpp']
+    pass
+if int(ARGUMENTS.get('basictest', 0)):
 	aEnv.Program(target= 'callstack', source = ['callstacktest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
 
 	aEnv.Program(target= 'docsplit', source = ['splitwords.cpp', 'usefullmachines.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)

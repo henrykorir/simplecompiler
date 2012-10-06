@@ -13,72 +13,6 @@
 
 NAMESPACE_BEGIN(kog)
 
-template<typename _Ty, size_t _Row, size_t _Col>
-struct SmartMatrix
-{
-public:
-	typedef std::size_t size_type;
-	typedef typename mpl::remove_const<_Ty>::type value_type;
-	typedef array_iterator<value_type> iterator;
-	typedef array_iterator<const value_type> const_iterator;
-	typedef std::reverse_iterator<iterator> reverse_iterator;
-	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-	typedef SmartMatrix<_Ty, _Row, _Col> _Myt;
-	typedef value_type& reference;
-	typedef const value_type& const_reference;
-	typedef _Ty* pointer;
-	typedef const _Ty* const_pointer;
-
-	typedef pointer RowVector;
-	typedef const_pointer ConstRowVector;
-
-public:
-	const static size_t Row = _Row;
-	const static size_t Column = _Col;
-	const static size_t Length = _Row * _Col;
-public:
-	SmartMatrix()
-	{}
-
-	// input from a value
-	SmartMatrix(const _Ty& val)
-	{
-		memset(_values, val, sizeof(_values));
-	}
-
-	// input from any iterator range
-	template<typename _IterIn>
-	SmartMatrix(_IterIn _First, _IterIn _Last)
-	{
-		std::copy(_First, _Last, begin());
-	}
-
-public:
-	_Ty* ptr() { return _values[0]; }
-	const _Ty* ptr() const { return _values[0]; }
-
-public:
-	iterator begin() { return iterator(_values[0], Length); }
-	iterator end() { return iterator(_values[0] + Length, Length, 0); }
-	const_iterator begin() const { return const_iterator(_values[0], Length); }
-	const_iterator end() const { return const_iterator(_values[0] + Length, Length, 0); }
-public:
-	size_t row() const { return _Row; }
-	size_t col() const { return _Col; }
-	size_t size() const {return Length; }
-public:
-	// operator[]
-	RowVector operator[](size_type idx) {return _values[idx];}
-	ConstRowVector operator[](size_type idx) const{return _values[idx];}
-
-public:
-	reference operator()(size_type r, size_type c) { return _values[r][c]; }
-	const_reference operator()(size_type r, size_type c) const { return _values[r][c]; }
-private:
-	_Ty _values[_Row][_Col];
-};
-
-
 template<typename _Ty, size_t _Length>
 struct SmartArray
 {
@@ -220,6 +154,7 @@ protected:
 				delete []values;
 			}
 			values = NULL;
+			is_auto_delete = false;
 			count = 0;
 		}
 
@@ -252,10 +187,20 @@ public:
 	}
 
 	smart_vector(const smart_vector& _Other)
-		: buf_(_Other.size() != 0 ? (new value_type[_Other.size()]) : NULL,
-			_Other.size(), true)
 	{
-		std::copy(_Other.begin(), _Other.end(), begin());
+		if (!_Other.buf_.is_auto_delete)
+		{
+			buf_.values = _Other.buf_.values;
+			buf_.count = _Other.buf_.count;
+			buf_.is_auto_delete = _Other.buf_.is_auto_delete;
+		}
+		else
+		{
+			buf_.values = _Other.buf_.count != 0 ? (new value_type[_Other.buf_.count]) : NULL;
+			buf_.count = _Other.buf_.count;
+			buf_.is_auto_delete = _Other.buf_.is_auto_delete;
+			std::copy(_Other.begin(), _Other.end(), begin());
+		}
 	}
 
 	smart_vector(pointer _Buf, std::size_t _N)
@@ -399,154 +344,6 @@ private:
 
 	block buf_;
 };
-
-template<typename _Tx>
-class smart_matrix
-{
-public:
-};
-
-//template<typename _Tx, size_t _M, size_t _N, size_t _K>
-//struct multiplies
-//	//: public std::binary_function<
-//	//	SmartMatrix<_Tx, _M, _N>, SmartMatrix<_Tx, _N, _K>,
-//	//	SmartMatrix<_Tx, _M, _K> >
-//{
-//	SmartMatrix<_Tx, _M, _K> operator()(const SmartMatrix<_Tx, _M, _N>& A, const SmartMatrix<_Tx, _N, _K>& B) const
-//	{
-//		SmartMatrix<_Tx, _M, _K> C;
-//		for(int m = 0; m < _M; ++ m)
-//		{
-//			for(int k = 0; k < _K; ++ k)
-//			{
-//				C[m][k] = 0;
-//				for(int n = 0; n < _N; ++ n)
-//				{
-//					C[m][k] += A[m][n] * B[n][k];
-//				}
-//			}
-//		}
-//		return C;
-//	}
-//};
-//
-//template<typename _Tx, size_t _M, size_t _N>
-//struct multiplies
-//	//: public std::binary_function<
-//{
-//	SmartArray<_Tx, _M> operator()(const SmartMatrix<_Tx, _M, _N>& A, const SmartArray<_Tx, _N>& b) const
-//	{
-//		SmartArray<_Tx, _M> t;
-//		for(int m = 0; m < _M; ++ m)
-//		{
-//			t[m] = 0;
-//			for(int n = 0; n < _N; ++ n)
-//			{
-//				t[m] += A[m][n] * b[n];
-//			}
-//		}
-//		return t;
-//	}
-//
-//	SmartArray<_Tx, _N> operator()(const SmartArray<_Tx, _M>& b, const SmartMatrix<_Tx, _M, _N>& A) const
-//	{
-//		SmartArray<_Tx, _N> t;
-//		for(int n = 0; n < _N; ++ n)
-//		{
-//			t[n] = 0;
-//			for(int m = 0; m < _M; ++ m)
-//			{
-//				t[n] += A[m][n] * b[m];
-//			}
-//		}
-//		return t;
-//	}
-//};
-//
-//// dot
-//template<typename _Tx, size_t _N>
-//struct multiplies
-//	//: public std::binary_function<
-//	//	SmartArray<_Tx, _N>, SmartArray<_Tx, _N>, SmartArray<_Tx, _N> >
-//{
-//	_Tx operator()(const SmartArray<_Tx, _N>& a, const SmartArray<_Tx, _N>& b) const
-//	{
-//		_Tx t = 0;
-//		for(int n = 0; n < _N; ++ n)
-//		{
-//			t += a[n] * b[n];
-//		}
-//		return t;
-//	}
-//
-//	SmartArray<_Tx, _N> operator()(const SmartArray<_Tx, _N>& v, const _Tx& a) const
-//	{
-//		SmartArray<_Tx, _N> t;
-//		std::transform(v.begin(), v.end(), t.begin(),
-//			std::bind2nd(std::multiplies<_Tx>(), a));
-//		return t;
-//	}
-//
-//	SmartArray<_Tx, _N> operator()(const _Tx& a, const SmartArray<_Tx, _N>& v) const
-//	{
-//		SmartArray<_Tx, _N> t;
-//		std::transform(v.begin(), v.end(), t.begin(),
-//			std::bind2nd(std::multiplies<_Tx>(), a));
-//		return t;
-//	}
-//}; 
-//
-//template<typename _Tx, size_t _N>
-//struct plus
-//	: public std::binary_function<SmartArray<_Tx, _N>, SmartArray<_Tx, _N>, SmartArray<_Tx, _N> >
-//{
-//	SmartArray<_Tx, _N> operator()(const SmartArray<_Tx, _N>& v1, const SmartArray<_Tx, _N>& v2) const
-//	{
-//		SmartArray<_Tx, _N> t;
-//		std::transform(v1.begin(), v1.end(), v2.begin(), t.begin(),
-//			std::plus<_Tx>());
-//		return t;
-//	}
-//};
-//
-//template<typename _Tx, size_t _M, size_t _N>
-//struct plus
-//	: public std::binary_function<SmartMatrix<_Tx, _M, _N>, SmartMatrix<_Tx, _M, _N>, SmartMatrix<_Tx, _M, _N> >
-//{
-//	SmartMatrix<_Tx, _M, _N> operator()(const SmartMatrix<_Tx, _M, _N>& m1, const SmartMatrix<_Tx, _M, _N>& m1) const
-//	{
-//		SmartArray<_Tx, _M, _N> t;
-//		std::transform(m1.begin(), m1.end(), m2.begin(), t.begin(),
-//			std::plus<_Tx>());
-//		return t;
-//	}
-//};
-//
-//template<typename _Tx, size_t _N>
-//struct minus
-//	: public std::binary_function<SmartArray<_Tx, _N>, SmartArray<_Tx, _N>, SmartArray<_Tx, _N> >
-//{
-//	SmartArray<_Tx, _N> operator()(const SmartArray<_Tx, _N>& v1, const SmartArray<_Tx, _N>& v2) const
-//	{
-//		SmartArray<_Tx, _N> t;
-//		std::transform(v1.begin(), v1.end(), v2.begin(), t.begin(),
-//			std::minus<_Tx>());
-//		return t;
-//	}
-//};
-//
-//template<typename _Tx, size_t _M, size_t _N>
-//struct minus
-//	: public std::binary_function<SmartMatrix<_Tx, _M, _N>, SmartMatrix<_Tx, _M, _N>, SmartMatrix<_Tx, _M, _N> >
-//{
-//	SmartMatrix<_Tx, _M, _N> operator()(const SmartMatrix<_Tx, _M, _N>& m1, const SmartMatrix<_Tx, _M, _N>& m1) const
-//	{
-//		SmartArray<_Tx, _M, _N> t;
-//		std::transform(m1.begin(), m1.end(), m2.begin(), t.begin(),
-//			std::minus<_Tx>());
-//		return t;
-//	}
-//};
 
 NAMESPACE_END(kog)
 

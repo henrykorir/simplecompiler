@@ -19,6 +19,8 @@ using namespace compile::doc;
 	_State |= ios_base::failbit;}
 #endif
 
+//#define COMBINE_REGEX_MACHINES
+
 class iwordstream : public std::istream
 {
 	typedef std::istream _Myios;
@@ -52,9 +54,10 @@ public:
 				}
 				//else if(_Ctype_fac.is(_Ctype::space,
 				//			std::istream::traits_type::to_char_type(_Meta)))
-				else if(_Meta == ' ' || _Meta == '\t' || _Meta == '\r' || _Meta == '\n')
+				//else if(_Meta == ' ' || _Meta == '\t' || _Meta == '\r' || _Meta == '\n')
+				else if(compiler::get_whitespaces().find(_Meta) != tstring::npos)
 				{// whitespace, continue
-					//_Myios::rdbuf()->sbumpc();
+					_Myios::rdbuf()->sbumpc();
 				}
 				else
 				{
@@ -73,6 +76,24 @@ public:
 private:
 	int try_to_read_symbol(word& aword, int_type _Meta)
 	{
+#ifdef COMBINE_REGEX_MACHINES
+		symbolmachine m = compiler::get_terminates_machine();
+		m.init();
+		int_type _Meta = _Myios::rdbuf()->sgetc();
+		for(; ; _Meta = _Myios::rdbuf()->snextc())
+		{
+			automachine::machine_meta meta(_Meta);
+			if (!m.eta(&meta))
+			{
+				int32 csid = m.get_cursid();
+				if (csid != -1)
+				{
+					/*log_error*/fire("machine fail into an unknown status!");
+				}
+				return csid;
+			}
+		}
+#else
 		if(int mtype = match_machines(aword, _Meta))
 		{
 			return mtype;
@@ -92,6 +113,7 @@ private:
 			throw std::runtime_error("invalidate charactor!");
 		}
 		return -1;
+#endif
 	}
 
 	bool read_content(_Str& txt, state_machine& nm)

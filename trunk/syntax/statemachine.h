@@ -17,26 +17,8 @@ public:
 public:
 	/* overwrite */ virtual void init();
 	/* overwrite */ virtual bool eta(machine_meta* meta);
-//public:
-//	class sheetrow : public automachine::sheetrow
-//	{
-//	public:
-//		
-//	};
 public:
 	MEMBER_VARIABLE_GET_SET(tstring, str, str_);
-public:
-	// param@regexstr: easy regex string
-	// param@m: result machine
-	// 	regex 
-	// 		any char .
-	//		zero more *
-	//		one more +
-	//		braces () []
-	//		or |
-	//		inv \
-	//
-//	static state_machine& construct_fromstring(const tstring& regexstr, state_machine& m);
 public:
 	void swap(state_machine& other)
 	{

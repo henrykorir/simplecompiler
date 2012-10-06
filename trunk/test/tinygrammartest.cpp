@@ -101,8 +101,8 @@ void simplegrammar_test::init_grammar(grammar& g)
 */
 void grammar_wrapper::simple_grammar()
 {
-	symholder& syms = symbols_;
-	vecprods& prods = productions_;
+	symbol_holder& syms = symbols_;
+	production_holder& prods = productions_;
 
     std::vector<std::string> funcs;
     init_funcs(funcs);
@@ -113,7 +113,7 @@ void grammar_wrapper::simple_grammar()
 
 	const int unTermCount = 23;
 	seperators_ = "{}()=*+-/;,";
-	syms.reset(23 + seperators_.size());
+	syms.resize(23 + seperators_.size());
 	syms[0] = Asymbol("Program", 0);
 	syms[1] = Asymbol("AProgramItem", 0);
 	syms[2] = Asymbol("ValueDeclear", 0);
@@ -139,29 +139,32 @@ void grammar_wrapper::simple_grammar()
 	syms[22] = Asymbol("FunctionBegin", 0);
 	for(size_t i = 0; i < seperators_.size(); ++ i)
 		syms[i + unTermCount] = Asymbol(std::string(1, seperators_[i]), sep, tstring(1, seperators_[i]));
-	eplisons() = 19;
+	this->eplison_symbol_ = 19;
 	// reset symbols name string
 	{
-		symholder newholder(Asymbol::stringBuf.begin(), Asymbol::stringBuf.end(), 
-				syms.begin(), syms.end());
-		for(symholder::iterator iter = newholder.begin(); iter != newholder.end(); ++ iter)
+		foreach (symbol& s, syms.begin(), syms.end())
 		{
-			iter->name = newholder.getstringptr() + (int32)(iter->name);
+			if (s.name == NULL) continue;
+			size_t size_in_bytes = sizeof(tchar) * s.Lname + 1;
+			std::auto_ptr<tchar> buffer(alloc_.allocate(s.Lname + 1));
+			memcpy(buffer.get(), s.name, size_in_bytes);
+			s.name = buffer.release();
 		}
-		newholder.swap(syms);
-		syms.make_index();
+		
+		this->make_index();
 	}
 
 	// set keywords and statemachines
 	{
-		keywords_.reset(Asymbol::keywords.size());
-		smacs_.reset(Asymbol::smacs.size());
+		keywords_.resize(Asymbol::keywords.size());
+		smacs_.resize(Asymbol::smacs.size());
 		std::copy(Asymbol::keywords.begin(), Asymbol::keywords.end(), keywords_.begin());
 		std::copy(Asymbol::smacs.begin(), Asymbol::smacs.end(), smacs_.begin());
 	}
 	
-	prods.reset(29);
-	V::symbols() = &syms;
+	prods.resize(29);
+	symindex::tinyg() = this;
+	//V::tinyg() = this;
 	prods[0] = Aproduction(0, V(1), funcs[0]); // program -> aprogramitem
 	prods[1] = Aproduction(0, V(1, 0), funcs[1]); // program -> aprogramitem program
 	prods[2] = Aproduction(1, V(3), funcs[2]); // aprogramitem -> funcion
@@ -208,6 +211,6 @@ void grammar_wrapper::init_funcs(std::vector<std::string>& funcs)
 
 std::deque<tchar> Asymbol::stringBuf;
 std::deque<std::pair<tstring, int32> > Asymbol::keywords;
-std::deque<std::pair<tstring, int32> > Asymbol::smacs;
+std::deque<kog::triple<tstring, int32, bool> > Asymbol::smacs;
 
 NEW_UNITTEST(simplegrammar_test);

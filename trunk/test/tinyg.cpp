@@ -246,10 +246,9 @@ void init_grammar(tinygrammar& tig)
 		slist[32].name = ",";
 		
 	}
-	symholder tmpholder(slist.begin(), slist.end());
-	tmpholder.make_index();
+	
 	//// create productions
-	tinygrammar::vecprods plist;
+	prodholder_proxy plist;
 	plist.reset(29);
 	{
 		int32 tmpv_0[] = {1};
@@ -340,13 +339,11 @@ void init_grammar(tinygrammar& tig)
 		plist[28] = production(21, tmpv_28, sizeof(tmpv_28)/sizeof(int32));
 		
 	}
+
+	tinygrammar tmptinyg(slist.begin(), slist.end(), 
+		plist.begin(), plist.end(), 0, -1, -1);
 	
-	tig.symbols().swap(tmpholder);
-	tig.productions().swap(plist);
-	tig.starts() = 0;
-	tig.eplisons() = -1;
-	tig.endings() = -1;
-	
+	tig.swap(tmptinyg);
 }
 
 class tree_wrap : public make_tree

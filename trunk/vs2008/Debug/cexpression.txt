@@ -1,0 +1,75 @@
+grammar:ExpressionList
+ExpressionList -> Expression ;
+ExpressionList -> Expression ; ExpressionList
+Expression1 -> var
+Expression1 -> FunctionCall
+FunctionCall -> fun ( ParamList )
+FunctionCall -> fun ( )
+ParamList -> Expression15
+ParamList -> Expression15 , ParamList
+Expression1 -> ( Expression )
+Expression1 -> Expression1 [ Expression ]
+Expression1 -> Expression1 -> var
+Expression1 -> Expression1 . var
+Expression1 -> :: var
+Expression1 -> Expression1 ++
+Expression1 -> Expression1 --
+Expression2 -> Expression1
+Expression2 -> ! Expression2
+Expression2 -> ~ Expression2
+Expression2 -> ++ Expression2
+Expression2 -> -- Expression2
+Expression2 -> - Expression2
+Expression2 -> + Expression2
+Expression2 -> * Expression2
+Expression2 -> & Expression2
+Expression2 -> ( int ) Expression2
+Expression2 -> sizeof ( Expression2 )
+Expression3 -> Expression2
+Expression3 -> Expression3 ->* var
+Expression3 -> Expression3 .* var
+Expression4 -> Expression3
+Expression4 -> Expression4 * Expression3
+Expression4 -> Expression4 / Expression3
+Expression4 -> Expression4 % Expression3
+Expression5 -> Expression4
+Expression5 -> Expression5 + Expression4
+Expression5 -> Expression5 - Expression4
+Expression6 -> Expression5
+Expression6 -> Expression6 << Expression5
+Expression6 -> Expression6 >> Expression5
+Expression7 -> Expression6
+Expression7 -> Expression7 < Expression6
+Expression7 -> Expression7 > Expression6
+Expression7 -> Expression7 <= Expression6
+Expression7 -> Expression7 >= Expression6
+Expression8 -> Expression7
+Expression8 -> Expression8 == Expression7
+Expression8 -> Expression8 != Expression7
+Expression9 -> Expression8
+Expression9 -> Expression9 & Expression8
+Expression10 -> Expression9
+Expression10 -> Expression10 ^ Expression9
+Expression11 -> Expression10
+Expression11 -> Expression11 | Expression10
+Expression12 -> Expression11
+Expression12 -> Expression12 && Expression11
+Expression13 -> Expression12
+Expression13 -> Expression13 || Expression12
+Expression14 -> Expression13
+Expression14 -> Expression14 ? Expression13 : Expression13
+Expression15 -> Expression14
+Expression15 -> Expression14 = Expression15
+Expression15 -> Expression14 += Expression15
+Expression15 -> Expression14 -= Expression15
+Expression15 -> Expression14 *= Expression15
+Expression15 -> Expression14 /= Expression15
+Expression15 -> Expression14 %= Expression15
+Expression15 -> Expression14 &= Expression15
+Expression15 -> Expression14 ^= Expression15
+Expression15 -> Expression14 |= Expression15
+Expression15 -> Expression14 <<= Expression15
+Expression15 -> Expression14 >>= Expression15
+Expression16 -> Expression15
+Expression16 -> Expression16 , Expression15
+Expression -> Expression16

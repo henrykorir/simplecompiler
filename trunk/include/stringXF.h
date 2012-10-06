@@ -140,7 +140,9 @@ std::basic_string<_Elem> replacefirst(const std::basic_string<_Elem>& str, const
 }
 
 template<typename _Elem>
-std::basic_string<_Elem> replaceall(const std::basic_string<_Elem>& str, const std::basic_string<_Elem>& oldString, const std::basic_string<_Elem>& newString)
+std::basic_string<_Elem> replaceall(const std::basic_string<_Elem>& str, 
+									const std::basic_string<_Elem>& oldString, 
+									const std::basic_string<_Elem>& newString)
 {
 	size_t pos = 0;
 	std::string temp(str);
@@ -231,7 +233,7 @@ struct string_split_t
         _Const_iterator operator++(int)
         {
             _Const_iterator tmp(*this);
-            ++ tmp;
+            ++ (*this);
             return tmp;
         }
     private:
@@ -611,6 +613,37 @@ inline std::string trim(const std::string& path, int trimType = 3)
 	}
 	return path.substr(pos, len);
 }
+
+
+// check string(main) is prefix with string(pattern)
+template<typename _Char>
+bool is_prefix_with(const std::basic_string<_Char>& main, const std::basic_string<_Char>& pattern)
+{
+	if (main.size() < pattern.size()) return false;
+	size_t n = pattern.size();
+	const _Char* pm = main.c_str();
+	const _Char* pp = pattern.c_str();
+	const int* pim = (const int*)pm;
+	const int* pip = (const int*)pp;
+	size_t m = n / sizeof(int);
+	while (m && *(pim ++) == *(pip ++)) -- m;
+	if (0 == m)
+	{
+		n %= sizeof(int);
+		pm = (const _Char*)pim;
+		pp = (const _Char*)pip;
+		while(n && *(pm ++) == *(pp ++)) --n;
+	}
+	return m == 0 && n == 0;
+
+}
+
+//template<typename _Char>
+//bool prefix_with(const _Char* main, const _Char* pattern)
+//{
+//	if (main == NULL || pattern == NULL) throw std::runtime_error("invalidate param");
+//	while ()
+//}
 
 typedef stringcmp<std::less<std::string>, char> stringless; 
 NAMESPACE_END(stringX)

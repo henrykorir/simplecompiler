@@ -20,12 +20,12 @@ struct symindex
 	}
 
 	symindex(const tstring& name)
-		: idx(symbols()->index(name))
+		: idx(tinyg()->index(name))
 	{
 	}
 
 	symindex(const compile::tchar* name)
-		: idx(symbols()->index(name))
+		: idx(tinyg()->index(name))
 	{
 	}
 
@@ -34,9 +34,9 @@ struct symindex
 		return idx;
 	}
 
-	static const compile::symholder*& symbols()
+	static const compile::tinygrammar*& tinyg()
 	{
-		static const compile::symholder* __local_p = NULL;
+		static const compile::tinygrammar* __local_p = NULL;
 		return __local_p;
 	}
 
@@ -128,9 +128,9 @@ public:
 		(*this)[12] = _12.idx;
 	}
 	
-	static const compile::symholder*& symbols()
+	static compile::symholder_proxy symbols()
 	{
-		return symindex::symbols();
+		return symindex::tinyg()->symbols();
 	}
 
 };
@@ -163,7 +163,7 @@ public:
 			}
 		case compile::grammar::smac: // make state_machine
 			{
-				smacs.push_back(std::make_pair(regex_exp, sid));
+				smacs.push_back(kog::make_triple(regex_exp, sid, false));
 				break;
 			}
 		}
@@ -171,7 +171,7 @@ public:
 public:
 	static std::deque<tchar> stringBuf;
 	static std::deque<std::pair<tstring, int32> > keywords;
-	static std::deque<std::pair<tstring, int32> > smacs;
+	static std::deque<kog::triple<tstring, int32, bool> > smacs;
 };
 
 class Aproduction : public compile::production
@@ -180,12 +180,12 @@ class Aproduction : public compile::production
 	typedef compile::tstring tstring;
 public:
 	Aproduction(int32 L, const V& v)
-		: compile::production(*V::symbols(), L, v.get(), v.size())
+		: compile::production(V::symbols(), L, v.get(), v.size())
 	{
 	}
 	
     Aproduction(int32 L, const V& v, const std::string& funct)
-		: compile::production(*V::symbols(), L, v.get(), v.size())
+		: compile::production(V::symbols(), L, v.get(), v.size())
 	{
         this->func() = funct;
 	}

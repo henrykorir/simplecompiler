@@ -10,26 +10,40 @@
 NAMESPACE_BEGIN(kog)
 
 template<typename _Tx>
-struct memblock
+struct varray
 {
 public:
-	typedef _Tx value_type;
-	typedef value_type* pointer;
-	typedef const value_type* const_pointer;
-	typedef value_type& reference;
-	typedef const value_type& const_reference;
+	typedef varray<_Tx> _Myt;
+public:
+	varray(size_t _L)
+		: objects_(new _Tx(_L))
+		, length_(_L)
+		, ref_count_(once_cont())
+	{}
+	
+	varray(_Myt& other)
+		: length_(other.length_)
+		, ref_count_(inc_count(other))
+		, objects_(other.objects_)
+	{}
 
-	typedef std::size_t size_type;
-
-	//typedef stdext::checked_array_iterator<array_iterator<value_type>> iterator;
-	//typedef stdext::checked_array_iterator<array_iterator<const value_type>> const_iterator;
-	typedef array_iterator<value_type> iterator;
-	typedef array_iterator<const value_type> const_iterator;
-
-	typedef std::reverse_iterator<iterator> reverse_iterator;
-	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 private:
-	_Tx* v;
+	static int* once_count()
+	{
+		static int __once = 1;
+		return &__once;
+	}
+
+	static int* inc_count(_Myt& other)
+	{
+		if ()
+		{
+		}
+	}
+private:
+	size_t length_;
+	_Tx* objects_;
+	int* ref_count_;
 };
 
 NAMESPACE_END(kog)

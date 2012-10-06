@@ -56,7 +56,7 @@ class firstfollow_test : public sc::unittest
 		ofs.close();
 	}
 
-	void outputSets(const firstset::vecintset& sets, const symholder& sholder, std::ostream& os, const std::string& sname)
+	void outputSets(const firstset::vecintset& sets, const symholder_proxy& sholder, std::ostream& os, const std::string& sname)
 	{
 		for(size_t i = 0; i < sets.size(); ++ i)
 		{

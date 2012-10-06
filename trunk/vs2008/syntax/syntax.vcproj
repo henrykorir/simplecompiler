@@ -180,6 +180,10 @@
 				RelativePath="..\..\syntax\symbol.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\syntax\symbolmachine.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -216,6 +220,10 @@
 			</File>
 			<File
 				RelativePath="..\..\syntax\symbol.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\syntax\symbolmachine.h"
 				>
 			</File>
 			<File

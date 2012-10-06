@@ -41,7 +41,7 @@ void removenotused::rm_notoT(const tinygrammar& tig)
 	size_t nLastCount = std::count(useds.begin(), useds.end(), 1);
 	size_t nNewCount = nLastCount;
 	
-	const tinygrammar::vecprods& refProductions = tig.productions();
+	const prodholder_proxy& refProductions = tig.productions();
 	do{
 		nLastCount = nNewCount;
 		for(size_t i = 0; i != refProductions.size(); ++ i)
@@ -81,7 +81,7 @@ void removenotused::rm_Snofm(const tinygrammar& tig)
 	size_t nLastCount = std::count(useds.begin(), useds.end(), 0x03);
 	size_t nNewCount = nLastCount;
 	
-	const tinygrammar::vecprods& refProductions = tig.productions();
+	const prodholder_proxy& refProductions = tig.productions();
 	do{
 		nLastCount = nNewCount;
 		for(size_t i = 0; i != refProductions.size(); ++ i)
@@ -128,7 +128,7 @@ void removenotused::new_grammar(const tinygrammar& tig, tinygrammar& tog)
 		}
 	}
 
-	const tinygrammar::vecprods& refProductions = tig.productions();
+	const prodholder_proxy& refProductions = tig.productions();
 	std::list<production> prodList;
 	for(size_t i = 0; i < usedp.size(); ++ i)
 	{
@@ -150,7 +150,7 @@ void removenotused::new_grammar(const tinygrammar& tig, tinygrammar& tog)
 
 void removesingle::operator()(const tinygrammar& tig, tinygrammar& tog)
 {
-	const tinygrammar::vecprods& refProductions = tig.productions();
+	const prodholder_proxy& refProductions = tig.productions();
 	typedef kog::smart_vector<int32> vecint;
 
 	vecint IsTerm(tig.symbols().size());
@@ -228,8 +228,8 @@ void removesingle::remove_duplicate(std::list<production>& plist)
 
 void symbol_to_eplison::operator()(const tinygrammar& tig, vecint& istoe, int32& eid)
 {
-	const symholder& sholder = tig.symbols();
-	const tinygrammar::vecprods& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
 	
 	kog::smart_vector<int32> IsProdUsed(prods.size());
 	memset(IsProdUsed.get(), 0, IsProdUsed.size_in_bytes());
@@ -240,8 +240,8 @@ void symbol_to_eplison::operator()(const tinygrammar& tig, vecint& istoe, int32&
 	eid = -2;
 	try{
 		const tchar* eplison = ""; // eplison is empty string
-		eid = sholder.index(eplison);
-		if(eid >= 0 && eid < sholder.size())toe[eid] = 1;
+		eid = tig.index(eplison);
+		if(eid >= 0 && eid < (int32)sholder.size())toe[eid] = 1;
 	}catch(...){
 	}
 
@@ -288,14 +288,14 @@ void symbol_to_eplison::operator()(const tinygrammar& tig, vecint& istoe, int32&
 
 void eliminate_eplison::operator()(const tinygrammar& tig, tinygrammar& tog)
 {
-	const symholder& sholder = tig.symbols();
-	const tinygrammar::vecprods& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
 
 	toe.reset(sholder.size());
 	memset(toe.get(), 0, toe.size_in_bytes());
 	
 	const tchar* eplison = ""; // eplison is empty string
-	eid = sholder.index(eplison);
+	eid = tig.index(eplison);
 	// eplison in G(Vn, Vt, P, S)?
 	if(-1 == eid) 
 	{
@@ -330,7 +330,7 @@ void eliminate_eplison::findtoe(const tinygrammar& tig)
 bool eliminate_eplison::is_start_in_right(const tinygrammar& tig) const
 {
 	const int32 ssid = tig.starts();
-	const tinygrammar::vecprods& prods = tig.productions();
+	const prodholder_proxy& prods = tig.productions();
 	for(size_t i = 0; i < prods.size(); ++ i)
 	{
 		const production& p = prods[i];
@@ -346,9 +346,9 @@ bool eliminate_eplison::is_start_in_right(const tinygrammar& tig) const
 void eliminate_eplison::new_start_symbol(const tinygrammar& tig, tinygrammar& tog)
 {
 	const int32 ssid = tig.starts();
-	const symholder& sholder = tig.symbols();
+	const symholder_proxy& sholder = tig.symbols();
 	std::deque<symbol> new_symbols(sholder.begin(), sholder.end());
-	const tinygrammar::vecprods& prods = tig.productions();
+	const prodholder_proxy& prods = tig.productions();
 	symbol asym;
 	asym.Lfuncs = 0;
 	asym.ist = 0;
@@ -379,14 +379,14 @@ void eliminate_eplison::new_start_symbol(const tinygrammar& tig, tinygrammar& to
 void eliminate_eplison::rmeplison(const tinygrammar& tig, tinygrammar& tog)
 {
 	const int32 ssid = tig.starts();
-	const symholder& sholder = tig.symbols();
-	const tinygrammar::vecprods& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
 
 	kog::smart_vector<int32> oldnewmap(sholder.size());
 	if(toe[ssid]) for(size_t i = 0; i < oldnewmap.size(); ++ i) oldnewmap[i] = (int32)i;
 	else
 	{
-		for(size_t i = 0; i < eid; ++ i) oldnewmap[i] = (int32)i;
+		for(size_t i = 0; (int32)i < eid; ++ i) oldnewmap[i] = (int32)i;
 		for(size_t i = eid+1; i < sholder.size(); ++ i) oldnewmap[i] = (int32)i - 1;
 		oldnewmap[eid] = -1;
 	}

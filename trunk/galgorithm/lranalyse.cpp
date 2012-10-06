@@ -108,13 +108,13 @@ int32 AlgorithmArg::get_lrsid(const lrstate* p) const
 
 
 //std::ostream& operator<<(std::ostream& os, const lrstateitem& itm)
-std::ostream& print_item(std::ostream& os, const lrstateitem& itm, const symholder& sholder)
+std::ostream& print_item(std::ostream& os, const lrstateitem& itm, const symholder_proxy& sholder)
 {
 	const production& p = *itm.prod;
 		
 	os<<sholder[p.left()].name<<" -> ";
 	
-	for(size_t j = 0; j < p.right_size(); ++ j)
+	for(int32 j = 0; j < p.right_size(); ++ j)
 	{
 		if(itm.dot == j) os<<".";
 		os<<sholder[p[j]].name<<" ";
@@ -155,7 +155,7 @@ void lranalyse::operator()(const tinygrammar& tig, lrmachine& mot)
 					arg.sparsesheet.push_back(kog::make_triple(pRow, *iterf, nextstate(&p)));
 #ifdef DEBUG_OUTPUT
 					const char* name = *iterf < 0 ? "#" : tig.symbols()[*iterf].name;
-					logstring("(I%d, %s) -> r%d\n", arg.get_lrsid(pRow), name, arg.get_pid(&p));
+					logstring("(I%d, %s) -> r%d", arg.get_lrsid(pRow), name, arg.get_pid(&p));
 #endif
 				}
 			}
@@ -228,7 +228,7 @@ void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachin
 		for (lrstate::const_iterator iter_item = iterI->first->begin(); iter_item != iterI->first->end(); ++ iter_item)
 		{
 			parray[nc].dot = iter_item->dot;
-			parray[nc].pid = (int32)std::distance(tig.productions().get(), iter_item->prod);
+			parray[nc].pid = (int32)std::distance<const production*>(tig.productions().get(), iter_item->prod);
 			++ nc;
 		}
 		tmpm.morelist().push_back(parray);
@@ -282,7 +282,7 @@ bool AlgorithmArg::CheckLR1(const lrstate* cs) const
 		else if(issused[x]) 
 		{
 #ifdef DEBUG_OUTPUT
-			logstring("\nAlgorithmArg::CheckLR1, error lr state:\n");
+			logstring("AlgorithmArg::CheckLR1, error lr state:\n");
 			for (lrstate::const_iterator iter_item = cs->begin(); iter_item != cs->end(); ++ iter_item)
 			{
 				print_item(kog::loggermanager::instance().get_logger().getos(), *iter_item, tig->symbols());
@@ -299,9 +299,8 @@ bool AlgorithmArg::CheckLR1(const lrstate* cs) const
 void AlgorithmArg::update_closure(lrstate& li) const
 {
 	std::set<int32> cset;
-	typedef tinygrammar::vecprods prodholder;
-	const prodholder& pholder = tig->productions();
-	const symholder& sholder = tig->symbols();
+	const prodholder_proxy& pholder = tig->productions();
+	const symholder_proxy& sholder = tig->symbols();
 
 	kog::smart_vector<sfollowset*> sfollows(sholder.size(), NULL);
 	kog::smart_vector<int32> issupdated(sholder.size(), 0);
@@ -327,11 +326,11 @@ void AlgorithmArg::update_closure(lrstate& li) const
 	while(true)
 	{
 		// find first need to update
-		int32 i = 0;
+		size_t i = 0;
 		for (; i < sholder.size() && !issupdated[i]; ++ i);
 		if(i == sholder.size()) break;
 		issupdated[i] = 0;
-		for (int32 j = ntpi[i]; j < plist.size() && plist[j]->left() == i; ++ j)
+		for (size_t j = ntpi[i]; j < plist.size() && plist[j]->left() == i; ++ j)
 		{
 			const production& p = *plist[j];
 			if(!ists[p[0]])
@@ -356,10 +355,10 @@ void AlgorithmArg::update_closure(lrstate& li) const
 		}
 	}
 
-	for (int32 i = 0; i < sfollows.size(); ++ i)
+	for (size_t i = 0; i < sfollows.size(); ++ i)
 	{
 		if(sfollows[i] == NULL) continue;
-		for (int32 j = ntpi[i]; j < plist.size() && plist[j]->left() == i; ++ j)
+		for (size_t j = ntpi[i]; j < plist.size() && plist[j]->left() == i; ++ j)
 		{
 			lrstateitem itm;
 			itm.prod = plist[j];
@@ -391,19 +390,19 @@ const lrstate* AlgorithmArg::insert_new_state(const lrstate* A, int32 a, const l
 		rv = ps;
 #ifdef DEBUG_OUTPUT
 		static int32 ii = 2;
-		logstring("\nI%d\n", ii++);
+		logstring("I%d", ii++);
 		for(size_t i = 0; i != ps->size(); ++ i)
 		{
 			const lrstateitem& itm = (*ps)[i];
 			print_item(kog::loggermanager::instance().get_logger().getos(), itm, tig->symbols());
 		}
-		logstring("\n");
+		//logstring("\n");
 #endif
 	}
 	sparsesheet.push_back(kog::make_triple(A, a, ps));
 #ifdef DEBUG_OUTPUT
 	const char* name = a < 0 ? "#" : tig->symbols()[a].name;
-	logstring("(I%d, %s) -> I%d\n", get_lrsid(A), name, get_lrsid(ps));
+	logstring("(I%d, %s) -> I%d", get_lrsid(A), name, get_lrsid(ps));
 #endif
 	return rv;
 }
@@ -433,9 +432,8 @@ AlgorithmArg::AlgorithmArg(const tinygrammar& gin)
 , ntpi(gin.symbols().size(), -1)
 , tig(&gin)
 {
-	typedef tinygrammar::vecprods prodholder;
-	const symholder& sholder = tig->symbols();
-	const prodholder& pholder = tig->productions();
+	const symholder_proxy& sholder = tig->symbols();
+	const prodholder_proxy& pholder = tig->productions();
 	const size_t M = pholder.size();
 	const size_t N = sholder.size();
 
@@ -465,13 +463,13 @@ AlgorithmArg::AlgorithmArg(const tinygrammar& gin)
 	{
 		lrstate& start = *kog::iterator_next(lrsts.begin());
 		int32 start_symbol = tig->starts();
-		if(start_symbol < 0 || start_symbol >= N)
+		if(start_symbol < 0 || start_symbol >= (int32)N)
 			fire("invalidate start symbol index(%d)", start_symbol);
 //		size_t nc = std::distance(plist.begin() + npti[start_symbol], 
 //			std::find_if(plist.begin() + npti[start_symbol], plist.end(), 
 //			kog::composite_function(kog::composite_function(kog::depointer_t<const production*>(), kog::member_value(&production::left)))))
 		int32 nc = 0;
-		for (int32 i = ntpi[start_symbol]; i < plist.size() && plist[i]->left() == start_symbol; ++ i) ++ nc;
+		for (size_t i = ntpi[start_symbol]; i < plist.size() && plist[i]->left() == start_symbol; ++ i) ++ nc;
 		start.resize(nc);
 		for (int32 i = ntpi[start_symbol], j = 0; j < nc; ++ i, ++ j)
 		{

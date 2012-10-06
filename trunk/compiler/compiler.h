@@ -12,10 +12,12 @@
 #include <buckethash.h>
 #include <tree.h>
 #include <basic_types.h>
-#include "automachine.h"
-#include "statemachine.h"
-#include "lalr1machine.h"
+#include <automachine.h>
+#include <statemachine.h>
+#include <symbolmachine.h>
+
 #include "interlanguage.h"
+#include "lalr1machine.h"
 
 NAMESPACE_BEGIN(compile)
 NAMESPACE_BEGIN(doc)
@@ -56,6 +58,7 @@ public:
 	typedef compile::automachine automachine;
 	typedef compile::state_machine state_machine;
 	typedef compile::lalr1machine lalr1machine;
+	typedef compile::symbol_machine symbol_machine;
 public:
 	compiler();
     ~compiler();
@@ -65,8 +68,11 @@ public:
 	static state_machine get_number_machine();
 	static state_machine get_symbol_machine();
 	static state_machine get_string_machine();
+	static symbol_machine get_terminates_machine();
 	static int get_all_machines(std::list<compile::doc::machine>& mlist);
     static automachine& get_machine(const std::string& machine_name);
+public:
+	static const compile::tstring& get_whitespaces();
 public:
     static compile::interlanguage& getiml();
 public:
@@ -76,12 +82,12 @@ public:
 private:
 	sc::int32 is_keywords(const std::string& s) const;
 private:
-	std::map<std::string, compile::doc::machine> machines;
-	kog::buckethash<std::string, sc::int32, string_2_int> keywords;
-	kog::smart_vector<sc::int32> separators;
-	kog::smart_vector<sc::int32> printablechars;
-	kog::tree<sc::int32> sepsid;
-	compile::tinygrammar tg;
+	std::map<std::string, compile::doc::machine> machines_;
+	kog::buckethash<std::string, sc::int32, string_2_int> keywords_;
+	kog::smart_vector<sc::int32> separators_;
+	kog::smart_vector<sc::int32> printablechars_;
+	kog::tree<sc::int32> sepsid_;
+	std::auto_ptr<compile::tinygrammar> tg_;
     kog::shared_ptr<compile::interlanguage> iml_;
 };
 

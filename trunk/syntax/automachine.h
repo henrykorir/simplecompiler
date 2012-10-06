@@ -42,15 +42,17 @@ public:
 	public:
 		int32 type() const { return eattype_; }
 		void type(int32 t) { eattype_ = t; }
-		int32 endings() const {return isendings_;}
+		int32 endings() const {return isendings_; }
 		void endings(int32 t) { isendings_ = t; }
 		void* more() const { return more_; }
 		void more(void* m) { more_ = m;}
+		int32 code() const { return code_; }
+		void code(int32 c) { code_ = c; }
 	public:
 		sheetrow()
 		: eattype_(special)
 		, isendings_(0)
-		, more_(NULL)
+		, code_(-1)
 		{}
 
 		sheetrow(int32 etype, int32 ise, void* morei)
@@ -63,7 +65,11 @@ public:
 	private:
 		int32 eattype_;
 		int32 isendings_;
-		void* more_;
+		union 
+		{
+			void* more_;
+			int32 code_;
+		};
 	};
 
 	struct machine_meta
@@ -102,7 +108,6 @@ public:
 		std::swap(sstate_, other.sstate_);
 //		std::swap(estate_, other.estate_);
 	}
-
 private:
 	//kog::share_ptr<sparsesheet> sheet_;
 	shared_sheet sheet_;

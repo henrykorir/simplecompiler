@@ -14,8 +14,8 @@ using namespace compile::ga;
 
 void eclosure::operator()(const tinygrammar& tig, closure_array& closures)
 {
-	const tinygrammar::vecprods& prods = tig.productions();
-	const symholder& sholder = tig.symbols();
+	const prodholder_proxy& prods = tig.productions();
+	const symholder_proxy& sholder = tig.symbols();
 
 	kog::smart_vector<int32> toe;
 	int32 eid = -2;
@@ -27,7 +27,7 @@ void eclosure::operator()(const tinygrammar& tig, closure_array& closures)
 		if(!sholder[i].ist) edges[i].insert(i);
 	// create graph
 	int32 virtual_ending = -1;
-	for (tinygrammar::vecprods::const_iterator iter = prods.begin(); iter != prods.end(); ++ iter)
+	for (prodholder_proxy::const_iterator iter = prods.begin(); iter != prods.end(); ++ iter)
 	{
 		const int32 l = iter->left();
 		const int32 r0 = iter->right().at(0);

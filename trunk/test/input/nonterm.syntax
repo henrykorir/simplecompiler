@@ -1,0 +1,47 @@
+# terminate symbol
+
+Terminates
+#	symbol : [a-zA-Z_][a-zA-Z_0-9]*
+#	intvalue : ([0-9]+)|(0x[0-9A-Fa-f]+)
+#	floatvalue : (\d*\.\d+)|(\d+\.)|((\d+|(\d*.\d+)|(\d+\.))[Ee][+-]?(\d+))f
+#	doublevalue : (\d*\.\d+)|(\d+\.)|((\d+|(\d*\.\d+)|(\d+\.))[Ee][+\-]?(\d+))
+#	charvalue : '([^\\']*(\\.)*)*'
+#	stringvalue : "([^\\"]*(\\.)*)*"
+	symbol : symbol
+	intvalue : intvalue
+	floatvalue : floatvalue
+	doublevalue : doublevalue
+	charvalue : charvalue
+	stringvalue : stringvalue
+
+Terminates
+	; : ;
+	( : \(
+	[ : \[
+	) : \)
+	] : \]
+	sizeof : sizeof
+	type : type
+
+Non-Terminates
+	ExpressionList
+	Expression
+	Expression1
+	Expression2
+	Expression3
+	Expression4
+	Expression5
+	Expression6
+	Expression7
+	Expression8
+	Expression9
+	Expression10
+	Expression11
+	Expression12
+	Expression13
+	Expression14
+	Expression15
+	Expression16
+	FunctionCall
+	ParamList
+	Type

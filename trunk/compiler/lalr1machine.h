@@ -43,6 +43,7 @@ protected:
 	/* overwrite */ virtual machine_meta* _reduce(int32 pid, const kog::smart_vector<machine_meta*>& rights, machine_meta* result);
 private:
 	kog::smart_vector<ifunction*> funcList_;
+	std::allocator<lalr1meta> alloc_;
 };
 
 NAMESPACE_END(compile)

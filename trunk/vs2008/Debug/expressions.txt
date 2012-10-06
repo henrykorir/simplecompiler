@@ -1,0 +1,16 @@
+
+grammar:Expressions
+Expressions -> AExpression ; Expressions
+Expressions -> AExpression ;
+AExpression -> symbol = AValue
+AExpression -> symbol = AValue Op AValue
+AExpression -> Print
+AValue -> symbol
+AValue -> number
+Print -> printF ( AValue )
+valuetype -> int
+valuetype -> float
+Op -> +
+Op -> -
+Op -> *
+Op -> /

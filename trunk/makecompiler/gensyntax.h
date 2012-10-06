@@ -9,6 +9,7 @@
 #include <ostream>
 
 #include "grammar.h"
+#include "compilersyntax.h"
 
 NAMESPACE_BEGIN(compile)
 
@@ -30,7 +31,7 @@ private:
 	void print_machine(std::ostream& os, const compile::automachine& mac);
     void print_productions();
 private:
-	void regex_str_to_machine(const std::string& regexstr, automachine& m);
+	void regex_str_to_machine(const std::string& regexstr, automachine& m, bool is_directly);
 	void refine_machine(automachine& m) const;
 	bool is_token_keyword(const tchar* name) const;
 public:
@@ -47,7 +48,8 @@ public:
     {}
 
 public:
-    function_parser& operator()(const _Str& func, const _Str& name);
+    function_parser& operator()(const _Str& comment, const _Str& func, const _Str& name);
+	function_parser& operator()(const _Str& comment, const compiler_grammar::prodinfo_t& infos, const _Str& name);
 private:
 
 private:

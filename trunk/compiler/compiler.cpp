@@ -16,8 +16,9 @@ using namespace compile::doc;
 using namespace compile::runtime;
 
 compiler::compiler()
-: keywords(string_2_int::max_int)
+: keywords_(string_2_int::max_int)
 , iml_(new interlanguage())
+, tg_(new grammar)
 {
 }
 
@@ -27,28 +28,39 @@ compiler::~compiler()
 
 state_machine compiler::get_number_machine()
 {
-	return *(dynamic_cast<state_machine*>(instance().machines["number"].mac.get()));
+	return *(dynamic_cast<state_machine*>(instance().machines_["number"].mac.get()));
 }
 
 state_machine compiler::get_symbol_machine()
 {
-	return *(dynamic_cast<state_machine*>(instance().machines["symbol"].mac.get()));
+	return *(dynamic_cast<state_machine*>(instance().machines_["symbol"].mac.get()));
 }
 
 state_machine compiler::get_string_machine()
 {
-	return *(dynamic_cast<state_machine*>(instance().machines["string"].mac.get()));
+	return *(dynamic_cast<state_machine*>(instance().machines_["string"].mac.get()));
+}
+
+symbol_machine compiler::get_terminates_machine()
+{
+	return *(dynamic_cast<symbol_machine*>(instance().machines_["terminates"].mac.get()));
+}
+
+const tstring& compiler::get_whitespaces()
+{
+	const tinygrammar* p = instance().tg_.get();
+	return as<grammar>(p)->whitespaces();
 }
 
 bool compiler::is_separator(int32 elem)
 {
-	return std::find(instance().separators.begin(), 
-			instance().separators.end(), elem) != instance().separators.end();
+	return std::find(instance().separators_.begin(), 
+			instance().separators_.end(), elem) != instance().separators_.end();
 }
 
 int compiler::get_all_machines(std::list<machine>& mlist)
 {
-	for(std::map<std::string, machine>::iterator iter = instance().machines.begin(); iter != instance().machines.end(); ++ iter)
+	for(std::map<std::string, machine>::iterator iter = instance().machines_.begin(); iter != instance().machines_.end(); ++ iter)
 		if (typeid(*iter->second.mac) == typeid(state_machine))
 		{
 			mlist.push_back(iter->second);
@@ -59,7 +71,7 @@ int compiler::get_all_machines(std::list<machine>& mlist)
     
 automachine& compiler::get_machine(const std::string& machine_name)
 {
-    std::map<std::string, compile::doc::machine>& ms = instance().machines;
+    std::map<std::string, compile::doc::machine>& ms = instance().machines_;
     std::map<std::string, compile::doc::machine>::iterator iter = ms.find(machine_name);
     if (iter == ms.end())
         fire("not found machine, " + machine_name);
@@ -81,27 +93,27 @@ extern void init_production_functions(kog::smart_vector<ifunction*>& pfuncs);
 
 void compiler::initialization()
 {
-	init_grammar(tg);
-	init_printablechars(printablechars);
-	init_keywords(keywords);
-	init_separators(separators, sepsid);
-	init_machines(machines);
+	init_grammar(*tg_);
+	init_printablechars(printablechars_);
+	init_keywords(keywords_);
+	init_separators(separators_, sepsid_);
+	init_machines(machines_);
 
     kog::smart_vector<ifunction*> tmp_prods;
     init_production_functions(tmp_prods);
     
     // create new machine
-    lalr1machine* lalr1mac = new lalr1machine(tg, tmp_prods);
-	machines["__main__"] = machine(kog::shared_ptr<automachine>(lalr1mac), -1);
+    lalr1machine* lalr1mac = new lalr1machine(*tg_, tmp_prods);
+	machines_["__main__"] = machine(kog::shared_ptr<automachine>(lalr1mac), -1);
 	init_syntax_machine(*lalr1mac);
 }
 
 
 int32 compiler::is_keywords(const std::string& s) const
 {
-	const int32* x = keywords.find(s);
-	if (!x) return -1;
-	return *x;
+	kog::buckethash<std::string, sc::int32, string_2_int>::const_iterator x = keywords_.find(s);
+	if (x == keywords_.end()) return -1;
+	return x->second;
 }
 
 struct split_separators
@@ -120,7 +132,7 @@ struct split_separators
 
 	int32 next()
 	{
-		kog::tree<int32>::link p = compiler::instance().sepsid.root();
+		kog::tree<int32>::link p = compiler::instance().sepsid_.root();
 		buf.clear();
 		while(*aword && p->nc)
 		{
@@ -146,7 +158,7 @@ void compiler::check(const std::string& fname)
 	const streamsplit::deqwords& words = wordsplit(cifs);
 	cifs.close();
 	
-	lrmachine& lrm = *(dynamic_cast<lrmachine*>(machines["__main__"].mac.get()));
+	lrmachine& lrm = *(dynamic_cast<lrmachine*>(machines_["__main__"].mac.get()));
 	lrm.init();
 
 	logstring("\nstart to run machine...");

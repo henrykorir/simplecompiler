@@ -153,7 +153,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\makecompiler\compilersyntax.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\makecompiler\gensyntax.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\makecompiler\prodfunction.cpp"
 				>
 			</File>
 		</Filter>
@@ -163,7 +171,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\makecompiler\compilermake.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\makecompiler\compilersyntax.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\makecompiler\gensyntax.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\makecompiler\prodfunction.h"
 				>
 			</File>
 		</Filter>

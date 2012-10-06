@@ -78,6 +78,7 @@ struct prod_func11 : public ifunction
 
 		ot->content = vdst;
 		ot->ctype = vdst->vtype();
+		return result;
 	}
 };
 

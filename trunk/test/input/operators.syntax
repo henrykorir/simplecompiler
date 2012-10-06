@@ -1,0 +1,44 @@
+# operators
+
+Operators
+	+	plus
+	++	inc
+	-	minus
+	--	dec
+	*	mul
+	/	div
+	%	mod
+	<	lt
+	<=	le
+	>	gt
+	>=	ge
+	<<	lsh
+	>>	rsh
+	>>=	lshe
+	<<=	rshe
+	?	is
+	^	xor
+	^=	xore
+	|	or
+	&	and
+	||	or2
+	&&	and2
+	+=	adde
+	-=	sube
+	*=	mule
+	/=	dive
+	&=	ande
+	|=	ore
+	%=	mode
+	==	eq
+	!=	ne
+	=	assign
+	:	or3
+	!	not
+	~	not2
+	,	sep
+	.	dot
+	->	get
+	::	gref
+	->*	mget
+	.*	mdot
