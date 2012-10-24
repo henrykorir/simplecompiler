@@ -8,7 +8,7 @@ cppfiles = ['xregex.cpp']
 if os.sys.platform.lower() == 'win32':
 	libboost = ''
 else:
-	libboost = 'boost-dev'
+	libboost = 'boost_regex'
 incboost = aEnv['boost_inc']
 
 aEnv['regexlib'] = ['regex', libboost]

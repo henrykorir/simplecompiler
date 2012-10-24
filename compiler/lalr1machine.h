@@ -29,7 +29,7 @@ public:
             , ctype(other.ctype)
         {}
 
-        const object* content;
+        /*const*/ object* content;
         const type* ctype;
     };
 public:
@@ -39,6 +39,8 @@ public:
 public:
     /* overwrite */ virtual machine_meta* new_meta(int meta);
     /* overwrite */ virtual machine_meta* new_meta(const machine_meta* meta);
+public:
+	void swap(lalr1machine& other) throw();
 protected:
 	/* overwrite */ virtual machine_meta* _reduce(int32 pid, const kog::smart_vector<machine_meta*>& rights, machine_meta* result);
 private:

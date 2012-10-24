@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\third_party;..\..\syntax;..\..\galgorithm"
+				AdditionalIncludeDirectories="..\..\include;..\..\third_party;..\..\syntax;..\..\galgorithm;..\..\third_party\typeinfo"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;VISUAL_STDIO;DEBUG_OUTPUT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -164,6 +164,10 @@
 				RelativePath="..\..\makecompiler\prodfunction.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\makecompiler\symbolmachine.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -184,6 +188,10 @@
 			</File>
 			<File
 				RelativePath="..\..\makecompiler\prodfunction.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\makecompiler\symbolmachine.h"
 				>
 			</File>
 		</Filter>

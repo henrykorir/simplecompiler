@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\;..\..\syntax;..\..\galgorithm;..\..\makecompiler;..\..\compiler"
+				AdditionalIncludeDirectories="..\..\include\;..\..\syntax;..\..\galgorithm;..\..\makecompiler;..\..\compiler;..\..\cprogramlanguage"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;VISUAL_STDIO"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -176,7 +176,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Debug\test.cpp"
+				RelativePath="..\..\test\output\cexpression_test_out.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\cprogramlanguage\cplcompiler.cpp"
 				>
 			</File>
 		</Filter>
@@ -185,6 +189,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\cprogramlanguage\cplcompiler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\cprogramlanguage\extract_stream.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

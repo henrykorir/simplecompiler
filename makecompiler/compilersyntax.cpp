@@ -32,6 +32,11 @@ int32 compiler_grammar::make_new_production(const tstring& left, const std::vect
 	return (int32)productions_.size();
 }
 
+int32 compiler_grammar::make_new_function(const tstring& funcname, const funcinfo_t& info)
+{
+	return 0;
+}
+
 int32 compiler_grammar::make_new_nonterm_symbol(const tstring& sname, const tstring& stype)
 {
 	int x = index(sname);
@@ -45,31 +50,46 @@ int32 compiler_grammar::make_new_nonterm_symbol(const tstring& sname, const tstr
 
 int32 compiler_grammar::make_new_term_symbol(const tstring& sname, const tstring& regexstring, const tstring& stype)
 {
-	return make_terminate(sname, regexstring, stype, false);
+	//logstring("terminate ");
+	return make_terminate(sname, regexstring, stype, 1);
 }
 
-int32 compiler_grammar::make_terminate(const tstring& sname, const tstring& regexstring, const tstring& stype, bool is_direct)
+int32 compiler_grammar::make_terminate(const tstring& sname, const tstring& content, const tstring& stype, int32 flag)
 {
 	int x = index(sname);
 	if (x != -1) fire("found exist symbol(%s), index is %d", sname.c_str(), x);
 	symbol news = make_symbol(sname, (int32)symbols_.size(), true);
 	symbols_.push_back(news);
 	nameIndexer_[sname] = news.sid;
-	//make_index();
-	// make regex string
-	smacs_.push_back(kog::make_triple(regexstring, news.sid, is_direct));
+	if (flag > 0) // is content is regex string?
+	{
+		// make regex string
+		smacs_.push_back(kog::make_triple(content, news.sid, flag > 1));
+	}
 	logstring("entry terminate symbol [%d] %s", news.sid, sname.c_str());
-	return (int32)symbols_.size();
+	return news.sid;
 }
 
-int32 compiler_grammar::make_new_keywords(const tstring& keyword)
+int32 compiler_grammar::make_new_keywords(const tstring& keyword, int32 basic_sid)
 {
-	return make_terminate(keyword, keyword, "", true);
+	logstring("keyword %s %d", keyword.c_str(), basic_sid);
+	int32 keyword_sid = make_terminate(keyword, keyword, "", -basic_sid);
+
+	complex_symbol_t xtmp;
+	xtmp.new_sid = keyword_sid;
+	xtmp.basic_sid = basic_sid;
+	xtmp.flag = complex_symbol_t::keyword;
+	xtmp.content = keyword;
+	complexsyms_.push_back(xtmp);
+
+	keywords_.push_back(std::make_pair(keyword, keyword_sid));
+	return keyword_sid;
 }
 
 int32 compiler_grammar::make_new_operators(const tstring& oprs, const tstring& name)
 {
-	return make_terminate(oprs, oprs, "", true);
+	logstring("operator %s %s", name.c_str(), oprs.c_str());
+	return make_terminate(oprs, oprs, "", 2);
 }
 
 int32 compiler_grammar::make_new_delimiters(const tstring& delimiters)
@@ -82,15 +102,31 @@ int32 compiler_grammar::make_new_delimiters(const tstring& delimiters)
 	return 0;
 }
 
+int32 compiler_grammar::make_new_complex_symbol(const tstring& sname, int32 sbasicid, const tstring& sfunc)
+{
+	logstring("complex symbol %s %d %s", sname.c_str(), sbasicid, sfunc.c_str());
+
+	int32 new_sid = make_terminate(sname, sfunc, "", -sbasicid);
+
+	complex_symbol_t xtmp;
+	xtmp.new_sid = new_sid;
+	xtmp.basic_sid = sbasicid;
+	xtmp.flag = complex_symbol_t::word;
+	xtmp.content = sfunc;
+	complexsyms_.push_back(xtmp);
+
+	return new_sid;
+}
+
 symbol compiler_grammar::make_symbol(const tstring& sname, int32 sid, bool isTerm)
 {
-	std::auto_ptr<tchar> buffer( alloc_.allocate(sname.size() + 1));
+	std::auto_ptr<tchar> buffer(alloc_.allocate(sname.size() + 1));
 	memcpy(buffer.get(), sname.c_str(), sizeof(tchar) * (sname.size() + 1));
 	symbol s;
 	s.funcs = NULL;
 	s.ist = isTerm ? 1 : 0;
-	s.Lname = sid;
-	s.sid = (int32)symbols_.size();
+	s.sid = sid;
+	s.Lname = (int32)sname.size();
 	s.Lfuncs = 0;
 	s.name = buffer.release();
 

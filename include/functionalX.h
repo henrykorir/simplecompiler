@@ -737,5 +737,12 @@ struct __range_foreach
 		for (int __c_1__ = 1, __b_1__ = 1; __c_1__ && __r_1__.hasNext(_End); (__c_1__ = (__b_1__ == 0) ? 1 : 0), (__b_1__ = 1)) \
 			for (_Value = *__r_1__.moveNext(_End); __c_1__ --; -- __b_1__)
 #endif
+
+#ifdef forrange
+#error 'exist forrange'
+#else
+#define forrange(_Value, _First, _End) \
+	for (_Value = _First; _First != _End; ++ _First)
+#endif
 NAMESPACE_END(kog)
 #endif

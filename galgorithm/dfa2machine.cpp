@@ -67,13 +67,18 @@ void dfa2machine::operator()(const tinygrammar& tig, automachine& mot)
 	logstring("start is %d", mot.sstate());
 	std::ostream& os = kog::loggermanager::instance().get_logger().getos();
 	size_t ir = 0;
+	//std::locale loc();
 	foreach (const automachine::sheetrow& r, mot.sheet().begin(), mot.sheet().end())
 	{
 		os<<stringX::format("row[%d] %s \n\t", ir++, r.endings() ? "ending" : "");
 		foreach (const automachine::gotoitem& it, r.begin(), r.end())
 		{
+#if (defined _WIN32 || defined WIN32)
 			if (std::isprint(it.first, std::locale("")))
-				os<<stringX::format("('%c',%d) ", (char)it.first, it.second);
+#else
+			if (std::isprint(it.first))
+#endif
+				os<<stringX::format("('%c',%d) ", (char)(it.first&0xff), it.second);
 			else os<<stringX::format("(%d,%d) ", it.first, it.second);
 		}
 		os<<std::endl;

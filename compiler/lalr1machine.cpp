@@ -31,7 +31,7 @@ lalr1machine::~lalr1machine()
 }
 
 machine_meta* lalr1machine::_reduce(int32 pid, const kog::smart_vector<machine_meta*>& rights, machine_meta* result)
-{	
+{
     if ((int32)funcList_.size() <= pid || pid < 0)
 	{
 	//	fire("no production function[%d]!", pid);
@@ -59,4 +59,12 @@ machine_meta* lalr1machine::new_meta(const machine_meta* meta)
 	machine_meta* pmeta = alloc_.allocate(1);
 	*pmeta = *((const lalr1meta*)meta);
     return pmeta;
+}
+
+void lalr1machine::swap(lalr1machine& other) throw()
+{
+	((lrmachine*)this)->swap(other);
+	funcList_.swap(other.funcList_);
+	//alloc_.swap(other.alloc_);
+	std::swap(alloc_, other.alloc_);
 }

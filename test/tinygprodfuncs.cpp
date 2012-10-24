@@ -68,8 +68,8 @@ struct prod_func11 : public ifunction
         lalr1meta* ot = (lalr1meta*)(result);
 
 		const _Str& symbol_name = as<word>(m0->content)->txt;
-		const variable* vdst = s->find(symbol_name);
-		const variable* vsrc = as<variable>(m2->content);
+		variable* vdst = s->find(symbol_name);
+		variable* vsrc = as<variable>(m2->content);
 		if (vdst == NULL) fire("undefined symbol " + symbol_name);
 		else if(vdst->vtype() != vsrc->vtype()) fire("can't assign a %s to %s", vsrc->vtype()->to_string().c_str(), vdst->vtype()->to_string().c_str());
 
@@ -257,7 +257,7 @@ struct prod_func21 : public ifunction
         scope* s = iml.current_scope();
         const lalr1meta* m0 = (const lalr1meta*)(metas[0]);
         lalr1meta* ot = (lalr1meta*)(result);
-        ot->content = typesystem::instance().int_type();
+        ot->content = (type*)typesystem::instance().int_type();
         ot->ctype = typesystem::instance().type_type(); // type_type
         return result;
     }
@@ -272,7 +272,7 @@ struct prod_func22 : public ifunction
         scope* s = iml.current_scope();
         const lalr1meta* m0 = (const lalr1meta*)(metas[0]);
         lalr1meta* ot = (lalr1meta*)(result);
-        ot->content = typesystem::instance().float_type();
+        ot->content = (type*)typesystem::instance().float_type();
         ot->ctype = typesystem::instance().type_type(); // type_type
         return result;
     }

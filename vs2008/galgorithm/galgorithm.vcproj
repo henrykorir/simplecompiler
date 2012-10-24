@@ -211,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\galgorithm\galgorithm.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\galgorithm\grammaralgorithm.h"
 				>
 			</File>

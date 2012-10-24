@@ -421,3 +421,33 @@ Type -> type
 Type -> Type *
 	$0 : type
 	$$ = new_type($0)
+
+type -> struct_type
+
+type -> enum_type
+
+type -> int
+
+type -> long
+
+type-> short
+
+type -> double
+
+type -> float
+
+type -> char
+
+type -> unsigned char
+
+type -> unsigned int
+
+type -> unsigned short
+
+type -> void *
+
+#Type -> FunctionType
+
+ReturnType -> void
+
+ReturnType -> Type

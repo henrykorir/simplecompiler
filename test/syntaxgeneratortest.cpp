@@ -35,8 +35,8 @@ class syntaxgenerator_test : public sc::unittest
 private:
 	void complex_gio()
 	{
-		fin_ = "../../test/input/cexpression.syntax";
-		cppout_ = "../../test/output/cexpout.cpp";
+		//fin_ = "../../test/input/cexpression.syntax";
+		//cppout_ = "../../test/output/cexpout.cpp";
 		makecompiler mc(fin_);
 		mc.build_compiler(cppout_);
 	}

@@ -20,8 +20,8 @@ Operators
 	^	xor
 	^=	xore
 	|	or
-	&	and
 	||	or2
+	&	and
 	&&	and2
 	+=	adde
 	-=	sube

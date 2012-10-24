@@ -1,0 +1,151 @@
+# c function: function define
+
+Keywords : symbol
+	return
+	if
+	else
+	for
+	while
+	do
+	switch
+	case
+	default
+	break
+	continue
+
+Non-Terminates
+	Function
+	FunctionBegin
+	FunctionContent
+	FunctionHeader
+#	ReturnType
+	ParamList
+	AFuncParam
+	AExpression
+#	DeclearExpression
+	If_Expression
+	While_Expression
+	For_Expression
+	DoWhile_Expression
+	Scope_Expression
+	Return_Expression
+	First_Statememnt
+	Second_Statememnt
+	Third_Statement
+	Switch_Expression
+	Switch_Content
+	Switch_Item
+	Case_Item
+	CaseValue
+	Default_Item
+	Bread_Expression
+	Continue_Expression
+	
+
+Function -> FunctionBegin FunctionContent }
+
+#empty function
+Function -> FunctionBegin }
+
+FunctionBegin -> FunctionHeader {
+
+FunctionHeader -> ReturnType symbol ( )
+
+FunctionHeader -> ReturnType symbol ( ParamList )
+
+ParamList -> AFuncParam
+
+ParamList -> AFuncParam , ParamList
+
+AFuncParam -> Type symbol
+
+ReturnType -> Type
+
+ReturnType -> void
+
+FunctionContent -> ContentExpression
+
+FunctionContent -> ContentExpression FunctionContent
+
+ContentExpression -> AExpression
+
+ContentExpression -> DeclearExpression
+
+AExpression -> Expression ;
+
+AExpression -> If_Expression
+
+AExpression -> While_Expression
+
+AExpression -> For_Expression
+
+AExpression -> DoWhile_Expression
+
+AExpression -> Scope_Expression
+
+AExpression -> Return_Expression
+
+AExpression -> Switch_Expression
+
+AExpression -> Break_Expression
+
+AExpression -> Continue_Expression
+
+Return_Expression -> return ;
+
+Return_Expression -> return Expression ;
+
+Scope_Expression -> { FunctionContent }
+
+Scope_Expression -> { }
+
+If_Expression -> if ( Expression ) AExpression
+
+If_Expression -> if ( Expression ) AExpression else AExpression
+
+While_Expression -> while ( Expression ) AExpression
+
+For_Expression -> for ( First_Statememnt Second_Statememnt Third_Statement ) AExpression
+
+First_Statememnt -> ;
+
+First_Statememnt -> ValueDecaler ;
+
+First_Statememnt -> Expression ;
+
+Second_Statememnt -> ;
+
+Second_Statememnt -> Expression ;
+
+Third_Statement -> ;
+
+Third_Statement -> Expression ;
+
+Bread_Expression -> break ;
+
+Continue_Expression -> continue ;
+
+DoWhile_Expression -> do AExpression while ( Expression ) ;
+
+Switch_Expression -> switch ( Expression ) { Switch_Content }
+
+Switch_Content -> Switch_Item
+
+Switch_Content -> Switch_Item Switch_Content
+
+Switch_Item -> Case_Item
+
+Switch_Item -> Default_Item
+
+Case_Item -> case CaseValue :
+
+Case_Item -> case CaseValue : AExpression
+
+Default_Item -> default :
+
+Default_Item -> default : AExpression
+
+CaseValue -> intvalue
+
+CaseValue -> charvalue
+

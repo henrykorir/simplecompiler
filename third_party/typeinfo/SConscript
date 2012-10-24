@@ -1,0 +1,7 @@
+# SConscript
+
+Import('aEnv')
+
+cppfiles = ['typeinfoname.cpp']
+
+aEnv.Library(target='typename', source = cppfiles)

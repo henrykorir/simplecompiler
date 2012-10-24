@@ -69,8 +69,8 @@ class grammar : public tinygrammar
 {
 	friend class syntaxgenerator;
 public:
-	typedef std::vector<kog::triple<tstring, int32, bool> > vecsmacs; // first: symbol.sid, second: regex string, third: is_direct?
-	typedef std::vector<std::pair<tstring, int32> > veckeywords;
+	typedef std::vector<kog::triple<tstring, int32, bool> > vecsmacs; // first: regex string, second: symbol.sid, third: is_direct?
+	typedef std::vector<std::pair<tstring, int32> > veckeywords; // first: symbol.name, second: symbol.sid
 public:
 	grammar();
 	explicit grammar(const tinygrammar& atinyG);

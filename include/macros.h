@@ -74,11 +74,11 @@
 
 #define CATCH_EXCEPTIONS_COUT \
 	catch(sc::scerror& sce){ \
-		std::cerr<<"["<<typeid(sce).name()<<"]"<<sce.what()<<"\n" \
+		std::cerr<<"["<<typeinfo_name(typeid(sce).name())<<"]"<<sce.what()<<"\n" \
 				 <<sce.trace_message()<<std::endl; \
 	}	\
 	catch(std::exception& ex){ \
-		std::cerr<<"["<<typeid(ex).name()<<"]"<<ex.what()<<std::endl; \
+		std::cerr<<"["<<typeinfo_name(typeid(ex).name())<<"]"<<ex.what()<<std::endl; \
 	}catch(...){ \
 		std::cerr<<"unknown exception!"<<std::endl; \
 	}

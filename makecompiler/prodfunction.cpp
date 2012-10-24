@@ -6,7 +6,7 @@
 using namespace compile;
 using namespace compile::syntax;
 
-compiler_action_parser::compiler_action_parser(prodinfo_t& otput)
+compiler_action_parser::compiler_action_parser(funcinfo_t& otput)
 : otput_(&otput)
 {
 }
