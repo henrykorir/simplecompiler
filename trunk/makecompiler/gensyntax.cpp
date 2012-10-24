@@ -1,5 +1,6 @@
 #include "gensyntax.h"
 #include "compilersyntax.h"
+#include "symbolmachine.h"
 #include <fstream>
 #include <set>
 
@@ -12,8 +13,9 @@
 #include <basicalgorithms.h>
 #include <scerror.h>
 #include <logger.h>
-#include <symbolmachine.h>
 #include <combinemachines.h>
+#include <typeinfo>
+#include <typeinfo/typeinfoname.h>
 
 //#define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
@@ -22,6 +24,7 @@
 #endif
 
 #define NEWLINE_FLUSH
+#define COMBINE_REGEX_MACHINES
 
 using namespace compile;
 using namespace compile::ga;
@@ -46,6 +49,7 @@ void syntaxgenerator::operator()(const grammar* aGrammar, const tstring& outfile
 		print_includes();
 		print_grammar();
 		//print_symbols();
+		print_complexsymbols();
 		print_separators();
 		print_keywords();
 		print_statemachines();
@@ -53,12 +57,16 @@ void syntaxgenerator::operator()(const grammar* aGrammar, const tstring& outfile
         print_productions();
 		cppstream_ = NULL;
 		ofs.close();
-	}catch(std::exception& ex){
+	} catch (sc::scerror& sce) {
 		ofs.close();
-		throw ex;
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(sce).name()).c_str(), sce.what(), sce.trace_message().c_str());
+	}
+	catch(std::exception& ex){
+		ofs.close();
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(ex).name()).c_str(), ex.what());
 	}catch(...){
 		ofs.close();
-		throw std::runtime_error("unknown exception[syntaxgenerator::operator()]!");
+		fire("unknown exception[syntaxgenerator::operator()]!");
 	}
 }
 
@@ -185,11 +193,13 @@ void syntaxgenerator::print_includes()
 		<<newline<<"#include <treemaker.h>"
 		<<newline<<"#include <deque>"
 		<<newline<<"#include <lalr1machine.h>"
+		<<newline<<"#include <cplcompiler.h>"
 		<<newline
 		<<newline<<"using namespace sc;"
 		<<newline<<"using namespace compile;"
 		<<newline<<"using namespace compile::doc;"
 		<<newline<<"using namespace compile::runtime;"
+		<<newline<<"using namespace compile::cplc;"
 		<<newline
 		<<newline<<"typedef lalr1machine::lalr1meta lalr1meta;"
 		<<newline;
@@ -229,6 +239,56 @@ void syntaxgenerator::print_separators()
 		<<newline<<"tree_wrap* tw = reinterpret_cast<tree_wrap*>(&sepsid);"
 		<<newline<<"tw->make();"
 		<<newline<<dec
+		<<newline<<"}"
+		<<newline;
+}
+
+void syntaxgenerator::print_complexsymbols()
+{
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	typedef std::ostream& (*pfun)(std::ostream& os);
+	pfun newline = tabident::newline;
+	std::ostream& os = *cppstream_;
+	size_t nsymbol_count = syntax_->symbols().size();
+	os<<newline<<"void init_complex_symbols(kog::smart_vector<cplcompiler::veccsconver>& convertors)"
+		<<newline<<"{"<<inc
+		<<newline<<"convertors.reset("<<nsymbol_count<<");";
+	if (dynamic_cast<const compiler_grammar*>(syntax_) != NULL)
+	{
+		const std::deque<compiler_grammar::complex_symbol_t>& csyms = dynamic_cast<const compiler_grammar*>(syntax_)->complex_symbols();
+		kog::smart_vector<std::set<tstring> > usedset(nsymbol_count);
+		foreach (const compiler_grammar::complex_symbol_t& s, csyms.begin(), csyms.end())
+		{
+			// output complex symbol
+			if (s.flag != compiler_grammar::complex_symbol_t::word) continue;
+			else if(usedset[s.basic_sid].find(s.content) != usedset[s.basic_sid].end()) continue;
+			usedset[s.basic_sid].insert(s.content);
+		}
+
+		{
+			std::set<tstring> externfuncs;
+			foreach (std::set<tstring>& tmps, usedset.begin(), usedset.end())
+			{
+				externfuncs.insert(tmps.begin(), tmps.end());
+			}
+			foreach (const tstring& func, externfuncs.begin(), externfuncs.end())
+			{
+				os<<newline<<"extern bool "<<func<<"(automachine::machine_meta* meta);";
+			}
+			os<<newline;
+		}
+
+		for (size_t i = 0; i < nsymbol_count; ++ i)
+		{
+			if (usedset[i].empty()) continue;
+			os<<newline<<"convertors["<<i<<"].resize("<<usedset[i].size()<<");";
+			size_t xx = 0;
+			foreach (const tstring& ctn, usedset[i].begin(), usedset[i].end())
+				os<<newline<<"convertors["<<i<<"]["<<xx ++<<"] = "<<ctn<<";";
+		}
+	}
+	os<<dec
 		<<newline<<"}"
 		<<newline;
 }
@@ -281,23 +341,17 @@ void syntaxgenerator::print_statemachines()
 	const symholder_proxy& sholder = syntax_->symbols();
 	const grammar::vecsmacs& smacs = syntax_->smacs_;
 #ifdef COMBINE_REGEX_MACHINES
-	symbolmachine mout;
-	kog::smart_vector<statemachine> inputmacs(smacs.size());
-	for (size_t i = 0; i < smacs.size(); ++ i)
-	{
-		regex_str_to_machine(smacs[i].first, inputmacs);
-	}
-	kog::smart_vector<automachine*> pmacs(smacs.size());
-	for (size_t i = 0; i < smacs.size(); ++ i) pmacs[i] = &inputmacs[i];
-	combine_machines combinemacs(pmacs.get(), pmacs.size(), mout);
-	combinemacs.invoke();
-	s<<newline<<newline<<"{"<<inc
-		<<newline<<"kog::shared_ptr<automachine> ptr_m(new state_machine);"
+	logstring("combine regex machines");
+	if (smacs.empty()) fire("must have string machine(s)!");
+	symbol_machine mout(&smacs[0], smacs.size());
+	os<<newline<<newline<<"{"<<inc
+		<<newline<<"kog::shared_ptr<automachine> ptr_m(new symbol_machine);"
 		<<newline<<"automachine& m = *ptr_m;";
 	print_machine(os, mout);
 	os<<newline<<"machines[\"symbol_machine\"] = machine(ptr_m, -1);"<<dec
 		<<newline<<"}";
 #else
+	logstring("generate regex string machines");
 	for(size_t i = 0; i < smacs.size(); ++ i)
 	{
 		logstring("print regex string machine (%s)", smacs[i].first.c_str());
@@ -368,6 +422,8 @@ void syntaxgenerator::print_machine(std::ostream& os, const compile::automachine
 	
 void syntaxgenerator::regex_str_to_machine(const std::string& regexstr, automachine& m, bool is_directly)
 {
+	if(is_directly) logstring("convert string(%s) to automachine", regexstr.c_str());
+	else logstring("convert regex string(%s) to automachine", regexstr.c_str());
 	grammar nfa, dfa;
 	ga::regex2nfa r2n(regexstr, nfa, is_directly);
 	ga::nfa2dfa n2d(nfa, dfa);
@@ -465,6 +521,7 @@ void syntaxgenerator::print_grammar()
 		<<newline<<syntax_->starts()<<", "
 			<<syntax_->eplisons()<<", "
 			<<syntax_->endings()<<");"<<dec
+		<<newline<<"tmptinyg.swap(tig);"
 		<<newline<<dec
 		<<newline<<"}"
 		<<newline;
@@ -502,8 +559,7 @@ void syntaxgenerator::print_productions()
 	{
 		os<<newline<<"pfuncs["<<i<<"] = new production_func_"<<i<<"();";
 	}
-	os<<newline<<dec
-		<<newline<<"}";
+	os<<dec<<newline<<"}";
 }
 
 #define CONTENT_BEGIN "{"
@@ -571,9 +627,10 @@ function_parser& function_parser::operator()(const _Str& comment, const compiler
         <<newline<<"/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)"
         <<newline<<"{"<<inc;
 
+	os<<newline<<"return result;";
 	foreach(const tstring& pinfo, infos.content.begin(), infos.content.end())
 	{
-		os<<newline<<pinfo<<";";
+		//os<<newline<<pinfo<<";";
 	}
 
     os<<dec<<newline<<"}"<<dec

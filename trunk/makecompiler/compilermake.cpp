@@ -56,6 +56,7 @@ size_t makecompiler::parse_file(const std::string& syntaxfile, compiler_grammar&
 	{
 		std::string tmp;
 		std::getline(ifs, tmp);
+		if (!tmp.empty() && tmp[tmp.size()-1] == '\r') tmp.erase(tmp.begin() + tmp.size() - 1); // remove last '\r' at the end of string
 		std::string lower_tmp = stringX::tolower(stringX::trim(tmp, 1)); // remove ending spaces
 		++ curfile_.iLine;
 
@@ -65,9 +66,11 @@ size_t makecompiler::parse_file(const std::string& syntaxfile, compiler_grammar&
 		else if (lower_tmp == "seprators") parse_seprators(ifs, cg); // add seprators
 		else if (lower_tmp == "operators") parse_operators(ifs, cg); // add opreators
 		else if (lower_tmp == "includes") parse_includes(ifs, cg); // include a new file
-		else if (lower_tmp == "keywords") parse_keywords(ifs, cg);
 		else if (lower_tmp == "terminates") parse_terms(ifs, cg);
 		else if (lower_tmp == "non-terminates") parse_nonterms(ifs, cg);
+		else if (lower_tmp == "complex-symbols") parse_complex_symbols(ifs, cg);
+		else if (stringX::xregex::is_match("^keywords\\s*:\\s*[^\\s]+\\s*$", lower_tmp)) parse_keywords(ifs, cg, lower_tmp.substr(lower_tmp.find(':') + 1));
+		else if (stringX::xregex::is_match("^function\\s*:\\s*[^\\s]+\\s*$", lower_tmp)) parse_function(ifs, cg, lower_tmp.substr(lower_tmp.find(':') + 1));
 		else if (lower_tmp.find("->") != std::string::npos) parse_production(ifs, cg, tmp); // add new production
 		//else if (lower_tmp == "whitespaces") parse_whitespaces(ifs, cg);
 		else if (stringX::xregex::is_match("startsymbol\\s*:.*", lower_tmp)) 
@@ -91,7 +94,11 @@ size_t makecompiler::parse_seprators(std::istream& is, compiler_grammar& cg)
 	std::string tmp;
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
+#ifdef WIN32
 		if(!std::isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read seprators, need a whitespace");
+#else
+		if(!std::isspace(tmp[0])) fire(errorpos() + "failed when read seprators, need a whitespace");
+#endif
 		
 		tmp = stringX::trim(tmp, 2); // remove leading spaces and ending spaces
 
@@ -116,8 +123,11 @@ size_t makecompiler::parse_operators(std::istream& is, compiler_grammar& cg)
 	std::string tmp;
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
+#ifdef WIN32
 		if(!std::isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read opreators, need a whitespace");
-		
+#else
+		if(!std::isspace(tmp[0])) fire(errorpos() + "failed when read opreators, need a whitespace");
+#endif	
 		tmp = stringX::trim(tmp, 2); // remove leading spaces and ending spaces
 		//_replace(tmp);
 
@@ -146,17 +156,28 @@ size_t makecompiler::parse_operators(std::istream& is, compiler_grammar& cg)
 	return curfile_.iLine;
 }
 
-size_t makecompiler::parse_keywords(std::istream& is, compiler_grammar& cg)
+size_t makecompiler::parse_keywords(std::istream& is, compiler_grammar& cg, const tstring& basic_symbol)
 {
+	tstring sname = stringX::trim(basic_symbol);
+	int32 symbol_sid = -1; 
+	if (!sname.empty())
+	{
+		symbol_sid = cg.index(sname);
+		if (symbol_sid == -1) fire("invalidate baisc symbol %s", sname.c_str());
+	}
+
 	std::string tmp;
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
+#ifdef WIN32
 		if(!std::isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read opreators, need a whitespace");
-		tmp = stringX::trim(tmp, 2); // remove leading spaces and ending spaces
-		
+#else
+		if(!std::isspace(tmp[0])) fire(errorpos() + "failed when read opreators, need a whitespace");
+#endif
+
 		// new keywords
 		// entry new keyword, 
-		cg.make_new_keywords(tmp);
+		cg.make_new_keywords(stringX::trim(tmp), symbol_sid);
 	}
 	return curfile_.iLine;
 }
@@ -165,7 +186,7 @@ size_t makecompiler::parse_production(std::istream& is, compiler_grammar& cg, co
 {
 	std::string tmp;
 
-	logstring("start to parse production {%s}", prod.c_str());
+	logstring("start to parse production { %s }", prod.c_str());
 	size_t rpos = prod.find("->");
 	tstring left = stringX::trim(prod.substr(0, rpos));
 	std::vector<std::string> rights = stringX::split(prod.substr(rpos + 2), std::string(" "), true);
@@ -179,12 +200,16 @@ size_t makecompiler::parse_production(std::istream& is, compiler_grammar& cg, co
 	foreach (const tstring& r, rights.begin(), rights.end())
 		if (tinyg.index(r) == -1) fire(errorpos() + "right symbol (%s) not found", r.c_str());
 	
-	prodinfo_t pinfo;
+	funcinfo_t pinfo;
 	syntax::compiler_action_parser action_parser(pinfo);
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
+#ifdef WIN32
 		if(!std::isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read production item, need a whitespace");
-		
+#else
+		if(!std::isspace(tmp[0])) fire(errorpos() + "failed when read production item, need a whitespace");
+#endif
+
 		tmp = stringX::trim(tmp, 2); // remove leading spaces and ending spaces
 
 		if(!action_parser.newline(tmp))
@@ -209,8 +234,12 @@ size_t makecompiler::parse_includes(std::istream& is, compiler_grammar& cg)
 
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
+#ifdef WIN32
 		if(!std::isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read includes, need a whitespace");
-		
+#else
+		if(!std::isspace(tmp[0])) fire(errorpos() + "failed when read includes, need a whitespace");
+#endif
+
 		tmp = stringX::trim(tmp); // remove leading spaces and ending spaces
 
 #if (defined _WIN32) || (defined WIN32)
@@ -219,8 +248,8 @@ size_t makecompiler::parse_includes(std::istream& is, compiler_grammar& cg)
 		tmp = prepath + tmp;
 		if (std::find(allfiles_.begin(), allfiles_.end(), tmp) == allfiles_.end())
 		{
-			parse_file(tmp, cg);
 			allfiles_.push_back(tmp);
+			parse_file(tmp, cg);
 		}
 	}
 
@@ -232,7 +261,7 @@ size_t makecompiler::parse_nonterms(std::istream& is, compiler_grammar& cg)
 	std::string tmp;
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
-		if (!isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read non-terms, need a whitespace");
+		if (!isspace(tmp[0])) fire(errorpos() + "failed when read non-terms, need a whitespace");
 
 		tmp = stringX::trim(tmp);
 
@@ -261,7 +290,7 @@ size_t makecompiler::parse_terms(std::istream& is, compiler_grammar& cg)
 	std::string tmp;
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
-		if (!isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read terms, need a whitespace");
+		if (!isspace(tmp[0])) fire(errorpos() + "failed when read terms, need a whitespace");
 
 		tmp = stringX::trim(tmp);
 
@@ -269,7 +298,7 @@ size_t makecompiler::parse_terms(std::istream& is, compiler_grammar& cg)
 		tstring regex_string;
 		tstring stype;
 
-		std::vector<tstring> ts = stringX::split(tmp, tstring(":"), true);
+		std::vector<tstring> ts = stringX::split(tmp, tstring(":"), false);
 
 		sname = stringX::trim(ts[0]);
 		if (ts.size() > 1) regex_string = stringX::trim(ts[1]);
@@ -284,6 +313,64 @@ size_t makecompiler::parse_terms(std::istream& is, compiler_grammar& cg)
 	return curfile_.iLine;
 }
 
+int32 makecompiler::parse_complex_symbol(const tstring& rline, compiler_grammar& cg)
+{
+	tstring tmp = stringX::trim(rline);
+	tstring sname;
+	tstring sbasic;
+	tstring sfunc;
+	int32 basic_sid = -1;
+
+	std::vector<std::string> vlist = stringX::split(tmp, std::string(":"), false);
+	size_t nc = vlist.size();
+
+	if (nc != 3) fire("must and just have a basic_type and a function name");
+	sname = stringX::trim(vlist[0]);
+	sbasic = stringX::trim(vlist[1]);
+	sfunc = stringX::trim(vlist[2]);
+	
+	if (sname.empty() || sbasic.empty() || sfunc.empty()) fire("sname or basic must not be empty");
+
+	basic_sid = cg.index(sbasic);
+	if (basic_sid == -1) fire("invalidate basic symbol name, must defined before use");
+
+	int32 new_sid = cg.make_new_complex_symbol(sname, basic_sid, sfunc);
+	// make new symbol
+	if (new_sid == -1)
+		fire(errorpos() + "invalidate complex symbol %s", sname.c_str());
+	return new_sid;
+}
+
+size_t makecompiler::parse_complex_symbols(std::istream& is, compiler_grammar& cg)
+{
+	std::string tmp;
+	while (get_nextline(is, tmp, curfile_.iLine))
+	{
+		if (!isspace(tmp[0])) fire(errorpos() + "failed when read complex symbol, need a whitespace");
+
+		parse_complex_symbol(tmp, cg);
+	}
+	return curfile_.iLine;
+}
+
+size_t makecompiler::parse_function(std::istream& is, compiler_grammar& cg, const tstring& funcname)
+{
+	std::string tmp;
+	while (get_nextline(is, tmp, curfile_.iLine))
+	{
+		if (!isspace(tmp[0])) fire(errorpos() + "failed when read function content, need a whitespace");
+
+		compiler_grammar::funcinfo_t finfo;
+		finfo.content.push_back(stringX::trim(tmp));
+
+		if (cg.make_new_function(funcname, finfo) == -1)
+			fire(errorpos() + "invalidate function %s", funcname.c_str());
+	}
+
+	return curfile_.iLine;
+}
+
+
 bool makecompiler::get_nextline(std::istream& is, std::string& tmp, size_t& flines) const
 {
 	while (is)
@@ -293,6 +380,7 @@ bool makecompiler::get_nextline(std::istream& is, std::string& tmp, size_t& flin
 		if (!is) return false;
 		++ flines;
 		if(tmp.empty()) return false;
+		else if (tmp[0] == '\r') return false;
 		else if(tmp[0] == '#') continue; // comment
 		else break;
 	}

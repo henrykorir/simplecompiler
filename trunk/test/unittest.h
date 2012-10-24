@@ -34,7 +34,7 @@ private:
 NAMESPACE_END(sc)
 
 #define NEW_UNITTEST(classname) \
-	classname a_classname##ut_obj
+	classname a_##classname##ut_obj
 
 #define ASSERT_COMMAND_ARGUMENTS(minnum, usage) \
 	if (argc < minnum) \

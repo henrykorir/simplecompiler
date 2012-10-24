@@ -61,10 +61,12 @@ bool compiler::is_separator(int32 elem)
 int compiler::get_all_machines(std::list<machine>& mlist)
 {
 	for(std::map<std::string, machine>::iterator iter = instance().machines_.begin(); iter != instance().machines_.end(); ++ iter)
+	{
 		if (typeid(*iter->second.mac) == typeid(state_machine))
 		{
 			mlist.push_back(iter->second);
 		}
+	}
 		
 	return (int32)mlist.size();
 }
@@ -155,14 +157,14 @@ void compiler::check(const std::string& fname)
 	streamsplit wordsplit;
 	std::ifstream cifs(fname.c_str());
 	if(!cifs.is_open()) fire("can't open file: " + fname);
-	const streamsplit::deqwords& words = wordsplit(cifs);
+	streamsplit::deqwords& words = wordsplit(cifs);
 	cifs.close();
 	
 	lrmachine& lrm = *(dynamic_cast<lrmachine*>(machines_["__main__"].mac.get()));
 	lrm.init();
 
 	logstring("\nstart to run machine...");
-	for(streamsplit::deqwords::const_iterator iter = words.begin(); iter != words.end(); ++ iter)
+	for(streamsplit::deqwords::iterator iter = words.begin(); iter != words.end(); ++ iter)
 	{
 		switch (iter->wordClass)
 		{
@@ -204,7 +206,7 @@ void compiler::check(const std::string& fname)
 				if(!lrm.eta(tmp_meta))
 					fire("not expected word!\n");
 			}
-		}		
+		}
 	}
 
 	if(lrm.isaccepted())

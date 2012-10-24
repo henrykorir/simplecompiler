@@ -198,6 +198,14 @@ void lranalyse::operator()(const tinygrammar& tig, lrmachine& mot)
 	}
 
 	make_machine(arg, tig, mot);
+
+	// reset mout's morelist
+	foreach (automachine::sheetrow& row, mot.sheet().begin(), mot.sheet().end())
+	{
+		row.more(NULL);
+		row.code(-1);
+	}
+	mot.morelist().clear();
 }
 
 void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachine& mot) const

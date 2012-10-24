@@ -61,9 +61,14 @@ private:
 	// read terminate symbol
 	size_t parse_terms(std::istream& is, compiler_grammar& cg);
 	// read keywords
-	size_t parse_keywords(std::istream& is, compiler_grammar& cg);
+	size_t parse_keywords(std::istream& is, compiler_grammar& cg, const tstring& baisc_symbol);
+	// read complex symbols
+	size_t parse_complex_symbols(std::istream& is, compiler_grammar& cg);
+	// read function 
+	size_t parse_function(std::istream& is, compiler_grammar& cg, const tstring& funcname);
 private:
 	bool get_nextline(std::istream& is, std::string& tmp, size_t& flines) const;
+	int32 parse_complex_symbol(const tstring& rline, compiler_grammar& cg);
 
 	void _replace(tstring& tmp) const;
 	void _new_replacer(const tstring& pattern, const tstring& replacer);

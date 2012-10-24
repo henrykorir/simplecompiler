@@ -4,7 +4,13 @@
 #include <singleton.h>
 #include <typeinfo>
 #include <scerror.h>
+
+#include <typeinfo/typeinfoname.h>
+
 using namespace sc;
+using namespace kog;
+
+#define _TRY_CATCH_ALL_
 
 class unittest_list : public std::list<unittest*>, public kog::singleton<unittest_list>
 {
@@ -15,12 +21,16 @@ public:
 		std::clog<<"############# run all tests #############"<<std::endl;
 		for(std::list<unittest*>::iterator iter = begin(); iter != end(); ++ iter)
 		{
+#ifdef _TRY_CATCH_ALL_
 			try{
+#endif
 				std::clog<<typeid(**iter).name()<<std::endl;
 				(*iter)->init(argc, argv);
 				(*iter)->run();
 				++ suc;
+#ifdef _TRY_CATCH_ALL_
 			}CATCH_EXCEPTIONS_COUT;
+#endif
 		}
 		std::clog<<"############# done #############"<<std::endl;
 		return suc;

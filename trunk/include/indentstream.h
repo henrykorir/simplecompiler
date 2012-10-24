@@ -21,12 +21,12 @@ public:
         : _Base((std::basic_streambuf<_charT, _traits>*)NULL)
 		, tabindent_(0)
     {
-        rdbuf(os.rdbuf());
+        this->rdbuf(os.rdbuf());
     }
 
 	~basic_oindentstream()
 	{
-		rdbuf((std::basic_streambuf<_charT, _traits>*)NULL);
+		this->rdbuf((std::basic_streambuf<_charT, _traits>*)NULL);
 	}
 public:
     int indent() const

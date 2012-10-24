@@ -5,6 +5,7 @@
 #include <cstring>
 #include <execinfo.h>
 #include <signal.h>
+#include <unistd.h>
 #include <sstream>
 
 using namespace kog;

@@ -12,12 +12,12 @@ NAMESPACE_BEGIN(syntax);
 class compiler_action_parser
 {
 public:
-	compiler_action_parser(prodinfo_t& otput);
+	compiler_action_parser(funcinfo_t& otput);
 public:
 	bool newline(const tstring& line) { return (*this)(line); }
 	bool operator()(const tstring& line);
 private:
-	prodinfo_t* otput_;
+	funcinfo_t* otput_;
 };
 
 NAMESPACE_END(syntax);

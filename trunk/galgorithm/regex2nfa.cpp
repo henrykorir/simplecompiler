@@ -17,6 +17,11 @@ using namespace compile::ga;
 
 #define LOG_REGEX_TO_NFA
 
+#ifdef LOG_REGEX_TO_NFA
+#include <logger.h>
+#include "../test/gio.h"
+#endif
+
 // can't enable this macro
 //#define JUST_PRINTABLE_CHAR
 
@@ -786,6 +791,11 @@ void regex2nfa::operator()(const tstring& input, tinygrammar& otput)
 		tocfg(input, otput);
 	//	tonfa(otput, otput);
 	}
+#ifdef LOG_REGEX_TO_NFA
+	logstring("[regex2nfa] result");
+	gwriter gw(kog::loggermanager::instance().get_logger().getos());
+	gw<<otput;
+#endif
 }
 
 int32 regex2nfa::make_ps(int32 L, int32 meta, int32 R)
@@ -1021,50 +1031,23 @@ void regex2nfa::tonfa(const tinygrammar& input, tinygrammar& otput)
 
 void regex2nfa::todfa_direct(const tstring& input, tinygrammar& otput)
 {
-	prodholder_proxy tmpprods;
-	symholder_proxy tmpsyms;
-	tmpsyms.reset(input.size() * 2 + 3);
-	tmpprods.reset(input.size() + 1);
+	// entry terminates
+	init_terminates();
 
-	memset(tmpsyms.get(), 0, tmpsyms.size_in_bytes());
-	std::list<std::string> strbuffer;
-	const int32 startsid = input.size() + 2;
+	int32 Start = new_nonterm();
+	int32 S_ending = new_nonterm();
+
+	int32 L = Start;
 	for (size_t i = 0; i < input.size(); ++ i)
 	{
-		strbuffer.push_back(stringX::format("S%d", i));
-		tmpsyms[i + startsid].name = strbuffer.back().c_str();
-		tmpsyms[i + startsid].Lname = strbuffer.back().size();
-		tmpsyms[i + startsid].sid = i + startsid;
-
-		strbuffer.push_back(std::string(1, input[i]));
-		tmpsyms[i + 1].name = strbuffer.back().c_str();
-		tmpsyms[i + 1].Lname = 1;
-		tmpsyms[i + 1].ist = 1;
-		tmpsyms[i + 1].sid = i + 1;
-
-		int32 R[2] = {i + 1, startsid + i + 1};
-		tmpprods[i] = production(startsid + i, R, 2);
+		L = make_ps(L, input[i]);
 	}
 
-	strbuffer.push_back(stringX::format("S%d", input.size()));
-	tmpsyms[input.size() + startsid].name = strbuffer.back().c_str();
-	tmpsyms[input.size() + startsid].Lname = strbuffer.back().size();
-	tmpsyms[input.size() + startsid].sid = input.size() + startsid;
+	make_ps(L, eplison_, S_ending);
+	tmpps_.push_back(production(S_ending, &eof_, 1));
 
-	tmpsyms[0].name = "";
-	tmpsyms[0].Lname = 0;
-	tmpsyms[0].sid = 0;
-	tmpsyms[0].ist = 1;
-
-	tmpsyms[input.size() + 1].name = "EOF";
-	tmpsyms[input.size() + 1].Lname = 3;
-	tmpsyms[input.size() + 1].sid = input.size() + 1;
-	tmpsyms[input.size() + 1].ist = 1;
-	tmpprods[input.size()] = production(startsid + input.size(), 
-		&tmpsyms[input.size() + 1].sid, 1); // last -> eof
-
-	tinygrammar tmpg(tmpsyms.begin(), tmpsyms.end(), 
-		tmpprods.begin(), tmpprods.end(), startsid, 0, input.size() + 1);
+	tinygrammar tmpg(tmpsyms_.begin(), tmpsyms_.end(), 
+		tmpps_.begin(), tmpps_.end(), Start, eplison_, eof_);
 
 	otput.swap(tmpg);
 }

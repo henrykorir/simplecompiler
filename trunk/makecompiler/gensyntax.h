@@ -27,6 +27,7 @@ private:
 	void print_includes();
 	void print_separators();
 	void print_keywords();
+	void print_complexsymbols();
 	void print_printablechars();
 	void print_machine(std::ostream& os, const compile::automachine& mac);
     void print_productions();

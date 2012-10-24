@@ -7,6 +7,8 @@
 #include <macros.h>
 #include <arrayX.h>
 #include <functionalX.h>
+#include <iterator>
+#include <cstring>
 
 NAMESPACE_BEGIN(kog)
 
@@ -81,7 +83,7 @@ public:
 	buckethash(const buckethash& _other)
 	{
 		// copy
-		this->copy_from(other);
+		this->copy_from(_other);
 	}
 public:
 	// const iterator, support ++ and --
@@ -294,7 +296,7 @@ public:
 			}
 			return -1;
 		}
-	private:
+	protected:
 		size_t kid;
 		const typename bucket::bucket_node* iter;
 		const buckethash* ref; // ref to hashset
@@ -303,6 +305,9 @@ public:
 	struct _Iterator : public _Const_iterator
 	{
 		friend class buckethash;//<_K, _V, _K2I, _Key_equal>;
+	public:
+		typedef keyvalue_pair& reference;
+		typedef keyvalue_pair* pointer;
 	protected:
 		_Iterator(const buckethash* r, size_t key_id, const typename bucket::bucket_node* p)
 			: _Const_iterator(r, key_id, p)
@@ -318,16 +323,16 @@ public:
 	public:
 		reference operator*() const
 		{
-			if (iter == NULL)
+			if (this->iter == NULL)
 				throw hash_error("invalidate iterator!");
-			return ((bucket::bucket_node*)iter)->data;
+			return ((typename bucket::bucket_node*)this->iter)->data;
 		}
 
 		pointer operator->() const
 		{
-			if (iter == NULL)
+			if (this->iter == NULL)
 				throw hash_error("invalidate iterator!");
-			return (pointer)&(iter->data);
+			return (pointer)&(this->iter->data);
 		}
 	public:
 		_Iterator& operator++()
@@ -360,8 +365,10 @@ public:
 	typedef _Const_iterator const_iterator;
 	typedef _Iterator iterator;
 	// reverse iterator is not effictive
-	typedef std::reverse_bidirectional_iterator<const_iterator, keyvalue_pair> const_reverse_iterator;
-	typedef std::reverse_bidirectional_iterator<iterator, keyvalue_pair> reverse_iterator;
+	//typedef std::reverse_bidirectional_iterator<const_iterator, keyvalue_pair> const_reverse_iterator;
+	//typedef std::reverse_bidirectional_iterator<iterator, keyvalue_pair> reverse_iterator;
+	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+	typedef std::reverse_iterator<iterator> reverse_iterator;
 public:
 	value_reference operator[](const key_type& k)
 	{
@@ -375,7 +382,7 @@ public:
 			iter_find = _insert(kid, k, tmpv);
 		}
 		
-		return ((bucket::bucket_node*)iter_find.iter)->data.second;
+		return ((typename bucket::bucket_node*)iter_find.iter)->data.second;
 	}
 
 	//const_value_reference operator[](const key_type& k) const
@@ -407,13 +414,13 @@ public:
 
 	void remove(const key_type& k)
 	{
-		bucket_const_iterator iter_find = find(k);
+		const_iterator iter_find = find(k);
 		if (iter_find == this->end()) 
 			throw hash_error("not found key in bucket!");
 		bucket& bk = buckets_[iter_find.kid];
 
 		_remove(bk, iter_find.iter);
-		if (!bk.count) _setbit(bitmap_.get(), kid, false);
+		if (!bk.count) _setbit(bitmap_.get(), iter_find.kid, false);
 		
 		delete iter_find.iter;
 
@@ -451,7 +458,7 @@ public:
 
 	const_iterator begin() const
 	{
-		_Const_Iterator tmp(this, 0, NULL);
+		_Const_iterator tmp(this, 0, NULL);
 		tmp.move_to_first();
 		return tmp;
 	}
@@ -510,8 +517,8 @@ public:
 		for (size_t i = 0; i < buckets_.size(); ++ i)
 		{
 			if (buckets_[i].count == 0) continue;
-			bucket::bucket_node* p = buckets_[i].first;
-			bucket::bucket_node* first = p;
+			typename bucket::bucket_node* p = buckets_[i].first;
+			typename bucket::bucket_node* first = p;
 			do {
 				size_t nid = _bucket_index(p->data.first, _Count);
 				_insert(tmp[nid], p);
@@ -534,9 +541,9 @@ public:
 			bucket& bk = buckets_[i];
 			if (bk.count)
 			{
-				bucket::bucket_node* p = bk.first;
+				typename bucket::bucket_node* p = bk.first;
 				do {
-					bucket::bucket_node* q = p->next;
+					typename bucket::bucket_node* q = p->next;
 					delete p;
 					p = q;
 				} while (p != bk.first);
@@ -565,7 +572,7 @@ private:
 		for (size_t i = 0; i < buckets_.size(); ++ i)
 		{
 			buckets_[i].count = other.buckets_[i].count;
-			bucket::bucket_node* p = other.buckets_[i].first;
+			typename bucket::bucket_node* p = other.buckets_[i].first;
 			if (p == NULL)
 			{
 				buckets_[i].first = NULL;
@@ -573,7 +580,7 @@ private:
 			}
 			do
 			{
-				bucket::bucket_node* n = new bucket::bucket_node(p->data);
+				typename bucket::bucket_node* n = new typename bucket::bucket_node(p->data);
 				_insert(buckets_[i], n);
 				p = p->next;
 			}while (p != other.buckets_[i].first);
@@ -593,7 +600,7 @@ private:
 	const_iterator _bucket_Locate(size_t kid, const key_type& k) const
 	{
 		const bucket& b = buckets_[kid];
-		bucket::bucket_node* p = b.first;
+		typename bucket::bucket_node* p = b.first;
 		_Key_equal key_eq;
 		size_t i = 0;
 		for (; i < b.count && !key_eq(k, p->data.first); ++ i, p = p->next);
@@ -605,7 +612,7 @@ private:
 	{
 		bucket& bk = buckets_[kid];
 		//keyvalue* kv = alloc_.allocate(1);
-		bucket::bucket_node* n = new bucket::bucket_node(k, v);
+		typename bucket::bucket_node* n = new typename bucket::bucket_node(k, v);
 
 		// insert into link list
 		_insert(bk, n);

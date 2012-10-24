@@ -20,6 +20,11 @@ class regex2nfa_test : public sc::unittest
 
 	/* overwrite */ virtual void run_test()
 	{
+		direct_test();
+	}
+
+	void regexstr_test()
+	{
 		const tchar* strs[] = 
 		{
 	//		"abcfd",
@@ -37,7 +42,23 @@ class regex2nfa_test : public sc::unittest
 		for(int i = 0; i < sizeof(strs) / sizeof(const tchar*); ++ i)
 		{
 			tinygrammar otputg;
-			regex2nfa r2n(strs[i], otputg);
+			regex2nfa r2n(strs[i], otputg, false);
+			r2n.invoke();
+			print_grammar_to_file(otputg);
+		}
+	}
+
+	void direct_test()
+	{
+		const tchar* strs[] = 
+		{
+	//		"abcfd",
+			"||",
+		};
+		for(int i = 0; i < sizeof(strs) / sizeof(const tchar*); ++ i)
+		{
+			tinygrammar otputg;
+			regex2nfa r2n(strs[i], otputg, true);
 			r2n.invoke();
 			print_grammar_to_file(otputg);
 		}

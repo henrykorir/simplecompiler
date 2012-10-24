@@ -22,7 +22,7 @@ int32 combine_machines::find_or_insert(const closure& c)
 	{
 		if (input_macs_[x.first]->sheet().at(x.second).endings())
 		{
-			if (r.endings()) fire("string can eat by two different machines");
+			if (r.endings()) fire("string can eat by two different machines %d and %d", r.code(), x.first);
 			r.endings(1);
 			r.code(x.first);
 		}
@@ -52,7 +52,11 @@ void combine_machines::update_sheet_row(int32 rid)
 		foreach (const automachine::gotoitem& gt, row.begin(), row.end())
 		{
 			firstmetas[gt.first].push_back(citem(ct.first, gt.second));
+#if (defined _WIN32 || defined WIN32)
 			if (std::isprint(gt.first, std::locale("")))
+#else
+			if (std::isprint(gt.first))
+#endif
 				logstring("closure[%d] -> '%c' (%d,%d)", rid, (char)gt.first, ct.first, gt.second);
 			else logstring("closure[%d] -> %d (%d,%d)", rid, gt.first, ct.first, gt.second);
 		}
@@ -71,7 +75,11 @@ void combine_machines::update_sheet_row(int32 rid)
 	os<<"firstmetas = { ";
 	foreach (meta_closure_pair& c, firstmetas.begin(), firstmetas.end())
 	{
-		if (std::isprint(c.first, std::locale("")))
+#if (defined _WIN32 || defined WIN32)
+			if (std::isprint(c.first, std::locale("")))
+#else
+			if (std::isprint(c.first))
+#endif
 			os<<"'"<<(char)c.first<<"' ";
 		else os<<c.first<<" ";
 	}
@@ -144,7 +152,11 @@ void combine_machines::operator()(const machine_vector& inputmacs, automachine& 
 			ir++, r.endings() ? "ending" : "", r.code());
 		foreach (const automachine::gotoitem& it, r.begin(), r.end())
 		{
+#if (defined _WIN32 || defined WIN32)
 			if (std::isprint(it.first, std::locale("")))
+#else
+			if (std::isprint(it.first))
+#endif
 				os<<stringX::format("('%c',%d) ", (char)it.first, it.second);
 			else os<<stringX::format("(%d,%d) ", it.first, it.second);
 		}

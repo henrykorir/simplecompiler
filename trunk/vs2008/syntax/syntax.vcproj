@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\third_party"
+				AdditionalIncludeDirectories="..\..\include;..\..\third_party;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;VISUAL_STDIO;DEBUG_OUTPUT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -180,10 +180,6 @@
 				RelativePath="..\..\syntax\symbol.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\..\syntax\symbolmachine.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -220,10 +216,6 @@
 			</File>
 			<File
 				RelativePath="..\..\syntax\symbol.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\syntax\symbolmachine.h"
 				>
 			</File>
 			<File
