@@ -136,8 +136,8 @@ struct prod_func14 : public ifunction
 
         const type* canTypes[] =
         {
-            typesystem::instance().int_type(),
-            typesystem::instance().float_type()
+            typesystem::instance().get_type("int"),
+            typesystem::instance().get_type("float")
         };
 
         variable* v = s->entry_value(as<word>(m0->content)->txt, canTypes, 2);
@@ -257,7 +257,7 @@ struct prod_func21 : public ifunction
         scope* s = iml.current_scope();
         const lalr1meta* m0 = (const lalr1meta*)(metas[0]);
         lalr1meta* ot = (lalr1meta*)(result);
-        ot->content = (type*)typesystem::instance().int_type();
+        ot->content = (type*)typesystem::instance().get_type("int");
         ot->ctype = typesystem::instance().type_type(); // type_type
         return result;
     }
@@ -272,7 +272,7 @@ struct prod_func22 : public ifunction
         scope* s = iml.current_scope();
         const lalr1meta* m0 = (const lalr1meta*)(metas[0]);
         lalr1meta* ot = (lalr1meta*)(result);
-        ot->content = (type*)typesystem::instance().float_type();
+        ot->content = (type*)typesystem::instance().get_type("float");
         ot->ctype = typesystem::instance().type_type(); // type_type
         return result;
     }

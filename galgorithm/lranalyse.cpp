@@ -111,7 +111,7 @@ int32 AlgorithmArg::get_lrsid(const lrstate* p) const
 std::ostream& print_item(std::ostream& os, const lrstateitem& itm, const symholder_proxy& sholder)
 {
 	const production& p = *itm.prod;
-		
+	
 	os<<sholder[p.left()].name<<" -> ";
 	
 	for(int32 j = 0; j < p.right_size(); ++ j)
@@ -143,7 +143,9 @@ void lranalyse::operator()(const tinygrammar& tig, lrmachine& mot)
 		sQueue.pop();
 
 		typedef std::pair<int32, const lrstateitem*> etapair;
+		typedef std::pair<int32, const production*> reducepair;
 		std::vector<etapair> eats;// first: next symbol, second: ref lrstateitem
+		std::vector<reducepair> reduces; // first: next symbol, second: reduce production
 		for(lrstate::const_iterator iter = pRow->begin(); iter != pRow->end(); ++ iter)
 		{
 			const production& p = *iter->prod;
@@ -152,11 +154,7 @@ void lranalyse::operator()(const tinygrammar& tig, lrmachine& mot)
 				// using first(By) to make reduce item
 				for(sfollowset::const_iterator iterf = iter->follow.begin(); iterf != iter->follow.end(); ++ iterf)
 				{
-					arg.sparsesheet.push_back(kog::make_triple(pRow, *iterf, nextstate(&p)));
-#ifdef DEBUG_OUTPUT
-					const char* name = *iterf < 0 ? "#" : tig.symbols()[*iterf].name;
-					logstring("(I%d, %s) -> r%d", arg.get_lrsid(pRow), name, arg.get_pid(&p));
-#endif
+					reduces.push_back(std::make_pair(*iterf, &p));
 				}
 			}
 			else
@@ -190,6 +188,24 @@ void lranalyse::operator()(const tinygrammar& tig, lrmachine& mot)
 			const lrstate* pNewS = arg.insert_new_state(pRow, eats[i].first, &s);
 			if(pNewS != NULL)
 				sQueue.push(pNewS);
+		}
+
+		// append reduce items
+		for (size_t i = 0; i < reduces.size(); ++ i)
+		{
+#ifdef LALR1_SHIFT_FIRST
+			if (std::find_if(eats.begin(), eats.end(), kog::composite_function(kog::mem_value(&etapair::first), 
+				std::bind2nd(std::equal_to<int32>(), reduces[i].first))) != eats.end())
+			{
+				logwarning("reduce-shift conflict! drop reduce production[%d], when symbol (%s)", 
+					arg.get_pid(reduces[i].second), tig.symbols()[reduces[i].first].name);
+			}
+#endif
+			arg.sparsesheet.push_back(kog::make_triple(pRow, reduces[i].first, nextstate(reduces[i].second)));
+#ifdef DEBUG_OUTPUT
+			const char* name = reduces[i].first < 0 ? "#" : tig.symbols()[reduces[i].first].name;
+			logstring("(I%d, %s) -> r%d", arg.get_lrsid(pRow), name, arg.get_pid(reduces[i].second));
+#endif
 		}
 
 		// reduce - reduce conflict
@@ -280,26 +296,36 @@ void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachin
 
 bool AlgorithmArg::CheckLR1(const lrstate* cs) const
 {
+	logstring("AlgorithmArg::CheckLR1 starting...");
 	typedef std::list<kog::triple<const lrstate*, int32, nextstate> > lrrowlist;
 	kog::smart_vector<int32> issused(tig->symbols().size() + 1); // last one is for ending symbol('#')
 	memset(issused.get(), 0, issused.size_in_bytes());
+	std::list<lrrowlist::const_reverse_iterator> needtoremove;
 	for (lrrowlist::const_reverse_iterator  iter = sparsesheet.rbegin(); iter != sparsesheet.rend() && iter->first == cs; ++ iter)
 	{
 		int32 x = iter->second == -1 ? (issused.size() - 1) : iter->second;
+		logstring("checking symbol '%s', sorp %d", iter->second == -1 ? "#" : tig->symbols()[x].name, iter->third.sorp);
 		if(x < 0) fire("invalidate symbol!");
 		else if(issused[x]) 
 		{
 #ifdef DEBUG_OUTPUT
 			logstring("AlgorithmArg::CheckLR1, error lr state:\n");
 			for (lrstate::const_iterator iter_item = cs->begin(); iter_item != cs->end(); ++ iter_item)
-			{
+			{	
 				print_item(kog::loggermanager::instance().get_logger().getos(), *iter_item, tig->symbols());
 			}
 #endif
 			
-			fire("not lr grammar!");
+#ifdef LALR1_SHIFT_FIRST
+			if (issused[x] == 2 && iter->third.sorp) fire("not lr grammar~! reduce-reduce conflict");
+#else
+			fire("not lr grammar! reduce-reduce(shift) conflict");
+#endif
 		}
-		else issused[x] = 1;
+		else 
+		{
+			issused[x] = 1 + (iter->third.sorp != 0);
+		}
 	}
 	return true;
 }

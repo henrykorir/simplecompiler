@@ -183,6 +183,10 @@
 				RelativePath="..\..\cprogramlanguage\cplcompiler.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\cprogramlanguage\expression-test-funcs.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

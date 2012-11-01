@@ -1,0 +1,60 @@
+# struct, enum, union 
+
+StructDefine -> struct { StructContent } 
+
+StructDefine -> struct symbol { StructContent } 
+
+StructDefine_WithVar -> struct { StructContent } ValueDefineList 
+
+StructDefine_WithVar -> struct symbol { StructContent } ValueDefineList 
+
+EnumDefine -> enum { EnumContent } 
+
+EnumDefine -> enum symbol { EnumContent } 
+
+EnumDefine_WithVar -> enum { EnumContent } ValueDefineList 
+
+EnumDefine_WithVar -> enum symbol { EnumContent } ValueDefineList 
+
+#EnumDefine -> enum : Type { EnumContent } 
+
+UnionDefine -> union { UnionContent } 
+
+UnionDefine -> union symbol { UnionContent } 
+
+UnionDefine_WithVar -> union { UnionContent } ValueDefineList 
+
+UnionDefine_WithVar -> union symbol { UnionContent } ValueDefineList 
+
+StructContent -> AStructContent
+
+StructContent -> AStructContent StructContent
+
+AStructContent -> StructDefine 
+
+AStructContent -> EnumDefine 
+
+AStructContent -> UnionDefine 
+
+AStructContent -> Type symbol 
+
+#AStructContent -> Typedef
+
+#AStructContent -> Type symbol : intvalue 
+
+EnumDefine -> AEnumItem
+
+EnumDefine -> AEnumItem , EnumDefine
+
+#EnumDefine -> AEnumItem ,
+
+AEnumItem -> symbol
+
+AEnumItem -> symbol = intvalue
+
+UnionContent -> AUnionItem
+
+UnionContent -> AUnionItem  UnionContent
+
+AUnionItem -> Type symbol
+

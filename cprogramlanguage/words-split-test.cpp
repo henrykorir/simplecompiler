@@ -92,7 +92,7 @@ private:
 		//std::ifstream ifs("../../test/callstacktest.cpp");
 		//std::ifstream ifs("../../test/input/tinyg.x");
 		if (!ifs.is_open()) fire("open file failed!");
-		extrace_stream es(ifs, mainmac, " \t\r\n");
+		extrace_stream es(ifs, mainmac, -1, " \t\r\n");
 		
 		streamword aword;
 		while(es>>aword)

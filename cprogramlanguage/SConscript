@@ -9,3 +9,11 @@ usedlib = ['compiler', 'syntax', 'mcompiler', 'regex']
 usedlibpath = ['../syntax', '../compiler', '../mcompiler', '../third_party/regexlib']
 
 aEnv.Library(target='cplcompiler', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)
+
+if int(ARGUMENTS.get('cplc', 0)):
+	incboost = aEnv['boost_inc']
+	cpllib = ['cplcompiler', 'unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace', 'typename', 'regex', aEnv['regexlib']]
+	cplinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm', './', '../third_party', incboost]
+	cpllibpath = ['.', '../test', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace', '../third_party/typename', '../third_party/regexlib']
+	cppfiles = ['cplmain.cpp', 'syntax/cplgrammar.cpp', 'prebuild.cpp']
+	aEnv.Program(target= 'kcc', source = cppfiles, LIBS=cpllib, CPPPATH=cplinc, LIBPATH=cpllibpath)

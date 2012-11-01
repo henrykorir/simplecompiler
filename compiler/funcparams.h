@@ -42,7 +42,7 @@ struct funcparamlist : public variable
 
     /* overwrite */ virtual _Str to_string() const
     {
-        stringX::basic_stringbuffer<_Str::value_type> tmp;
+        stringX::basic_string_builder<_Str::value_type> tmp;
         const _Str::value_type* sep = "[";
         for(vec_params::const_iterator iter = params_.begin(); iter != params_.end(); ++ iter)
         {

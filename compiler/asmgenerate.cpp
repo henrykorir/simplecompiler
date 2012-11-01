@@ -166,14 +166,14 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 			logstring("asm.print code: plus");
             if (pt->src1->vtype() != pt->src2->vtype())
                 fire("invalidate type when add: %s %s", pt->src1->vtype()->to_string().c_str(), pt->src2->vtype()->to_string().c_str());
-            else if(pt->src1->vtype() == typesystem::instance().int_type())
+            else if(pt->src1->vtype() == typesystem::instance().get_type("int"))
             {
                 os<<newline<<"movl "<<varpos(pt->src1)<<", %eax";
                 os<<newline<<"movl "<<varpos(pt->src2)<<", %ebx";
                 os<<newline<<"addl %eax, %ebx";
                 os<<newline<<"movl %ebx, "<<varpos(pt->dst);
             }
-            else if(pt->src2->vtype() == typesystem::instance().float_type())
+            else if(pt->src2->vtype() == typesystem::instance().get_type("float"))
             {
                 os<<newline<<"flds "<<varpos(pt->src1);
                 os<<newline<<"fadds "<<varpos(pt->src2);
@@ -185,14 +185,14 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 			logstring("asm.print code: minus");
             if (pt->src1->vtype() != pt->src2->vtype())
                 fire("invalidate type when add: %s %s", pt->src1->vtype()->to_string().c_str(), pt->src2->vtype()->to_string().c_str());
-            else if(pt->src1->vtype() == typesystem::instance().int_type())
+            else if(pt->src1->vtype() == typesystem::instance().get_type("int"))
             {
                 os<<newline<<"movl "<<varpos(pt->src1)<<", %eax";
                 os<<newline<<"movl "<<varpos(pt->src2)<<", %ebx";
                 os<<newline<<"subl %eax, %ebx";
                 os<<newline<<"movl %ebx, "<<varpos(pt->dst);
             }
-            else if(pt->src2->vtype() == typesystem::instance().float_type())
+            else if(pt->src2->vtype() == typesystem::instance().get_type("float"))
             {
                 os<<newline<<"flds "<<varpos(pt->src1);
                 os<<newline<<"fsubs "<<varpos(pt->src2);
@@ -204,14 +204,14 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 			logstring("asm.print code: multi");
             if (pt->src1->vtype() != pt->src2->vtype())
                 fire("invalidate type when add: %s %s", pt->src1->vtype()->to_string().c_str(), pt->src2->vtype()->to_string().c_str());
-            else if(pt->src1->vtype() == typesystem::instance().int_type())
+            else if(pt->src1->vtype() == typesystem::instance().get_type("int"))
             {
                 os<<newline<<"movl "<<varpos(pt->src1)<<", %eax";
                 os<<newline<<"movl "<<varpos(pt->src2)<<", %ebx";
                 os<<newline<<"imul %eax, %ebx";
                 os<<newline<<"movl %ebx, "<<varpos(pt->dst);
             }
-            else if(pt->src2->vtype() == typesystem::instance().float_type())
+            else if(pt->src2->vtype() == typesystem::instance().get_type("float"))
             {
                 os<<newline<<"flds "<<varpos(pt->src1);
                 os<<newline<<"fmuls "<<varpos(pt->src2);
@@ -223,14 +223,14 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 			logstring("asm.print code: divid");
             if (pt->src1->vtype() != pt->src2->vtype())
                 fire("invalidate type when add: %s %s", pt->src1->vtype()->to_string().c_str(), pt->src2->vtype()->to_string().c_str());
-            else if(pt->src1->vtype() == typesystem::instance().int_type())
+            else if(pt->src1->vtype() == typesystem::instance().get_type("int"))
             {
                 os<<newline<<"movl "<<varpos(pt->src1)<<", %eax";
                 os<<newline<<"movl "<<varpos(pt->src2)<<", %ebx";
                 os<<newline<<"divl %eax, %ebx";
                 os<<newline<<"movl %ebx, "<<varpos(pt->dst);
             }
-            else if(pt->src2->vtype() == typesystem::instance().float_type())
+            else if(pt->src2->vtype() == typesystem::instance().get_type("float"))
             {
                 os<<newline<<"flds "<<varpos(pt->src1);
                 os<<newline<<"fdivs "<<varpos(pt->src2);
@@ -294,12 +294,12 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 				logstring("asm.print code: internal");
 				// internal_call* icall = as<internal_call>(src1);
 				// print 
-				if (pt->src2->vtype() == typesystem::instance().int_type())
+				if (pt->src2->vtype() == typesystem::instance().get_type("int"))
 				{
 					os<<newline<<"pushl "<<varpos(pt->src2)
 						<<newline<<"call print_int";
 				}
-				else if (pt->src2->vtype() == typesystem::instance().float_type())
+				else if (pt->src2->vtype() == typesystem::instance().get_type("float"))
 				{
 					os<<newline<<"pushl "<<varpos(pt->src2)
 						<<newline<<"call print_float";

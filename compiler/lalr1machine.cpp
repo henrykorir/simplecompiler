@@ -56,7 +56,7 @@ machine_meta* lalr1machine::new_meta(const machine_meta* meta)
 {
     kog::assert::is_true(meta != NULL);
 
-	machine_meta* pmeta = alloc_.allocate(1);
+	lalr1meta* pmeta = alloc_.allocate(1);
 	*pmeta = *((const lalr1meta*)meta);
     return pmeta;
 }

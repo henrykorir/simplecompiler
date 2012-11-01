@@ -73,7 +73,7 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 	//  ntpi[i] is first production: symbol[i] -> ...
 	kog::smart_vector<int32> ntpi(sholder.size(), -1);
 	for(size_t i = 0; i < plist.size(); ++ i)
-		if(ntpi[plist[i]->left()] == -1) ntpi[plist[i]->left()] = i;
+		if(ntpi[plist[i]->left()] == -1) ntpi.at(plist[i]->left()) = i;
 	// e-closure
 	kog::smart_vector<int32> updated(sholder.size(), 1); // mark who is updated
 	while(std::find(updated.begin(), updated.end(), 1) != updated.end()) // until don't update
@@ -155,8 +155,9 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		std::vector<std::pair<int32, int32> > t;
 		for(std::set<int32>::const_iterator iter = cs->begin(); iter != cs->end(); ++ iter)
 		{
+			if (*iter == virtual_ending) continue;
 			int32 x = ntpi[*iter]; // first production start from symbol[*iter]
-			if (x == -1) fire("can't be -1");
+			if (x == -1) fire("can't be -1; sid(%d), name(%s)", *iter, sholder.at(*iter).name);
 			// process all productions start from *iter
 			for (size_t v = x; v < plist.size() && plist[v]->left() == *iter; ++ v)
 			{

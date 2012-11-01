@@ -116,11 +116,15 @@ private:
 #ifdef VISUAL_STDIO
 #define logstring(fmt, ...) \
 	kog::loggermanager::instance().dump(stringX::format("[%s:%d][message]", __FILE__, __LINE__) + stringX::format(fmt, __VA_ARGS__))
+#define logwarning(fmt, ...) \
+	kog::loggermanager::instance().dump(stringX::format("[%s:%d][warning]", __FILE__, __LINE__) + stringX::format(fmt, __VA_ARGS__))
 #define logerror(fmt, ...) \
 	kog::loggermanager::instance().dump(stringX::format("[%s:%d][error]", __FILE__, __LINE__) + stringX::format(fmt, __VA_ARGS__))
 #else
 #define logstring(fmt, arg...) \
 	kog::loggermanager::instance().dump(stringX::format("[%s:%d][message]", __FILE__, __LINE__) + stringX::format(fmt, ##arg))
+#define logwarning(fmt, arg...) \
+	kog::loggermanager::instance().dump(stringX::format("[%s:%d][warning]", __FILE__, __LINE__) + stringX::format(fmt, ##arg))
 #define logerror(fmt, arg...) \
 	kog::loggermanager::instance().dump(stringX::format("[%s:%d][error]", __FILE__, __LINE__) + stringX::format(fmt, ##arg))
 #endif

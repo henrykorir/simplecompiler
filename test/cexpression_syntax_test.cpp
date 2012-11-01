@@ -27,6 +27,7 @@ using namespace compile::ga;
 using namespace compile::cplc;
 
 void load_grammar_machine(tinygrammar& g, lalr1machine& m, symbol_machine& s, kog::smart_vector<cplcompiler::veccsconver>& symconvertor);
+extern void print_nodes();
 class cexpression_test : public unittest
 {
 public:
@@ -56,12 +57,34 @@ public:
 		c_expression_compiler.build(ifs);
 
 		ifs.close();
+
+		print_nodes();
 	}
 private:
 	std::string input;
 };
 
 NEW_UNITTEST(cexpression_test);
+
+void entry_types()
+{
+	typesystem::instance().new_type<type>("struct_type")->tsize = 4; // struct_type
+	typesystem::instance().new_type<type>("enum_type")->tsize = 4; // enum_type
+	typesystem::instance().new_type<type>("union_type")->tsize = 4; // enum_type
+	typesystem::instance().new_type<type>("void")->tsize = 0; // enum_type
+    typesystem::instance().new_type<type>("int")->tsize = sizeof(int32); // int_type
+    typesystem::instance().new_type<type>("float")->tsize = sizeof(float); // float_type
+    typesystem::instance().new_type<type>("double")->tsize = sizeof(double); // double_type
+    typesystem::instance().new_type<type>("short")->tsize = sizeof(short); // short_type
+    typesystem::instance().new_type<type>("char")->tsize = sizeof(char); // char_type
+    typesystem::instance().new_type<type>("long")->tsize = sizeof(long); // long_type
+    typesystem::instance().new_type<type>("long long")->tsize = sizeof(long long); // long_long_type
+    typesystem::instance().new_type<type>("unsigned char")->tsize = sizeof(unsigned char); // uchar_type
+    typesystem::instance().new_type<type>("unsigned short")->tsize = sizeof(unsigned short); // ushort_type
+    typesystem::instance().new_type<type>("unsigned int")->tsize = sizeof(unsigned int); // uint_type
+    typesystem::instance().new_type<type>("unsigned long")->tsize = sizeof(unsigned long); // ulong_type
+    typesystem::instance().new_type<type>("unsigned long long")->tsize = sizeof(unsigned long long); // ulong_long_type
+}
 
 using namespace compile::doc;
 extern void init_grammar(tinygrammar& tig);
