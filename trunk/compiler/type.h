@@ -9,6 +9,7 @@
 #include <stringXF.h>
 #include <singleton.h>
 #include <deque>
+#include <map>
 #include <basic_types.h>
 
 NAMESPACE_BEGIN(compile)
@@ -18,11 +19,12 @@ NAMESPACE_END(runtime)
 
 struct type : public compile::object
 {
-	type(int32 id = -1, int32 s = 0)
+	type(const tstring& type_name, int32 id = -1, int32 s = 0)
 		: tid(id)
         , tsize(s)
         , defvalue(NULL)
 		, content(NULL)
+		, name(type_name)
 	{}
 
     /* overwrite */ virtual _Str to_string() const
@@ -35,6 +37,7 @@ struct type : public compile::object
 	int32 tsize; // value's default size
 	runtime::scope* content; // if type is a class/struct/enum/union..., 
 			// content is the scope of the class/...
+	tstring name; // name of the type
 };
 
 struct function_type : public type
@@ -45,13 +48,25 @@ struct function_type : public type
 	//	const _Str pname;
 	//};
 
-    function_type(int32 id = -1)
-        : type(id)
+    function_type(const tstring& name, int32 id = -1)
+        : type(name, id)
     {}
+
+	static tstring packname(int32 nparams, const type* params[], const type* return_type);
 
     kog::smart_vector<const type*> params_type;
     const type* return_type;
 	void* more;
+};
+
+class pointer_type : public type
+{
+	pointer_type(const tstring& name, const type* basictype = NULL, int32 id = -1)
+		: basic_type(basictype)
+		, type(name, id, 4)
+	{}
+
+	const type* basic_type;
 };
 
 class typesystem : public kog::singleton<typesystem>
@@ -65,19 +80,27 @@ public:
 public:
     const type* type_type() const;
     const type* operator_type() const;
-    const type* functiontype_type() const;
     const type* word_type() const;
-    const type* int_type() const;
-    const type* float_type() const;
+    const type* functiontype_type() const;
 public:
-    const function_type* get_func_type(int32 nparams, const type* params[]) const;
-
-	const type* gettype(int32 tid) const
+	// get type from name
+	const type* get_type(const tstring& name) const;
+	// get type from tid
+	const type* get_type(int32 tid) const;
+public:
+	template<typename _Type> _Type* new_type(const tstring& name)
 	{
-		return types_.at(tid);
+		const type* pt = get_type(name);
+		if (pt != NULL) return (_Type*)as<_Type>(pt);
+		_Type* pn = new _Type(name);
+		pn->tid = (int32)types_.size();
+		types_.push_back(pn);
+		name2type_[name] = pn;
+		return pn;
 	}
 private:
 	std::deque<type*> types_;
+	std::map<tstring, type*> name2type_;
 };
 
 NAMESPACE_END(compile)

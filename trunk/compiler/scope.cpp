@@ -157,13 +157,13 @@ variable* scope::entry_value(const _Str& content, const type* canTypes[], int _C
     {
         v->initv = (byte*)new float(stringX::tovalue<float>(content));
         v->size = sizeof(float);
-        var.reset(new variable(name, typesystem::instance().float_type(), this, v));
+        var.reset(new variable(name, typesystem::instance().get_type("float"), this, v));
     }
     else
     {
         v->initv = (byte*)new int(stringX::tovalue<int>(content));
         v->size = sizeof(int);
-        var.reset(new variable(name, typesystem::instance().int_type(), this, v));
+        var.reset(new variable(name, typesystem::instance().get_type("int"), this, v));
     }
 
 	ref_session<rodata_session>(this, sessions_)->insert(var.get());

@@ -5,6 +5,9 @@
 #include <deque>
 #include <lalr1machine.h>
 #include <cplcompiler.h>
+#include <stack>
+#include <list>
+#include <indentstream.h>
 
 using namespace sc;
 using namespace compile;
@@ -22392,11 +22395,103 @@ void init_printablechars(kog::smart_vector<sc::int32>& printablechars)
 	
 }
 
+struct expression_node : public object
+{
+	expression_node* firstc;
+	expression_node* nextbr;
+	//expression_node* parent;
+
+	enum 
+	{
+		enone, elist, eoper, evar, eval, epms, etype
+	};
+
+	int32 flag;
+	std::string content;
+};
+
+expression_node* empty_node()
+{
+	expression_node* n = new expression_node;
+	n->firstc = NULL;
+	n->nextbr = NULL;
+	n->flag = expression_node::enone;
+	return n;
+}
+
+expression_node* root = NULL;
+void print_nodes()
+{
+	logstring("start print expression result...");
+	kog::oindentstream os(kog::loggermanager::instance().get_logger().getos());
+	std::stack<expression_node*> nodes;
+	nodes.push(root);
+	while (!nodes.empty())
+	{
+		expression_node* p = nodes.top();
+		nodes.pop();
+		if (p == NULL)
+		{
+			os<<kog::dectab;
+			continue;
+		}
+		os<<kog::newline;
+		switch (p->flag)
+		{
+			case expression_node::enone: os<<"[enone]"; break;
+			case expression_node::elist: os<<"[elist]"; break;
+			case expression_node::eoper: os<<"[eoper]"; break;
+			case expression_node::evar: os<<"[evar]"; break;
+			case expression_node::eval: os<<"[eval]"; break;
+			case expression_node::epms: os<<"[epms]"; break;
+			case expression_node::etype: os<<"[etype]"; break;
+			default: fire("unknown flag(%d)!", p->flag);
+		}
+		os<<""<<p->content;
+		if (p->firstc)
+		{
+			os<<kog::inctab;
+			std::list<expression_node*> tmplist;
+			expression_node* c= p->firstc;
+			while (c != NULL)
+			{
+				tmplist.push_front(c);
+				c = c->nextbr;
+			}
+			nodes.push(NULL);
+			foreach (expression_node* q, tmplist.begin(), tmplist.end())
+				nodes.push(q);
+		}
+	}
+}
+
+#ifndef lalr1m
+#define lalr1m(meta) ((const lalr1machine::lalr1meta*)(meta))
+#endif
+
+#define asenode(n) (as<expression_node>(n))
+#define m2node(meta) asenode(lalr1m(meta)->content)
+#define set_result(n) \
+	((lalr1machine::lalr1meta*)result)->content = n; ((lalr1machine::lalr1meta*)result)->ctype = enodetype();
+
+const type* enodetype()
+{
+	static const type* _st = typesystem::instance().get_type("enode");
+	return _st;
+}
+
+
 //ExpressionList -> Expression ;
 struct production_func_0 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		enode->firstc = m2node(metas[0]);
+		enode->flag = expression_node::elist;
+		root = enode;
+		//enode->content = "";
+		set_result(enode);
 		return result;
 	}
 };
@@ -22406,6 +22501,11 @@ struct production_func_1 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = m2node(metas[2]);
+		expression_node* first = m2node(metas[0]);
+		first->nextbr = enode->firstc;
+		enode->firstc = first;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22415,6 +22515,11 @@ struct production_func_2 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		word* w = as<word>(lalr1m(metas[0])->content);
+		enode->content = w->txt;
+		enode->flag = expression_node::evar;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22424,6 +22529,11 @@ struct production_func_3 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		word* w = as<word>(lalr1m(metas[0])->content);
+		enode->content = w->txt;
+		enode->flag = expression_node::eval;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22433,6 +22543,11 @@ struct production_func_4 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		word* w = as<word>(lalr1m(metas[0])->content);
+		enode->content = w->txt;
+		enode->flag = expression_node::eval;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22442,6 +22557,11 @@ struct production_func_5 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		word* w = as<word>(lalr1m(metas[0])->content);
+		enode->content = w->txt;
+		enode->flag = expression_node::eval;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22451,6 +22571,11 @@ struct production_func_6 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		word* w = as<word>(lalr1m(metas[0])->content);
+		enode->content = w->txt;
+		enode->flag = expression_node::eval;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22460,6 +22585,11 @@ struct production_func_7 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		word* w = as<word>(lalr1m(metas[0])->content);
+		enode->content = w->txt;
+		enode->flag = expression_node::eval;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22469,6 +22599,8 @@ struct production_func_8 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = m2node(metas[0]);
+		set_result(enode);
 		return result;
 	}
 };
@@ -22478,6 +22610,12 @@ struct production_func_9 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->content = "call";
+		opr->flag = expression_node::eoper;
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		set_result(opr);
 		return result;
 	}
 };
@@ -22487,6 +22625,11 @@ struct production_func_10 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->content = "call";
+		opr->flag = expression_node::eoper;
+		opr->firstc = m2node(metas[0]);
+		set_result(opr);
 		return result;
 	}
 };
@@ -22496,6 +22639,10 @@ struct production_func_11 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* elist = empty_node();
+		elist->firstc = m2node(metas[0]);
+		elist->flag = expression_node::epms;
+		set_result(elist);
 		return result;
 	}
 };
@@ -22505,6 +22652,11 @@ struct production_func_12 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = m2node(metas[2]);
+		expression_node* first = m2node(metas[0]);
+		first->nextbr = enode->firstc;
+		enode->firstc = first;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22514,6 +22666,7 @@ struct production_func_13 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[1]));
 		return result;
 	}
 };
@@ -22523,6 +22676,12 @@ struct production_func_14 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "array";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22532,6 +22691,13 @@ struct production_func_15 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "ptr->mem";
+		set_result(opr);
+
 		return result;
 	}
 };
@@ -22541,6 +22707,12 @@ struct production_func_16 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "ref.mem";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22550,6 +22722,11 @@ struct production_func_17 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* enode = empty_node();
+		word* w = as<word>(lalr1m(metas[1])->content);
+		enode->content = w->txt;
+		enode->flag = expression_node::evar;
+		set_result(enode);
 		return result;
 	}
 };
@@ -22559,6 +22736,11 @@ struct production_func_18 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->flag = expression_node::eoper;
+		opr->content = "v++";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22568,6 +22750,11 @@ struct production_func_19 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->flag = expression_node::eoper;
+		opr->content = "v--";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22577,6 +22764,7 @@ struct production_func_20 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22586,6 +22774,11 @@ struct production_func_21 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->flag = expression_node::eoper;
+		opr->content = "!";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22595,6 +22788,11 @@ struct production_func_22 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->flag = expression_node::eoper;
+		opr->content = "~";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22604,6 +22802,11 @@ struct production_func_23 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->flag = expression_node::eoper;
+		opr->content = "++v";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22613,6 +22816,11 @@ struct production_func_24 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->flag = expression_node::eoper;
+		opr->content = "--v";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22622,6 +22830,11 @@ struct production_func_25 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->flag = expression_node::eoper;
+		opr->content = "-";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22631,6 +22844,7 @@ struct production_func_26 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[1]));
 		return result;
 	}
 };
@@ -22640,6 +22854,11 @@ struct production_func_27 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->flag = expression_node::eoper;
+		opr->content = "*";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22649,6 +22868,11 @@ struct production_func_28 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->flag = expression_node::eoper;
+		opr->content = "&";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22658,6 +22882,12 @@ struct production_func_29 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[1]);
+		opr->firstc->nextbr = m2node(metas[3]);
+		opr->flag = expression_node::eoper;
+		opr->content = "(type)";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22667,6 +22897,11 @@ struct production_func_30 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "sizeof";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22676,6 +22911,7 @@ struct production_func_31 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22685,6 +22921,12 @@ struct production_func_32 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "ptr->*ptr";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22694,6 +22936,12 @@ struct production_func_33 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "ref->.ptr";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22703,6 +22951,7 @@ struct production_func_34 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22712,6 +22961,12 @@ struct production_func_35 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "*";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22721,6 +22976,12 @@ struct production_func_36 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "/";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22730,6 +22991,12 @@ struct production_func_37 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "%";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22739,6 +23006,7 @@ struct production_func_38 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22748,6 +23016,12 @@ struct production_func_39 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "+";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22757,6 +23031,12 @@ struct production_func_40 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "-";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22766,6 +23046,7 @@ struct production_func_41 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22775,6 +23056,12 @@ struct production_func_42 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "<<";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22784,6 +23071,12 @@ struct production_func_43 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = ">>";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22793,6 +23086,7 @@ struct production_func_44 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22802,6 +23096,12 @@ struct production_func_45 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "<";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22811,6 +23111,12 @@ struct production_func_46 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = ">";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22820,6 +23126,12 @@ struct production_func_47 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "<";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22829,6 +23141,12 @@ struct production_func_48 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = ">=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22838,6 +23156,7 @@ struct production_func_49 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22847,6 +23166,12 @@ struct production_func_50 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "==";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22856,6 +23181,12 @@ struct production_func_51 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "!=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22865,6 +23196,7 @@ struct production_func_52 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22874,6 +23206,12 @@ struct production_func_53 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "&";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22883,6 +23221,7 @@ struct production_func_54 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]))
 		return result;
 	}
 };
@@ -22892,6 +23231,12 @@ struct production_func_55 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "^";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22901,6 +23246,7 @@ struct production_func_56 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22910,6 +23256,12 @@ struct production_func_57 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "|";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22919,6 +23271,7 @@ struct production_func_58 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22928,6 +23281,12 @@ struct production_func_59 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "&&";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22937,6 +23296,7 @@ struct production_func_60 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22946,6 +23306,12 @@ struct production_func_61 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "||";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22955,6 +23321,7 @@ struct production_func_62 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22964,6 +23331,13 @@ struct production_func_63 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->firstc->nextbr->nextbr = m2node(metas[4]);
+		opr->flag = expression_node::eoper;
+		opr->content = "?:";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22973,6 +23347,7 @@ struct production_func_64 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -22982,6 +23357,12 @@ struct production_func_65 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -22991,6 +23372,12 @@ struct production_func_66 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "+=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23000,6 +23387,12 @@ struct production_func_67 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "-=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23009,6 +23402,12 @@ struct production_func_68 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "*=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23018,6 +23417,12 @@ struct production_func_69 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "/=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23027,6 +23432,12 @@ struct production_func_70 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "%=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23036,6 +23447,12 @@ struct production_func_71 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "&=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23045,6 +23462,12 @@ struct production_func_72 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "^=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23054,6 +23477,12 @@ struct production_func_73 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "|=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23063,6 +23492,12 @@ struct production_func_74 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = "<<=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23072,6 +23507,12 @@ struct production_func_75 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = ">>=";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23081,6 +23522,7 @@ struct production_func_76 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -23090,6 +23532,12 @@ struct production_func_77 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* opr = empty_node();
+		opr->firstc = m2node(metas[0]);
+		opr->firstc->nextbr = m2node(metas[2]);
+		opr->flag = expression_node::eoper;
+		opr->content = ",";
+		set_result(opr);
 		return result;
 	}
 };
@@ -23099,6 +23547,7 @@ struct production_func_78 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -23108,6 +23557,7 @@ struct production_func_79 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };
@@ -23117,6 +23567,11 @@ struct production_func_80 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* x = m2node(metas[0]);
+		expression_node* n = empty_node();
+		n->content = x->content + "*";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23126,6 +23581,11 @@ struct production_func_81 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "struct_type";
+		n->flag = expression_node::etype;
+		set_result(n);
+		// a new struct type
 		return result;
 	}
 };
@@ -23135,6 +23595,10 @@ struct production_func_82 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "enum_type";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23144,6 +23608,10 @@ struct production_func_83 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "int";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23153,6 +23621,10 @@ struct production_func_84 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "long";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23162,6 +23634,10 @@ struct production_func_85 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "short";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23171,6 +23647,10 @@ struct production_func_86 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "double";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23180,6 +23660,10 @@ struct production_func_87 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "float";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23189,6 +23673,10 @@ struct production_func_88 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "char";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23198,6 +23686,10 @@ struct production_func_89 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "uchar";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23207,6 +23699,10 @@ struct production_func_90 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "uint";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23216,6 +23712,10 @@ struct production_func_91 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "ushort";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23225,6 +23725,10 @@ struct production_func_92 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "void*";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23234,6 +23738,10 @@ struct production_func_93 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		expression_node* n = empty_node();
+		n->content = "void";
+		n->flag = expression_node::etype;
+		set_result(n);
 		return result;
 	}
 };
@@ -23243,6 +23751,7 @@ struct production_func_94 : public ifunction
 {
 	/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)
 	{
+		set_result(m2node(metas[0]));
 		return result;
 	}
 };

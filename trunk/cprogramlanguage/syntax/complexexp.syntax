@@ -1,0 +1,58 @@
+# complex expressions: if/else while for switch 
+
+includes
+	nonterm.syntax
+
+If_Expression -> If_Content
+
+If_Content -> if ( Expression ) AExpression
+
+If_Expression -> If_Content Else_Statement 
+
+Else_Statement -> else AExpression
+
+While_Expression -> while ( Expression ) AExpression
+
+For_Expression -> for ( First_Statememnt Second_Statememnt Third_Statement ) AExpression
+
+First_Statememnt -> ;
+
+First_Statememnt -> ValueDeclear ;
+
+First_Statememnt -> Expression ;
+
+Second_Statememnt -> ;
+
+Second_Statememnt -> Expression ;
+
+Third_Statement -> ;
+
+Third_Statement -> Expression ;
+
+Break_Expression -> break ;
+
+Continue_Expression -> continue ;
+
+DoWhile_Expression -> do AExpression while ( Expression ) ;
+
+Switch_Expression -> switch ( Expression ) { Switch_Content }
+
+Switch_Content -> Switch_Item
+
+Switch_Content -> Switch_Item Switch_Content
+
+Switch_Item -> Case_Item
+
+Switch_Item -> Default_Item
+
+Case_Item -> case CaseValue :
+
+Case_Item -> case CaseValue : AExpression
+
+Default_Item -> default :
+
+Default_Item -> default : AExpression
+
+CaseValue -> intvalue
+
+CaseValue -> charvalue

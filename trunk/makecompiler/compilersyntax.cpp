@@ -25,6 +25,14 @@ int32 compiler_grammar::make_new_production(const tstring& left, const std::vect
 
 	if (L == -1 || std::find(R.begin(), R.end(), -1) != R.end())
 		fire("invalidate production, some symbol not found!");
+	// check has same production
+	foreach (const production& tmp, productions_.begin(), productions_.end())
+	{
+		if (L == tmp.left() && tmp.right_size() == rights.size() &&
+				std::equal(R.begin(), R.end(), tmp.right().begin()))
+			fire("existing same production!");
+	}
+
 	production p(symbols(), L, R.get(), R.size());
 	productions_.push_back(p);
 	pinfos_.push_back(pinfo);

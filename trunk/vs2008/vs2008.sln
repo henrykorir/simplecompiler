@@ -108,6 +108,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic-test", "basic-test\ba
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "typeinfoname", "typeinfoname\typeinfoname.vcproj", "{A7EFF8DC-19EA-44ED-9B2A-5723CD022D42}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "c-compiler", "c-compiler\c-compiler.vcproj", "{42C7DB73-82C4-401A-901F-0DEE9E83D391}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -182,6 +184,10 @@ Global
 		{A7EFF8DC-19EA-44ED-9B2A-5723CD022D42}.Debug|Win32.Build.0 = Debug|Win32
 		{A7EFF8DC-19EA-44ED-9B2A-5723CD022D42}.Release|Win32.ActiveCfg = Release|Win32
 		{A7EFF8DC-19EA-44ED-9B2A-5723CD022D42}.Release|Win32.Build.0 = Release|Win32
+		{42C7DB73-82C4-401A-901F-0DEE9E83D391}.Debug|Win32.ActiveCfg = Debug|Win32
+		{42C7DB73-82C4-401A-901F-0DEE9E83D391}.Debug|Win32.Build.0 = Debug|Win32
+		{42C7DB73-82C4-401A-901F-0DEE9E83D391}.Release|Win32.ActiveCfg = Release|Win32
+		{42C7DB73-82C4-401A-901F-0DEE9E83D391}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

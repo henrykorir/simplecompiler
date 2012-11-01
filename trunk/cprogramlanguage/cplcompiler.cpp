@@ -53,7 +53,11 @@ void cplcompiler::build(tistream& cfile)
 		{
 			foreach (complex_symbol_convert& convertor, symconvertor_[word.sid].begin(), symconvertor_[word.sid].end())
 			{
-				if (convertor != NULL && convertor(tmp_meta)) break;
+				if (convertor != NULL && convertor(tmp_meta)) 
+				{
+					logstring("convert sid from (%d) to (%d)", word.sid, tmp_meta->sid);
+					break;
+				}
 			}
 		}
 

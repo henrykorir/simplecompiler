@@ -1,0 +1,67 @@
+# program
+
+includes
+	expression.syntax
+	cdeclear.syntax
+	complextype.syntax
+	type.syntax
+
+StartSymbol : CProgram
+
+CProgram -> ProgramItemList
+
+ProgramItemList -> ProgramItem
+
+ProgramItemList -> ProgramItem ProgramItemList
+
+ProgramItem -> Define ;
+
+ProgramItem -> Include
+
+ProgramItem -> Typedef ;
+
+ProgramItem -> ExternValue ;
+
+ProgramItem -> ExternFunc ; 
+
+ProgramItem -> StructDefine ;
+
+ProgramItem -> EnumDefine ;
+
+ProgramItem -> UnionDefine ;
+
+ProgramItem -> StructDefine_WithVar ;
+
+ProgramItem -> EnumDefine_WithVar ;
+
+ProgramItem -> UnionDefine_WithVar ;
+
+ProgramItem -> ValueDeclear ;
+
+ProgramItem -> FunctionDeclear ;
+
+ProgramItem -> Function
+
+#Define -> #define symbol define_content
+
+#Define -> #define symbol ( NameList ) 
+
+Include -> #include stringvalue
+
+Include -> #include < file_name >
+
+Typedef -> typedef Type symbol
+
+Typedef -> typedef Type ( * symbol ) ( )
+
+Typedef -> typedef void ( * symbol ) ( )
+
+Typedef -> typedef Type ( * symbol ) ( ParamList )
+
+Typedef -> typedef void ( * symbol ) ( ParamList )
+
+ExternValue -> extern Type symbol
+
+ExternFunc -> extern FunctionDeclear
+
+

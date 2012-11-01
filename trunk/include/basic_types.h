@@ -6,7 +6,7 @@
 
 #include <macros.h>
 #include <string>
-#include <istream>
+#include <iostream>
 
 NAMESPACE_BEGIN(sc)
 
@@ -26,6 +26,7 @@ typedef unsigned char uchar;
 typedef uchar byte;
 
 typedef std::basic_istream<tchar> tistream;
+typedef std::basic_ostream<tchar> tostream;
 
 NAMESPACE_END(sc)
 

@@ -78,7 +78,7 @@
 				 <<sce.trace_message()<<std::endl; \
 	}	\
 	catch(std::exception& ex){ \
-		std::cerr<<"["<<typeinfo_name(typeid(ex).name())<<"]"<<ex.what()<<std::endl; \
+		std::cerr<<"["<<kog::typeinfo_name(typeid(ex).name())<<"]"<<ex.what()<<std::endl; \
 	}catch(...){ \
 		std::cerr<<"unknown exception!"<<std::endl; \
 	}

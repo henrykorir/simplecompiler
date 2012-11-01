@@ -1,0 +1,20 @@
+# declear: value or function
+
+includes
+	cfunction.syntax
+
+ValueDeclear -> Type VarDeclearList 
+
+VarDeclearList -> AVarDeclear
+
+VarDeclearList -> AVarDeclear , VarDeclearList
+
+AVarDeclear -> symbol
+
+# can't use ',', '=', '+=', ... operators
+AVarDeclear -> symbol = Expression14
+
+#AVarDeclear -> symbol ( Expression )
+
+FunctionDeclear -> FunctionHeader 
+

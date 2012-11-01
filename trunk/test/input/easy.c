@@ -1,4 +1,3 @@
-#include <stdio.h>
 
 int add(int a, int b)
 {
@@ -10,9 +9,10 @@ float fadd(float a, float b)
 	return a + b;
 }
 
-int main(int argc, const char* argv[])
+int main(int argc, char* argv[])
 {
 	printf("easy test!\n");
+	int t;
 	int a = 4;
 	int b = 5;
 	int c = add(a, b);

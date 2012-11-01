@@ -49,6 +49,7 @@ void syntaxgenerator::operator()(const grammar* aGrammar, const tstring& outfile
 		print_includes();
 		print_grammar();
 		//print_symbols();
+		print_keyword_convert_funcs();
 		print_complexsymbols();
 		print_separators();
 		print_keywords();
@@ -243,6 +244,52 @@ void syntaxgenerator::print_separators()
 		<<newline;
 }
 
+void syntaxgenerator::print_keyword_convert_funcs()
+{
+	if (dynamic_cast<const compiler_grammar*>(syntax_) == NULL) return;
+	logstring("print keyword convert functions...");
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	typedef std::ostream& (*pfun)(std::ostream& os);
+	pfun newline = tabident::newline;
+	std::ostream& os = *cppstream_;
+	const symholder_proxy& sholder = syntax_->symbols();
+	std::map<int32, std::list<int32> > keywordconverts;
+
+	const std::deque<compiler_grammar::complex_symbol_t>& csyms = dynamic_cast<const compiler_grammar*>(syntax_)->complex_symbols();
+	foreach (const compiler_grammar::complex_symbol_t& s, csyms.begin(), csyms.end())
+	{
+		if (s.flag == compiler_grammar::complex_symbol_t::keyword) 
+		{
+			keywordconverts[s.basic_sid].push_back(s.new_sid);
+		}
+	}
+
+	typedef std::pair<int32, std::list<int32> > intlistpair;
+	foreach (const intlistpair& p, keywordconverts.begin(), keywordconverts.end())
+	{
+		const tstring funcname = stringX::format("_keyword_from_sid_%d", p.first);
+		os<<newline<<"bool "<<funcname<<"(automachine::machine_meta* meta)"
+			<<newline<<"{"<<inc;
+		os<<newline<<"static std::map<tstring, int32> _keywords;"
+			<<newline<<"if (_keywords.empty())"
+			<<newline<<"{"<<inc;
+		foreach (int32 x, p.second.begin(), p.second.end())
+		{
+			os<<newline<<"_keywords[\""<<sholder.at(x).name<<"\"] = "<<x<<";";
+		}
+		os<<dec
+			<<newline<<"}"
+			<<newline<<"const tstring& w = as<word>(((lalr1machine::lalr1meta*)meta)->content)->txt;"
+			<<newline<<"logstring(\"check whether (%s) is a keyword\", w.c_str());"
+			<<newline<<"std::map<tstring, int32>::const_iterator iter = _keywords.find(w);"
+			<<newline<<"if (iter != _keywords.end()) meta->sid = iter->second;"
+			<<newline<<"return iter != _keywords.end();"<<dec
+			<<newline<<"}"
+			<<newline;
+	}
+}
+
 void syntaxgenerator::print_complexsymbols()
 {
 	tabident inc(tabident::inctab);
@@ -260,10 +307,16 @@ void syntaxgenerator::print_complexsymbols()
 		kog::smart_vector<std::set<tstring> > usedset(nsymbol_count);
 		foreach (const compiler_grammar::complex_symbol_t& s, csyms.begin(), csyms.end())
 		{
+			tstring funcname;
 			// output complex symbol
-			if (s.flag != compiler_grammar::complex_symbol_t::word) continue;
-			else if(usedset[s.basic_sid].find(s.content) != usedset[s.basic_sid].end()) continue;
-			usedset[s.basic_sid].insert(s.content);
+			if (s.flag == compiler_grammar::complex_symbol_t::keyword) 
+				funcname = stringX::format("_keyword_from_sid_%d", s.basic_sid);
+			else if (s.flag != compiler_grammar::complex_symbol_t::word) 
+				funcname = s.content;
+			else continue;
+			
+			if(usedset[s.basic_sid].find(funcname) != usedset[s.basic_sid].end()) continue;
+			usedset[s.basic_sid].insert(funcname);
 		}
 
 		{

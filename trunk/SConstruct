@@ -6,20 +6,20 @@ outdir = 'build'
 
 aEnv = Environment(ENV = os.environ)
 
-defines = [] #['COMBINE_REGEX_MACHINES']
+defines = ['DEBUG_OUTPUT', 'LALR1_SHIFT_FIRST'] #['COMBINE_REGEX_MACHINES']
 debug_ccflags = ''
 if os.sys.platform.lower() == 'win32':
 	aEnv['boost_inc'] = r'D:\Work\libs\boost_1_50_0'
 	aEnv['boost_libpath'] = r'D:\D:\Work\libs\boost_1_50_0\stage'
 	aEnv.Append(CCFLAGS = '/D WIN32')
 	aEnv.Append(CCFLAGS = '/D UNICODE /D VISUAL_STDIO /EHsc /MTd /D DEBUG_OUTPUT')
-#aEnv.Append(CCFLAGS = '/D ' + ' /D '.join(defines))
+	aEnv.Append(CCFLAGS = ' '.join(['/D ' + x for x in defines]))
 	debug_ccflags = '/D _DEBUG /D DEBUG'
 else:
 	aEnv['boost_inc'] = ''
 	aEnv['boost_libpath'] = ''
 	debug_ccflags = '-g -rdynamic'
-#aEnv.Append(CCFLAGS = '-D ' + ' -D '.join(defines))
+	aEnv.Append(CCFLAGS = ' '.join(['-D' + x for x in defines]))
 
 if int(ARGUMENTS.get('debug', 0)):
 	aEnv.Append(CCFLAGS = debug_ccflags)
