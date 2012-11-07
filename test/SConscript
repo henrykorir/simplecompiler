@@ -6,9 +6,9 @@ Import('aEnv')
 incboost = aEnv['boost_inc']
 aEnv.Library(target = 'unittest', source = ['unittest.cpp'], CPPPATH=['../include', '../third_party'])
 
-UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace', 'typename', 'regex', aEnv['regexlib']]
+UTlib = ['unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace', 'typename', 'regex', aEnv['regexlib'], 'fs']
 UTinc = ['../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm', './', '../third_party', incboost]
-UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace', '../third_party/typename', '../third_party/regexlib']
+UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace', '../third_party/typename', '../third_party/regexlib', '../third_party/fslib']
 
 if int(ARGUMENTS.get('parseg', 0)):
     cppfiles = ['syntaxgeneratortest.cpp']
