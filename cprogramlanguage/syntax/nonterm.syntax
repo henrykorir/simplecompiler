@@ -22,8 +22,12 @@ Non-Terminates
 	EnumContent
 	UnionContent
 	AStructContent
+	StructHeader
 	AEnumItem
+	EnumName
+	EnumHeader
 	AUnionItem
+	UnionHeader
 	FunctionHeader
 	Function
 	FunctionBegin
@@ -52,6 +56,12 @@ Non-Terminates
 	Break_Expression
 	Continue_Expression
 	AVarDeclear
+	PtrArrayValue
+	AInitContent
+	InitList
+	ArraySize
+	ArraySize2
+	AArraySize
 	VarDeclearList
 	ExpressionList
 	Expression
@@ -73,7 +83,12 @@ Non-Terminates
 	Expression16
 	FunctionCall
 	ParamList
+	SymbolWithPtrArray
+	SymbolWithArray
 	Type
 	type
+	basic_type
+	integer_type
 	ReturnType
+	FunctionType
 	file_name

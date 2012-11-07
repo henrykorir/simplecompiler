@@ -18,17 +18,31 @@ FunctionHeader -> void symbol ( )
 #FunctionHeader -> ReturnType symbol ( ParamList )
 FunctionHeader -> Type symbol ( ParamList )
 
+FunctionHeader -> Type symbol ( ParamList , ... )
+
 FunctionHeader -> void symbol ( ParamList )
+
+FunctionHeader -> void symbol ( ParamList , ... )
 
 ParamList -> AFuncParam
 
 ParamList -> AFuncParam , ParamList
 
+AFuncParam -> Type
+
+AFuncParam -> Type ArraySize
+
 AFuncParam -> Type symbol
 
-AFuncParam -> Type symbol [ ]
+AFuncParam -> Type symbol ArraySize
 
-AFuncParam -> Type symbol [ intvalue ]
+AFuncParam -> void ( * ) ( ParamList )
+
+AFuncParam -> Type ( * ) ( ParamList )
+
+AFuncParam -> void ( * symbol ) ( ParamList )
+
+AFuncParam -> Type ( * symbol ) ( ParamList )
 
 FunctionContent -> ContentExpression
 
@@ -39,6 +53,10 @@ ContentExpression -> AExpression
 ContentExpression -> DeclearExpression ;
 
 ContentExpression -> Typedef ;
+
+ContentExpression -> StructDefine ;
+
+ContentExpression -> StructDefine_WithVar ;
 
 AExpression -> Expression ;
 

@@ -1,60 +1,72 @@
 # struct, enum, union 
 
-StructDefine -> struct { StructContent } 
+StructDefine -> StructHeader { StructContent } 
 
-StructDefine -> struct symbol { StructContent } 
+StructDefine_WithVar -> StructHeader { StructContent } ValueDefineList
 
-StructDefine_WithVar -> struct { StructContent } ValueDefineList 
+EnumDefine -> EnumHeader { EnumContent } 
 
-StructDefine_WithVar -> struct symbol { StructContent } ValueDefineList 
+EnumDefine_WithVar -> EnumHeader { EnumContent } ValueDefineList 
 
-EnumDefine -> enum { EnumContent } 
+UnionDefine -> UnionHeader { UnionContent } 
 
-EnumDefine -> enum symbol { EnumContent } 
+UnionDefine_WithVar -> UnionHeader { UnionContent } ValueDefineList 
 
-EnumDefine_WithVar -> enum { EnumContent } ValueDefineList 
-
-EnumDefine_WithVar -> enum symbol { EnumContent } ValueDefineList 
-
-#EnumDefine -> enum : Type { EnumContent } 
-
-UnionDefine -> union { UnionContent } 
-
-UnionDefine -> union symbol { UnionContent } 
-
-UnionDefine_WithVar -> union { UnionContent } ValueDefineList 
-
-UnionDefine_WithVar -> union symbol { UnionContent } ValueDefineList 
-
-StructContent -> AStructContent
+StructContent -> AStructContent ;
 
 StructContent -> AStructContent StructContent
 
 AStructContent -> StructDefine 
 
+AStructContent -> StructDefine_WithVar
+
 AStructContent -> EnumDefine 
+
+AStructContent -> EnumDefine_WithVar
 
 AStructContent -> UnionDefine 
 
-AStructContent -> Type symbol 
+AStructContent -> UnionDefine_WithVar
 
-#AStructContent -> Typedef
+AStructContent -> basic_type SymbolWithPtrArray
 
-#AStructContent -> Type symbol : intvalue 
+AStructContent -> const basic_type SymbolWithPtrArray
+
+AStructContent -> integer_type symbol : intvalue
+
+AStructContent -> Typedef 
+
+StructHeader -> struct
+
+StructHeader -> struct symbol
 
 EnumDefine -> AEnumItem
 
 EnumDefine -> AEnumItem , EnumDefine
 
-#EnumDefine -> AEnumItem ,
-
 AEnumItem -> symbol
 
 AEnumItem -> symbol = intvalue
+
+EnumHeader -> enum
+
+EnumHeader -> enum EnumName
+
+EnumName -> :
+
+EnumName -> symbol
+
+EnumName -> symbol : integer_type
 
 UnionContent -> AUnionItem
 
 UnionContent -> AUnionItem  UnionContent
 
-AUnionItem -> Type symbol
+AUnionItem -> basic_type SymbolWithPtrArray
+
+AUnionItem -> const basic_type SymbolWithPtrArray
+
+UnionHeader -> union
+
+UnionHeader -> union symbol
 

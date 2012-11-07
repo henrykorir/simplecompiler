@@ -17,10 +17,12 @@ Terminates
 	] : \]
 	{ : \{
 	} : \}
+	... : \.\.\.
 
 complex-symbols
 	struct_type : symbol : complex_type_check
 	enum_type : symbol : complex_type_check
+	union_type : symbol : complex_type_check
 #	file_name : 
 
 Keywords : symbol

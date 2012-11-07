@@ -3,16 +3,42 @@
 includes
 	cfunction.syntax
 
-ValueDeclear -> Type VarDeclearList 
+ValueDeclear -> basic_type VarDeclearList 
+
+ValueDeclear -> const basic_type VarDeclearList 
 
 VarDeclearList -> AVarDeclear
 
 VarDeclearList -> AVarDeclear , VarDeclearList
 
-AVarDeclear -> symbol
+AVarDeclear -> PtrArrayValue
+
+PtrArrayValue -> SymbolWithPtrArray
+
+ArraySize -> [ ]
+
+ArraySize -> [ ] ArraySize2
+
+ArraySize -> ArraySize2
+
+AArraySize -> [ intvalue ]
+
+AArraySize -> [ symbol ]
+
+ArraySize2 -> AArraySize
+
+ArraySize2 -> AArraySize ArraySize2
 
 # can't use ',', '=', '+=', ... operators
-AVarDeclear -> symbol = Expression14
+AVarDeclear -> PtrArrayValue = Expression14
+
+#AVarDeclear -> PtrArrayValue = { InitList }
+
+AInitContent -> Expression15
+
+AInitContent -> { InitList }
+
+InitList -> AInitContent , InitList
 
 #AVarDeclear -> symbol ( Expression )
 
