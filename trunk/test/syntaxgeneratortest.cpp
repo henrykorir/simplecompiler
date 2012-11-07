@@ -91,7 +91,7 @@ private:
 		}
 
 		syntaxgenerator gensyntax;
-		gensyntax(&simplegrammar, cppout_);
+		gensyntax(&simplegrammar, cppout_, "simple");
 	}
 private:
 

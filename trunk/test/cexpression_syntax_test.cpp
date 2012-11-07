@@ -47,7 +47,7 @@ public:
 		cplcompiler c_expression_compiler;
 
 		logstring("start setup compiler...");
-		c_expression_compiler.setup(load_grammar_machine);
+		c_expression_compiler.setup();
 
 		logstring("start init compiler...");
 		c_expression_compiler.init();

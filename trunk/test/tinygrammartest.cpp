@@ -52,7 +52,7 @@ public:
 		}
 
 		syntaxgenerator gensyntax;
-		gensyntax(&simplegrammar, cppfile);
+		gensyntax(&simplegrammar, cppfile, "tiny");
 	}
 private:
 	void init_grammar(grammar& g);
