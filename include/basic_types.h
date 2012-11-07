@@ -8,6 +8,12 @@
 #include <string>
 #include <iostream>
 
+#if (defined _WIN32 || defined WIN32)
+#ifndef VISUAL_STDIO
+#define VISUAL_STDIO
+#endif
+#endif
+
 NAMESPACE_BEGIN(sc)
 
 typedef long int int64;

@@ -351,7 +351,8 @@ std::basic_string<_Elem> toupper(const std::basic_string<_Elem>& _Str)
 {
 	std::basic_string<_Elem> tmp(_Str.size(), (_Elem)'\0');
 	for(size_t i = 0; i < tmp.size(); ++ i)
-		if(std::islower(_Str[i])) tmp[i] = (_Str[i] - 'a') + 'A';
+		if(::islower(_Str[i])) tmp[i] = (_Str[i] - 'a') + 'A';
+		else tmp[i] = _Str[i];
 	return tmp;
 }
 /*inline bool AWEqual(const std::string& str1, const std::wstring& str2)
