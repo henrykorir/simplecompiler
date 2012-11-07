@@ -4,7 +4,7 @@ Import('aEnv')
 
 cppfiles = ['gensyntax.cpp', 'compilermake.cpp', 'compilersyntax.cpp', 'symbolmachine.cpp', 'prodfunction.cpp']
 inc = ['../include', '../syntax', '../galgorithm', '../third_party']
-usedlib = ['ga', 'syntax', 'typename']
-usedlibpath = ['../syntax', '../galgorithm', '../thirty_party/typename']
+usedlib = ['ga', 'syntax', 'typename', 'fs']
+usedlibpath = ['../syntax', '../galgorithm', '../thirty_party/typename', '../thirty_party/fslib']
 
 aEnv.Library(target='mcompiler', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)

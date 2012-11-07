@@ -16,6 +16,7 @@
 #include <combinemachines.h>
 #include <typeinfo>
 #include <typeinfo/typeinfoname.h>
+#include <filesystem/folder.h>
 
 //#define DEBUG_OUTPUT
 #ifdef DEBUG_OUTPUT
@@ -29,6 +30,10 @@
 using namespace compile;
 using namespace compile::ga;
 
+const tstring syntaxgenerator::compiler_hfile_fmt = "%s/%s_compiler.h";
+const tstring syntaxgenerator::compiler_cppfile_fmt = "%s/%s_compiler.cpp";
+const tstring syntaxgenerator::reduce_functions_fmt = "%s/%s_pruductions.cpp";
+
 syntaxgenerator::syntaxgenerator()
 {
 }
@@ -37,38 +42,18 @@ syntaxgenerator::~syntaxgenerator()
 {
 }
 
-void syntaxgenerator::operator()(const grammar* aGrammar, const tstring& outfile)
+void syntaxgenerator::operator()(const grammar* aGrammar, const tstring& outputfolder, const tstring& grammarname)
 {
 	syntax_ = aGrammar;
-	cppfile_ = outfile;
-	std::ofstream ofs(cppfile_.c_str());
-	if(!ofs.is_open()) throw std::runtime_error("can't open file " + cppfile_);
-	try{
-		cppstream_ = &ofs;
-		// try to output syntax file
-		print_includes();
-		print_grammar();
-		//print_symbols();
-		print_keyword_convert_funcs();
-		print_complexsymbols();
-		print_separators();
-		print_keywords();
-		print_statemachines();
-		print_printablechars();
-        print_productions();
-		cppstream_ = NULL;
-		ofs.close();
-	} catch (sc::scerror& sce) {
-		ofs.close();
-		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(sce).name()).c_str(), sce.what(), sce.trace_message().c_str());
-	}
-	catch(std::exception& ex){
-		ofs.close();
-		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(ex).name()).c_str(), ex.what());
-	}catch(...){
-		ofs.close();
-		fire("unknown exception[syntaxgenerator::operator()]!");
-	}
+	gname_ = grammarname;
+	ofolder_ = outputfolder;
+
+	kog::folder fout(ofolder_);
+	if (!fout.isexist()) fout.mkdir();
+	
+	print_hfile();
+	print_cppfile();
+	print_rpfile();
 }
 
 std::set<tstring>& keywords()
@@ -106,6 +91,92 @@ bool syntaxgenerator::is_token_keyword(const tchar* name) const
 	if(*name) return false;
 	return keywords().find(tstring(p)) == keywords().end();
 }
+
+void syntaxgenerator::print_hfile()
+{
+	//const tstring hfile = ofolder_ + "\\" + gname_ + "_compiler.h";
+	const tstring hfile = stringX::format(syntaxgenerator::compiler_hfile_fmt.c_str(), ofolder_.c_str(), gname_.c_str());
+	std::ofstream ofs(hfile.c_str());
+	if(!ofs.is_open()) throw std::runtime_error("can't open file " + hfile);
+
+	try{
+		cppstream_ = &ofs;
+		// print XX_compile.h
+		print_compiler();
+		cppstream_ = NULL;
+		ofs.close();
+	} catch (sc::scerror& sce) {
+		ofs.close();
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(sce).name()).c_str(), sce.what(), sce.trace_message().c_str());
+	}
+	catch(std::exception& ex){
+		ofs.close();
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(ex).name()).c_str(), ex.what());
+	}catch(...){
+		ofs.close();
+		fire("unknown exception[syntaxgenerator::operator()]!");
+	}
+}
+
+void syntaxgenerator::print_cppfile()
+{
+	const tstring cppfile = stringX::format(syntaxgenerator::compiler_cppfile_fmt.c_str(), ofolder_.c_str(), gname_.c_str());
+	std::ofstream ofs(cppfile.c_str());
+	if(!ofs.is_open()) throw std::runtime_error("can't open file " + cppfile);
+
+	try{
+		cppstream_ = &ofs;
+		// try to output syntax file
+		print_includes();
+		print_grammar();
+		//print_symbols();
+		print_keyword_convert_funcs();
+		print_complexsymbols();
+		print_separators();
+		print_keywords();
+		print_statemachines();
+		print_printablechars();
+		cppstream_ = NULL;
+		ofs.close();
+	} catch (sc::scerror& sce) {
+		ofs.close();
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(sce).name()).c_str(), sce.what(), sce.trace_message().c_str());
+	}
+	catch(std::exception& ex){
+		ofs.close();
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(ex).name()).c_str(), ex.what());
+	}catch(...){
+		ofs.close();
+		fire("unknown exception[syntaxgenerator::operator()]!");
+	}
+}
+
+void syntaxgenerator::print_rpfile()
+{
+	const tstring rpfile = stringX::format(syntaxgenerator::reduce_functions_fmt.c_str(), ofolder_.c_str(), gname_.c_str());
+	std::ofstream ofs(rpfile.c_str());
+	if(!ofs.is_open()) throw std::runtime_error("can't open file " + rpfile);
+
+	try{
+		cppstream_ = &ofs;
+		// print productions
+		print_includes();
+        print_productions();
+		cppstream_ = NULL;
+		ofs.close();
+	} catch (sc::scerror& sce) {
+		ofs.close();
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(sce).name()).c_str(), sce.what(), sce.trace_message().c_str());
+	}
+	catch(std::exception& ex){
+		ofs.close();
+		fire("inner exception is [%s] (%s)\n%s", kog::typeinfo_name(typeid(ex).name()).c_str(), ex.what());
+	}catch(...){
+		ofs.close();
+		fire("unknown exception[syntaxgenerator::operator()]!");
+	}
+}
+
 
 void syntaxgenerator::print_symbols()
 {
@@ -206,6 +277,48 @@ void syntaxgenerator::print_includes()
 		<<newline;
 }
 
+void syntaxgenerator::print_compiler()
+{
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	typedef std::ostream& (*pfun)(std::ostream& os);
+	pfun newline = tabident::newline;
+	std::ostream& os = *cppstream_;
+	os<<"// "<<gname_<<": compiler class, generator by kog's app"
+		<<newline<<"//"
+		<<newline
+		<<newline<<"#ifndef _"<<stringX::toupper(gname_)<<"_COMPILER_H_KOG_GEN_"
+		<<newline<<"#define _"<<stringX::toupper(gname_)<<"_COMPILER_H_KOG_GEN_"
+		<<newline
+		<<newline<<"#include <lalr1machine.h>"
+		<<newline<<"#include <compiler.h>"
+		<<newline<<"#include <vector>"
+		<<newline
+		<<newline<<"class "<<gname_
+		<<newline<<"{"
+		<<newline<<"public:"<<inc
+		<<newline<<"typedef sc::int32 int32;"
+		<<newline<<"typedef bool (*complex_symbol_convert)(compile::automachine::machine_meta* meta);"
+		<<newline<<"typedef std::vector<complex_symbol_convert> veccsconver;"
+		<<dec
+		<<newline<<"public:"<<inc
+		<<newline<<gname_<<"() {}"
+		<<newline<<"virtual ~"<<gname_<<"() {}"<<dec
+		<<newline<<"protected:"<<inc
+		<<newline<<"void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid);"
+		<<newline<<"void init_complex_symbols(kog::smart_vector<veccsconver>& convertors);"
+		<<newline<<"void init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords);"
+		<<newline<<"void init_printablechars(kog::smart_vector<sc::int32>& printablechars);"
+		<<newline<<"void init_machines(std::map<std::string, compile::doc::machine>& machines);"
+		<<newline<<"void init_syntax_machine(compile::lalr1machine& lrm);"
+		<<newline<<"void init_grammar(compile::tinygrammar& tig);"
+		<<newline<<"void init_production_functions(kog::smart_vector<compile::ifunction*>& pfuncs);"<<dec
+		<<newline<<"};"
+		<<newline
+		<<newline<<"#endif"
+		<<newline;
+}
+
 void syntaxgenerator::print_separators()
 {
 	tabident inc(tabident::inctab);
@@ -231,7 +344,7 @@ void syntaxgenerator::print_separators()
 		<<newline
 		<<newline<<"};";
 		
-	os<<newline<<"void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid)"
+	os<<newline<<"void "<<gname_<<"::init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid)"
 		<<newline<<"{"<<inc
 		<<newline<<"const char tmp[] = "<<getstring(syntax_->seperators_)<<";"
 		<<newline<<"separators.reset(sizeof(tmp));"
@@ -298,7 +411,7 @@ void syntaxgenerator::print_complexsymbols()
 	pfun newline = tabident::newline;
 	std::ostream& os = *cppstream_;
 	size_t nsymbol_count = syntax_->symbols().size();
-	os<<newline<<"void init_complex_symbols(kog::smart_vector<cplcompiler::veccsconver>& convertors)"
+	os<<newline<<"void "<<gname_<<"::init_complex_symbols(kog::smart_vector<veccsconver>& convertors)"
 		<<newline<<"{"<<inc
 		<<newline<<"convertors.reset("<<nsymbol_count<<");";
 	if (dynamic_cast<const compiler_grammar*>(syntax_) != NULL)
@@ -353,7 +466,7 @@ void syntaxgenerator::print_keywords()
 	typedef std::ostream& (*pfun)(std::ostream& os);
 	pfun newline = tabident::newline;
 	std::ostream& os = *cppstream_;
-	os<<"void init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords)"
+	os<<"void "<<gname_<<"::init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords)"
 		<<newline<<"{"<<inc;
 	const grammar::veckeywords& keywords = syntax_->keywords_;
 	for (grammar::veckeywords::const_iterator iter = keywords.begin(); iter != keywords.end(); ++ iter)
@@ -372,7 +485,7 @@ void syntaxgenerator::print_printablechars()
 	typedef std::ostream& (*pfun)(std::ostream& os);
 	pfun newline = tabident::newline;
 	std::ostream& os = *cppstream_;
-	os<<"void init_printablechars(kog::smart_vector<sc::int32>& printablechars)"
+	os<<"void "<<gname_<<"::init_printablechars(kog::smart_vector<sc::int32>& printablechars)"
 		<<newline<<"{"<<inc
 		<<newline<<dec
 		<<newline<<"}"
@@ -388,7 +501,7 @@ void syntaxgenerator::print_statemachines()
 	typedef std::ostream& (*pfun)(std::ostream& os);
 	pfun newline = tabident::newline;
 	std::ostream& os = *cppstream_;
-	os<<newline<<"void init_machines(std::map<std::string, machine>& machines)"
+	os<<newline<<"void "<<gname_<<"::init_machines(std::map<std::string, machine>& machines)"
 		<<newline<<"{"<<inc;
 	
 	const symholder_proxy& sholder = syntax_->symbols();
@@ -429,7 +542,7 @@ void syntaxgenerator::print_statemachines()
 	lrmachine lrm;
 	lranalyse lra(*syntax_, lrm);
 	lra.invoke();
-	os<<newline<<"void init_syntax_machine(lalr1machine& lrm)"
+	os<<newline<<"void "<<gname_<<"::init_syntax_machine(lalr1machine& lrm)"
 		<<newline<<"{"<<inc
 		<<newline<<"kog::shared_ptr<automachine> ptr_m(new state_machine);"
 		<<newline<<"automachine& m = *ptr_m;";
@@ -531,7 +644,7 @@ void syntaxgenerator::print_grammar()
 
 	const tinygrammar& tig = syntax_->gettinyg();
 
-	os<<newline<<"void init_grammar(tinygrammar& tig)"
+	os<<newline<<"void "<<gname_<<"::init_grammar(tinygrammar& tig)"
 		<<newline<<"{"<<inc
 		<<newline<<"//// create symbols list: "
 		<<newline<<"std::deque<symbol> slist;"
@@ -605,7 +718,7 @@ void syntaxgenerator::print_productions()
 	tabident dec(tabident::dectab);
 	typedef std::ostream& (*pfun)(std::ostream& os);
 	pfun newline = tabident::newline;
-	os<<newline<<newline<<"void init_production_functions(kog::smart_vector<ifunction*>& pfuncs)"
+	os<<newline<<newline<<"void "<<gname_<<"::init_production_functions(kog::smart_vector<ifunction*>& pfuncs)"
 		<<newline<<"{"<<inc
 		<<newline<<"pfuncs.reset("<<pholder.size()<<");";
 	for (size_t i = 0; i < pholder.size(); ++ i)
@@ -630,7 +743,7 @@ function_parser& function_parser::operator()(const _Str& comment, const _Str& fu
 	tabident inc(tabident::inctab);
 	tabident dec(tabident::dectab);
 	pfun newline = tabident::newline;
-    os<<newline<<"//"<<comment
+    os<<newline<<"// "<<comment
 		<<newline<<"struct "<<name<<" : public ifunction"
         <<newline<<"{"<<inc
         <<newline<<"/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)"
@@ -674,7 +787,7 @@ function_parser& function_parser::operator()(const _Str& comment, const compiler
 	tabident inc(tabident::inctab);
 	tabident dec(tabident::dectab);
 	pfun newline = tabident::newline;
-    os<<newline<<"//"<<comment
+    os<<newline<<"// "<<comment
 		<<newline<<"struct "<<name<<" : public ifunction"
         <<newline<<"{"<<inc
         <<newline<<"/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)"

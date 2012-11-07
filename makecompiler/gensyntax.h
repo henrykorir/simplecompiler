@@ -7,6 +7,7 @@
 #include <macros.h>
 #include <basic_types.h>
 #include <ostream>
+#include <istream>
 
 #include "grammar.h"
 #include "compilersyntax.h"
@@ -19,8 +20,13 @@ public:
 	syntaxgenerator();
 	virtual ~syntaxgenerator();
 public:
-	void operator()(const grammar* aGrammar, const tstring& outfile);
+	void operator()(const grammar* aGrammar, const tstring& outputfolder, const tstring& grammarname);
 private:
+	void print_hfile();
+	void print_cppfile();
+	void print_rpfile();
+private:
+	void print_compiler();
 	void print_grammar();
 	void print_symbols();
 	void print_statemachines();
@@ -38,8 +44,13 @@ private:
 	bool is_token_keyword(const tchar* name) const;
 public:
 	const grammar* syntax_;
-	tstring cppfile_;
+	tstring gname_;
+	tstring ofolder_;
 	std::ostream* cppstream_;
+private:
+	static const tstring compiler_hfile_fmt;
+	static const tstring compiler_cppfile_fmt;
+	static const tstring reduce_functions_fmt;
 };
 
 class function_parser
