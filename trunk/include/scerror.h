@@ -6,81 +6,30 @@
 
 #include <macros.h>
 #include <stdexcept>
+#include <stringX.h>
 
 #include <basic_types.h>
-#include <stringX.h>
-#include <functionalX.h>
-#include <shared_ptr.h>
-#include "../third_party/callstack/stacktrace.h"
+#include "trace_error.h"
 
 NAMESPACE_BEGIN(sc)
 
-class scerror : public std::runtime_error
+class scerror : public kog::trace_error
 {
 public:
 	scerror()
-		: std::runtime_error("")
 	{
-		make_trace();
 	}
 
 	scerror(const tstring& err)
-		: std::runtime_error(err)
+		: kog::trace_error(err)
 	{
-		make_trace();
 	}
 
 	scerror(const scerror& other)
-		: std::runtime_error(other)
-		, trace_(other.trace_)
+		: kog::trace_error(other)
 	{
 	}
-
-	virtual ~scerror() throw()
-	{
-	}
-public:
-	tstring trace_message() const
-	{
-		tstring msg;
-#if (defined _WIN32) || (defined WIN32) 
-		foreach (const std::string& frame, trace_->begin(), trace_->end())
-#else
-		foreach (const std::string& frame, trace_->begin() + 2, trace_->end())
-#endif
-		//for (kog::callstack::trace::const_iterator iter = ; iter != ; ++ iter)
-		{
-			msg += frame + "\n";
-		}
-		return msg;
-	}
-private:
-	void make_trace()
-	{
-		trace_ = new kog::callstack::trace;
-	}
-private:
-	kog::shared_ptr<kog::callstack::trace> trace_;
 };
-
-/*class argument_exception_base : public scerror
-{
-public:
-	argument_exception_base()
-	{
-	}
-
-	argument_exception(const argument_exception_base& other)
-		: scerror(other)
-	{}
-	
-	argument_exception(const tstring& err, const std::exception& ex)
-		: innerException_()
-private:
-	std::exception* innerException_;
-};
-
-public argue*/
 
 #ifdef VISUAL_STDIO
 #define fire(fmt, ...) \
