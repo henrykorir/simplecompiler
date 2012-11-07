@@ -11,29 +11,41 @@ Type -> Type *
 	$0 : type
 	$$ = new_type($0)
 
-type -> struct_type
+Type -> const Type
 
-type -> enum_type
+Type -> Type const
 
-type -> int
+integer_type -> enum_type
 
-type -> long
+integer_type -> int
 
-type-> short
+integer_type -> long
 
-type -> double
+integer_type -> short
 
-type -> float
+integer_type -> char
 
-type -> char
+integer_type -> unsigned char
 
-type -> unsigned char
+integer_type -> unsigned int
 
-type -> unsigned int
+integer_type -> unsigned short
 
-type -> unsigned short
+basic_type -> void *
 
-type -> void *
+basic_type -> double
+
+basic_type -> float
+
+basic_type -> integer_type
+
+basic_type -> struct_type
+
+basic_type -> union_type
+
+type -> basic_type
+
+#type -> const basic_type
 
 #Type -> FunctionType
 

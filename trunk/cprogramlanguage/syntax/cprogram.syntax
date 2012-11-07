@@ -1,5 +1,7 @@
 # program
 
+GrammarName : CLanguage
+
 includes
 	expression.syntax
 	cdeclear.syntax
@@ -50,15 +52,29 @@ Include -> #include stringvalue
 
 Include -> #include < file_name >
 
-Typedef -> typedef Type symbol
+SymbolWithArray -> symbol
 
-Typedef -> typedef Type ( * symbol ) ( )
+SymbolWithArray -> symbol ArraySize
 
-Typedef -> typedef void ( * symbol ) ( )
+SymbolWithPtrArray -> SymbolWithArray
 
-Typedef -> typedef Type ( * symbol ) ( ParamList )
+SymbolWithPtrArray -> * SymbolWithPtrArray
 
-Typedef -> typedef void ( * symbol ) ( ParamList )
+SymbolWithPtrArray -> const SymbolWithPtrArray
+
+#Typedef -> typedef Type symbol
+
+Typedef -> typedef basic_type SymbolWithPtrArray
+
+Typedef -> typedef StructDefine SymbolWithPtrArray 
+
+Typedef -> typedef Type ( * SymbolWithArray ) ( )
+
+Typedef -> typedef void ( * SymbolWithArray ) ( )
+
+Typedef -> typedef Type ( * SymbolWithArray ) ( ParamList )
+
+Typedef -> typedef void ( * SymbolWithArray ) ( ParamList )
 
 ExternValue -> extern Type symbol
 
