@@ -39,7 +39,7 @@ void makecompiler::build_compiler(const _Str& cppfile)
 
 	// generator syntax cpp file
 	syntaxgenerator	gensyntax;
-	gensyntax(&cgrammar, cppfile);
+	gensyntax(&cgrammar, cppfile, cgrammar.name());
 }
 
 size_t makecompiler::parse_file(const std::string& syntaxfile, compiler_grammar& cg)
@@ -75,6 +75,8 @@ size_t makecompiler::parse_file(const std::string& syntaxfile, compiler_grammar&
 		//else if (lower_tmp == "whitespaces") parse_whitespaces(ifs, cg);
 		else if (stringX::xregex::is_match("startsymbol\\s*:.*", lower_tmp)) 
 			cg.starts() = cg.index(stringX::trim(tmp.substr(tmp.find(":") + 1)));
+		else if (stringX::xregex::is_match("grammarname\\s*:.*", lower_tmp))
+			cg.name() = stringX::trim(tmp.substr(tmp.find(":") + 1));
 		else 
 		{
 			fire("invalidate syntax@ %s:%d", syntaxfile.c_str(), curfile_.iLine);

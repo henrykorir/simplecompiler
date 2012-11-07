@@ -87,6 +87,7 @@ public:
 	MEMBER_VARIABLE_GET_SET(int32, starts, start_symbol_);
 	MEMBER_VARIABLE_GET_SET(int32, eplisons, eplison_symbol_);
 	MEMBER_VARIABLE_GET_SET(int32, endings, ending_symbol_);
+	MEMBER_VARIABLE_GET_SET(tstring, name, gname_);
 private:
 	int32 make_terminate(const tstring& sname, const tstring& content, const tstring& stype, int32 flag);
 	symbol make_symbol(const tstring& name, int32 sid, bool isTerm);
@@ -95,6 +96,7 @@ private:
 	std::deque<prodinfo_t> pinfos_;
 	std::deque<complex_symbol_t> complexsyms_;
 	std::map<tstring, funcinfo_t> funcs_;
+	tstring gname_;
 };
 
 NAMESPACE_END(compile);
