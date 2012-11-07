@@ -1,0 +1,7 @@
+# SConscript
+
+Import('aEnv')
+
+cppfiles = ['folder.cpp']
+
+aEnv.Library(target='fs', source = cppfiles, CPPPATH=['../../include'])
