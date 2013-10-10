@@ -7,6 +7,7 @@
 #include <map>
 #include <list>
 #include <singleton.h>
+#include <stringX.h>
 #include <arrayX.h>
 #include <shared_ptr.h>
 #include <buckethash.h>
@@ -21,6 +22,9 @@
 //class compiler;
 struct split_separators;
 NAMESPACE_BEGIN(compile)
+//NAMESPACE_BEGIN(runtime)
+//class typesystem;
+//NAMESPACE_END(runtime);
 
 class interlanguage
 {
@@ -43,6 +47,8 @@ public:
     // get current scope
     runtime::scope* current_scope() const;
 public:
+	void print_il(const std::string& ilfile) const;
+public:
 	void generate(const std::string& finput_name, const std::string& fotput_name);
 public:
     //kog::iterator_wrap_t<std::deque<kog::shared_ptr<runtime::scope> >::iterator > 
@@ -51,6 +57,7 @@ private:
     std::deque<runtime::scope*> all_scopes_;
 	//std::deque<runtime::module*> all_modules_;
     runtime::scope* current_scope_;
+	//kog::shared_ptr<compile::runtime::typesystem> _all_types;
 };
 
 NAMESPACE_END(compile)

@@ -41,6 +41,17 @@ public:
         return tabs;
     }
 
+public:
+	virtual _Myt& newline()
+	{
+		_Myt& indent_os = *this;
+		indent_os<<std::endl;
+		for (int i = 0; i < indent_os.indent(); ++ i)
+		{
+			indent_os<<(_charT)('\t');
+		}
+		return indent_os;
+	}
 private:
     int tabindent_;
 };
@@ -62,12 +73,7 @@ template<typename _charT, typename _traits> std::basic_ostream<_charT, _traits>&
 template<typename _charT, typename _traits> std::basic_ostream<_charT, _traits>& newline(std::basic_ostream<_charT, _traits>& os)
 {
     basic_oindentstream<_charT, _traits>& indent_os = dynamic_cast<basic_oindentstream<_charT, _traits>&>(os);
-    indent_os<<std::endl;
-    for (int i = 0; i < indent_os.indent(); ++ i)
-    {
-        indent_os<<(_charT)('\t');
-    }
-    return os;
+	return indent_os.newline();
 }
 
 typedef basic_oindentstream<char> oindentstream;

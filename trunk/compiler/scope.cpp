@@ -5,9 +5,12 @@
 #include <stringX.h>
 #include <functionalX.h>
 #include <logger.h>
+#include "type_helper.h"
 
 using namespace compile;
 using namespace compile::runtime;
+
+scope* compile::runtime::global_scope = /*new slicescope*/NULL;
 
 scope::scope()
 : parent_(NULL)
@@ -39,7 +42,7 @@ scope::~scope()
 variable* scope::find_here(const _Str& name) const
 {
 	std::deque<variable*>* vars = NULL;
-	if (name.size() > 4 && name.find("##") == 0 && name.rfind("##") == name.size() - 2)
+	if (name.size() > 4 && name.find("$ro$") == 0)
 	{
 		session_map::const_iterator iter = sessions_.find(typeid(rodata_session).name());
 		if (iter != sessions_.end())
@@ -131,13 +134,24 @@ _SessionType* ref_session(scope* sp, scope::session_map& smap)
 variable* scope::entry_variable(const _Str& vname, const type* vtype, int ass_type, int32 vscope)
 { 
     logstring("scope(%s): entry_variable, name %s", name_.c_str(), vname.c_str());
-    //variable v(vname, vtype, this);
+	if (find_here(vname) != NULL)
+	{
+		logerror("find existing variable!");
+		return NULL;
+	}
+
     variable* pv = new variable(vname, vtype, this);
 	ref_session<data_session>(this, sessions_)->insert(pv);
 	
     return pv;
 }
-    
+
+static int g_tmpid = 0;
+tstring scope::get_temp_name()
+{
+	return name_ + stringX::format("%d", g_tmpid++);
+}
+
 variable* scope::entry_function(int ass_type, const _Str& fname, function_type* ftype)
 {
     logstring("scope(%s): entry_function, name %s", name_.c_str(), fname.c_str());
@@ -147,28 +161,43 @@ variable* scope::entry_function(int ass_type, const _Str& fname, function_type* 
 	return pv;
 }
 
+variable* scope::entry_value(const _Str& content, const type* var_type)
+{
+    logstring("scope(%s): entry_value, content %s, type %s", name_.c_str(), content.c_str(), get_typeinfo(var_type));
+	if (var_type == NULL) fire("var type == NULL");
+	rodata_session* rods = ref_session<rodata_session>(this, sessions_);
+	const tstring tname = stringX::format("$ro$[%s]%s", get_typeinfo(var_type), content.c_str());
+	variable* var = find_here(tname);
+	if (var == NULL)
+	{ // not found existing value, create new one
+		value* v = new value;
+		v->size = (uint32)var_type->tsize;
+		if (var_type == int_type) v->initv = (byte*)new int(atoi(content.c_str()));
+		else if (var_type == float_type) v->initv = (byte*)new float((float)atof(content.c_str()));
+		else if (var_type == double_type) v->initv = (byte*)new double(atof(content.c_str()));
+		else if (var_type == char_type) v->initv = (byte*)new char(content[0]);
+		//else if (var_type == tuple_type) v->initv = new 
+		var = new variable(tname, var_type, this, v);
+
+		rods->insert(var);
+	}
+
+	return var;
+}
+
 variable* scope::entry_value(const _Str& content, const type* canTypes[], int _C)
 {
-    logstring("scope(%s): entry_value, content %s", name_.c_str(), content.c_str());
-    std::auto_ptr<variable> var;
-    value* v = new value();
-	_Str name = stringX::format("##noname_var%d$$", noname_idx_ ++);
+	const type* var_type = NULL;
     if (content.find('.') != _Str::npos)
     {
-        v->initv = (byte*)new float(stringX::tovalue<float>(content));
-        v->size = sizeof(float);
-        var.reset(new variable(name, typesystem::instance().get_type("float"), this, v));
+        var_type = typesystem::instance().get_type("float");
     }
     else
     {
-        v->initv = (byte*)new int(stringX::tovalue<int>(content));
-        v->size = sizeof(int);
-        var.reset(new variable(name, typesystem::instance().get_type("int"), this, v));
+        var_type = typesystem::instance().get_type("int");
     }
 
-	ref_session<rodata_session>(this, sessions_)->insert(var.get());
-
-	return var.release();
+	return entry_value(content, var_type);
 }
 
 tuple* scope::entry_tuple(const operation* oper, const object* src1, const object* src2, const object* dst)
@@ -179,5 +208,18 @@ tuple* scope::entry_tuple(const operation* oper, const object* src1, const objec
 	p->src1 = (variable*)compile::as<variable>(src1);
 	p->src2 = (variable*)compile::as<variable>(src2);
 	ref_session<text_session>(this, sessions_)->tuples().push_back(p);
+	logstring("enter tuple %s = %s(%s, %s)", obj2str(dst).c_str(), oper->to_string().c_str(), obj2str(src1).c_str(), obj2str(src2).c_str());
     return p;
+}
+	
+const session* scope::get_session(const _Str& session_name) const
+{
+	session_map::const_iterator iter = sessions_.find(session_name);
+	if (iter == sessions_.end()) return NULL;
+	return iter->second;
+}
+
+int32 scope::access_type(const _Str& str) const
+{
+	return 0;
 }

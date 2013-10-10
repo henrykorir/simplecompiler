@@ -7,6 +7,7 @@
 #include <map>
 #include <list>
 #include <singleton.h>
+#include <stringX.h>
 #include <arrayX.h>
 #include <shared_ptr.h>
 #include <buckethash.h>
@@ -20,6 +21,7 @@
 #include "lalr1machine.h"
 
 NAMESPACE_BEGIN(compile)
+class compiler_setup;
 NAMESPACE_BEGIN(doc)
 
 struct machine
@@ -54,40 +56,29 @@ struct string_2_int
 class compiler : public kog::singleton<compiler>
 {
 	friend struct split_separators;
-public:
-	typedef compile::automachine automachine;
-	typedef compile::state_machine state_machine;
-	typedef compile::lalr1machine lalr1machine;
-	typedef compile::symbol_machine symbol_machine;
-public:
+	friend class kog::singleton<compiler>;
+private:
 	compiler();
     ~compiler();
 public:
-	void initialization();
+	typedef sc::tstring tstring;
 public:
-	static state_machine get_number_machine();
-	static state_machine get_symbol_machine();
-	static state_machine get_string_machine();
-	static symbol_machine get_terminates_machine();
-	static int get_all_machines(std::list<compile::doc::machine>& mlist);
-    static automachine& get_machine(const std::string& machine_name);
+	void setup(kog::shared_ptr<compile::compiler_setup> setup_obj);
+	void init(const tstring& src_file, const tstring& obj_folder = "");
 public:
-	static const compile::tstring& get_whitespaces();
+	void prebuild();
+	// build 
+	void build_src2iml();
+	void build_iml2asm();
 public:
-    static compile::interlanguage& getiml();
-public:
-	static bool is_separator(sc::int32 elem);
-	void check(const std::string& fname);
-    void generate_asm(const std::string& asmfile);
-private:
-	sc::int32 is_keywords(const std::string& s) const;
+	compile::interlanguage* get_iml();
 private:
 	std::map<std::string, compile::doc::machine> machines_;
-	kog::buckethash<std::string, sc::int32, string_2_int> keywords_;
-	kog::smart_vector<sc::int32> separators_;
-	kog::smart_vector<sc::int32> printablechars_;
-	kog::tree<sc::int32> sepsid_;
-	std::auto_ptr<compile::tinygrammar> tg_;
+private:
+	std::string _src_file;
+	std::string _il_file;
+	std::string _asm_file;
+	kog::shared_ptr<compile::compiler_setup> setup_;
     kog::shared_ptr<compile::interlanguage> iml_;
 };
 

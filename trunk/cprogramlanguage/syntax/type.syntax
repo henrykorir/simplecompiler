@@ -4,12 +4,18 @@ includes
 	nonterm.syntax
 
 Type -> type
-	$0 : word
-	$$ = as<type>(find($0.txt))
+{
+	$0 : type_variable
+	$$ = $0;
+}
 
 Type -> Type *
-	$0 : type
-	$$ = new_type($0)
+{
+	$0 : type_variable
+	#1 : type_variable
+	#1.typevar = get_result_type("ptr", $0.typevar, NULL);
+	$$ = #1;
+}
 
 Type -> const Type
 
@@ -18,12 +24,19 @@ Type -> Type const
 integer_type -> enum_type
 
 integer_type -> int
+{
+	#1 : type_variable
+	#1.typevar = int_type;
+	$$ = #1;
+}
 
 integer_type -> long
 
 integer_type -> short
 
 integer_type -> char
+
+integer_type -> wchar_t
 
 integer_type -> unsigned char
 
@@ -38,12 +51,23 @@ basic_type -> double
 basic_type -> float
 
 basic_type -> integer_type
+{
+	$0 : type_variable
+	$$ = $0;
+}
 
-basic_type -> struct_type
+basic_type -> struct struct_type
 
 basic_type -> union_type
 
+#no enum type because enum_type is integer_type
+#basic_type -> enum_type
+
 type -> basic_type
+{
+	$0 : type_variable
+	$$ = $0;
+}
 
 #type -> const basic_type
 

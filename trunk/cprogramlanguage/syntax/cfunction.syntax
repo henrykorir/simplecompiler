@@ -18,23 +18,29 @@ FunctionHeader -> void symbol ( )
 #FunctionHeader -> ReturnType symbol ( ParamList )
 FunctionHeader -> Type symbol ( ParamList )
 
-FunctionHeader -> Type symbol ( ParamList , ... )
-
 FunctionHeader -> void symbol ( ParamList )
 
-FunctionHeader -> void symbol ( ParamList , ... )
+ParamList -> ParamList_NoMore
 
-ParamList -> AFuncParam
+ParamList -> ParamList_NoMore , ...
 
-ParamList -> AFuncParam , ParamList
+ParamList_NoMore -> AFuncParam
+
+ParamList_NoMore -> AFuncParam , ParamList_NoMore
 
 AFuncParam -> Type
 
-AFuncParam -> Type ArraySize
+AFuncParam -> Type FuncParamArraySize
 
 AFuncParam -> Type symbol
 
-AFuncParam -> Type symbol ArraySize
+AFuncParam -> Type symbol FuncParamArraySize
+
+FuncParamArraySize -> [ ]
+
+FuncParamArraySize -> ArraySize2
+
+FuncParamArraySize -> [ ] ArraySize2
 
 AFuncParam -> void ( * ) ( ParamList )
 

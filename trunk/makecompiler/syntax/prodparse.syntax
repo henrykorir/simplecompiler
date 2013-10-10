@@ -1,0 +1,55 @@
+
+GrammarName : ProdSyntax
+
+Terminates
+	text : [^\s]+
+	space : \s+
+
+complex-symbols
+	result : text : func
+	param : text : func
+	tempv : text : func
+
+Keywords : text
+	<=>
+#	"\n"	<br>
+
+Non-Terminates
+	Production
+	AItem
+	Declear
+	Statement
+	AValueName
+	ASItem
+
+StartSymbol : Production
+
+Production -> AItem
+
+#Production -> AItem "\n" Production
+
+AItem -> Declear
+
+AItem -> Statement
+
+Declear -> AValueName <=> text
+
+AValueName -> result
+
+AValueName -> param
+
+AValueName -> tempv
+
+Statement -> ASItem
+
+Statement -> ASItem Statement
+
+ASItem -> text
+
+ASItem -> space
+
+ASItem -> result
+
+ASItem -> param
+
+ASItem -> tempv

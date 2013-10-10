@@ -34,13 +34,21 @@ machine_meta* lalr1machine::_reduce(int32 pid, const kog::smart_vector<machine_m
 {
     if ((int32)funcList_.size() <= pid || pid < 0)
 	{
+		logstring("not found production reduce function [%d]!", pid);
 	//	fire("no production function[%d]!", pid);
 	}
     else if(funcList_[pid] != NULL)
     {
+		compile::ifunction* func = funcList_[pid];
 		prodholder_proxy pholder = tinyg().productions();
 		logstring("reduce product(%d): %s", pid, pholder.at(pid).to_string().c_str());
-        (*funcList_[pid])(rights.get(), rights.size(), result);
+		func->entry();
+#ifdef NOTCALL_REDUCE_FUNC
+		logstring("don't call ruduce function");
+#else
+        (*func)(rights.get(), (int)rights.size(), result);
+#endif
+		func->leave();
     }
 	return result;
 }

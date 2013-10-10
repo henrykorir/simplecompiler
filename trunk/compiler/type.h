@@ -15,7 +15,6 @@
 NAMESPACE_BEGIN(compile)
 NAMESPACE_BEGIN(runtime)
 class scope;
-NAMESPACE_END(runtime)
 
 struct type : public compile::object
 {
@@ -25,12 +24,26 @@ struct type : public compile::object
         , defvalue(NULL)
 		, content(NULL)
 		, name(type_name)
+		, const_type(NULL)
+		, ptr_type(NULL)
+		, base_type(NULL)
 	{}
 
     /* overwrite */ virtual _Str to_string() const
     {
-        return stringX::format("type<%d>", tid);
+        //return stringX::format("type<%d>", tid);
+		return name;
     }
+
+	//const type* get_pointer_type() const;
+
+	//const type* get_reference_type() const;
+	
+
+	const type* const_type;
+	const type* ptr_type;
+	const type* ref_type;
+	const type* base_type;
 
 	int32 tid; // type id
 	byte* defvalue; // default value
@@ -42,12 +55,6 @@ struct type : public compile::object
 
 struct function_type : public type
 {
-	//struct param
-	//{
-	//	const type* ptype;
-	//	const _Str pname;
-	//};
-
     function_type(const tstring& name, int32 id = -1)
         : type(name, id)
     {}
@@ -59,14 +66,19 @@ struct function_type : public type
 	void* more;
 };
 
-class pointer_type : public type
+class array_type : public type
 {
-	pointer_type(const tstring& name, const type* basictype = NULL, int32 id = -1)
-		: basic_type(basictype)
-		, type(name, id, 4)
-	{}
-
-	const type* basic_type;
+public:
+	array_type(const type* base_type, size_t arraylen, int32 sid = -1);
+public:
+	MEMBER_VARIABLE_GET(size_t, arraylen, arrlen_);
+public:
+	static tstring get_array_type_name(const type& base_type, size_t arraylen);
+public:
+	// get count of all items
+	size_t get_count() const;
+protected:
+	size_t arrlen_;
 };
 
 class typesystem : public kog::singleton<typesystem>
@@ -75,13 +87,15 @@ public:
     typesystem();
     virtual ~typesystem();
 public:
+	void init_buildin_types();
+public:
     // check if exist same function type, if existed, return it, or create a new type and return it
     const function_type* new_func_type(int32 nparams, const type* params[], const type* return_type);
 public:
-    const type* type_type() const;
-    const type* operator_type() const;
-    const type* word_type() const;
-    const type* functiontype_type() const;
+	const type* get_const_type(const type* t);
+	const type* get_array_type(const type* t, size_t array_size);
+	const type* get_ptr_type(const type* t);
+	const type* get_ref_type(const type* t);
 public:
 	// get type from name
 	const type* get_type(const tstring& name) const;
@@ -103,6 +117,19 @@ private:
 	std::map<tstring, type*> name2type_;
 };
 
+// build-in types
+extern const type* int_type;
+extern const type* float_type;
+extern const type* double_type;
+extern const type* char_type;
+extern const type* string_type;
+extern const type* type_type;
+extern const type* tuple_type;
+extern const type* complex_variable_type;
+extern const type* type_variable_type;
+extern const type* pointer_variable_type;
+
+NAMESPACE_END(runtime)
 NAMESPACE_END(compile)
 
 #endif

@@ -1,0 +1,12 @@
+# SConscript
+
+Import('aEnv')
+
+
+if int(ARGUMENTS.get('cexp', 0)):
+	incboost = aEnv['boost_inc']
+	cpllib = ['unittest', 'compiler', 'mcompiler', 'ga', 'syntax', 'stacktrace', 'typename', 'regex', aEnv['regexlib']]
+	cplinc = ['.', '../include', '../makecompiler', '../compiler', '../syntax', '../galgorithm', './', '../third_party', incboost]
+	cpllibpath = ['.', '../test', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '../third_party/stacktrace', '../third_party/typename', '../third_party/regexlib']
+	cppfiles = ['../test/cexpression_syntax_test.cpp', "CExpTest_compiler.cpp", "CExpTest_pruductions.cpp"]
+	aEnv.Program(target= 'kcexp', source = cppfiles, LIBS=cpllib, CPPPATH=cplinc, LIBPATH=cpllibpath)

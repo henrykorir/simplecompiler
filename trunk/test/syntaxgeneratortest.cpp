@@ -44,7 +44,7 @@ private:
 	void simple_gio()
 	{
 		std::ifstream ifs(fin_.c_str());
-		if(!ifs.is_open()) throw std::runtime_error("can't open file " + fin_);
+		if (!ifs.is_open()) throw std::runtime_error("can't open file " + fin_);
 		greader gifs(ifs);
 		tinygrammar g;
 		gifs>>g;

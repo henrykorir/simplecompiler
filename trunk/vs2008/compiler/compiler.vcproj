@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\third_party;..\..\syntax;..\..\makecompiler"
+				AdditionalIncludeDirectories="..\..\include;..\..\third_party;..\..\syntax;..\..\makecompiler;..\..\third_party\filesystem;..\..\third_party\typeinfo"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;VISUAL_STDIO;DEBUG_OUTPUT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -104,7 +104,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\include;..\..\third_party;..\..\syntax;..\..\makecompiler;..\..\third_party\filesystem"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;VISUAL_STDIO"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -149,6 +150,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\compiler\arraylist.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\compiler\asmgenerate.cpp"
 				>
 			</File>
@@ -157,7 +162,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\compiler\extract.cpp"
+				RelativePath="..\..\compiler\compiler_setup.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\compiler\ifunction.cpp"
 				>
 			</File>
 			<File
@@ -195,6 +204,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\compiler\arraylist.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\compiler\asmgenerate.h"
 				>
 			</File>
@@ -203,11 +216,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\compiler\extract.h"
+				RelativePath="..\..\compiler\compiler_setup.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\compiler\extract_stream.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\compiler\funcparams.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\compiler\function.h"
 				>
 			</File>
 			<File

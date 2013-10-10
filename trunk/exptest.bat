@@ -1,0 +1,1 @@
+vs2008\Release\syntaxgenerator.exe cprogramlanguage\syntax\cexptest.syntax cexpressiontest

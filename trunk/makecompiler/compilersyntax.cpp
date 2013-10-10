@@ -33,7 +33,7 @@ int32 compiler_grammar::make_new_production(const tstring& left, const std::vect
 			fire("existing same production!");
 	}
 
-	production p(symbols(), L, R.get(), R.size());
+	production p(symbols(), L, R.get(), (int32)R.size());
 	productions_.push_back(p);
 	pinfos_.push_back(pinfo);
 	logstring("entry production [%d] %s", pinfos_.size() - 1, p.to_string().c_str());

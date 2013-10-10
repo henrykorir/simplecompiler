@@ -12,16 +12,12 @@ UTlibpath = ['.', '../mcompiler', '../compiler', '../syntax', '../galgorithm', '
 
 if int(ARGUMENTS.get('parseg', 0)):
     cppfiles = ['syntaxgeneratortest.cpp']
-    aEnv.Program(target = 'parsesyntax', source = cppfiles, LIBS = UTlib + aEnv['regexlib'], CPPPATH=UTinc, LIBPATH=UTlibpath)
+    aEnv.Program(target = 'parsesyntax', source = cppfiles, LIBS = UTlib + aEnv['regexlib'], CPPPATH=UTinc, LIBPATH=UTlibpath + [aEnv['boost_libpath']])
 
 if int(ARGUMENTS.get('tinyg', 0)):
     #gfile = 'output/tinyg/tinyg.cpp'
     gfiles = ['tinyg.cpp', 'tinygprodfuncs.cpp']
     aEnv.Program(target= 'tinycompiler', source = ['tinygrammar-compiler.cpp'] + gfiles, LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)
-
-if int(ARGUMENTS.get('cexp', 0)):
-    gfiles = ['cexpression_syntax_test.cpp', 'output/cexpression_test_out.cpp']
-    aEnv.Program(target= 'cexptest', source = gfiles, LIBS=['cplcompiler'] + UTlib, CPPPATH=UTinc + ['../cprogramlanguage'], LIBPATH=UTlibpath + ['../cpl'])
 
 if int(ARGUMENTS.get('basictest', 0)):
 	aEnv.Program(target= 'callstack', source = ['callstacktest.cpp'], LIBS=UTlib, CPPPATH=UTinc, LIBPATH=UTlibpath)

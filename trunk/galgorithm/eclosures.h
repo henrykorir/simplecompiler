@@ -5,6 +5,7 @@
 #define _ECLOSURE_H_SC_
 
 #include <macros.h>
+#include <stringX.h>
 #include <arrayX.h>
 #include "grammaralgorithm.h"
 

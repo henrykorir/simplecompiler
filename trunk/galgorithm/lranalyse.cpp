@@ -234,7 +234,7 @@ void lranalyse::make_machine(AlgorithmArg& arg, const tinygrammar& tig, lrmachin
 	typedef kog::triple<const lrstate*, int32, nextstate> gototriple;
 	arg.sparsesheet.sort(kog::composite_function(kog::mem_value(&gototriple::first),
 					kog::mem_value(&gototriple::first), std::less<const lrstate*>()));
-	int32 nstate = arg.lrsts.size();
+	int32 nstate = (int32)arg.lrsts.size();
 	sheet.reset(nstate);
 	std::map<const lrstate*, int32> lrmap;
 	int32 idx = 0;
@@ -303,7 +303,7 @@ bool AlgorithmArg::CheckLR1(const lrstate* cs) const
 	std::list<lrrowlist::const_reverse_iterator> needtoremove;
 	for (lrrowlist::const_reverse_iterator  iter = sparsesheet.rbegin(); iter != sparsesheet.rend() && iter->first == cs; ++ iter)
 	{
-		int32 x = iter->second == -1 ? (issused.size() - 1) : iter->second;
+		int32 x = iter->second == -1 ? ((int32)issused.size() - 1) : iter->second;
 		logstring("checking symbol '%s', sorp %d", iter->second == -1 ? "#" : tig->symbols()[x].name, iter->third.sorp);
 		if(x < 0) fire("invalidate symbol!");
 		else if(issused[x]) 
@@ -369,7 +369,7 @@ void AlgorithmArg::update_closure(lrstate& li) const
 			const production& p = *plist[j];
 			if(!ists[p[0]])
 			{
-				int32 xn = sfollows[p[0]]->size();
+				int32 xn = (int32)sfollows[p[0]]->size();
 				get_firsts(get_next_symbol(p, 1), *sfollows[i], *sfollows[p[0]]);
 				issupdated[p[0]] |= sfollows[p[0]]->size() != xn; // need to update
 			}
@@ -476,7 +476,7 @@ AlgorithmArg::AlgorithmArg(const tinygrammar& gin)
 	kog::depointer_t<const production> dpp;
 	std::sort(plist.begin(), plist.end(), kog::composite_function(dpp, dpp, pleft_less()));
 	for(size_t i = 0; i < plist.size(); ++ i)
-		if(ntpi[plist[i]->left()] == -1) ntpi[plist[i]->left()] = i;
+		if(ntpi[plist[i]->left()] == -1) ntpi[plist[i]->left()] = (int32)i;
 
 	// get e-closure of every non-terminate symbol
 	eclosure ec_algorithm(*tig, closures);

@@ -82,4 +82,16 @@
 	}catch(...){ \
 		std::cerr<<"unknown exception!"<<std::endl; \
 	}
+
+
+///*extern*/ const char* __get_stack_info(const char* what);
+#if (defined VISUAL_STDIO || defined _MSC_VER)
+#define KOG_THROW_EXCEPTION(exception_class, exception_what, ...) \
+	throw sc::scerror(exception_class(exception_what, __VA_ARGS__).what())
+	//__get_stack_info != NULL ? throw sc::scerror(exception_class(exception_what, __VA_ARGS__).what()) : throw exception_class(exception_what, __VA_ARGS__)
+#else
+#define KOG_THROW_EXCEPTION(exception_class, exception_what, args...) \
+	throw exception_class(stringX::format(exception_what, ##args).c_str())
 #endif
+#endif
+

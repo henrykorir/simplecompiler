@@ -128,11 +128,13 @@ void syntaxgenerator::print_cppfile()
 		cppstream_ = &ofs;
 		// try to output syntax file
 		print_includes();
+		print_construct();
 		print_grammar();
 		//print_symbols();
 		print_keyword_convert_funcs();
 		print_complexsymbols();
 		print_separators();
+		print_whitespaces();
 		print_keywords();
 		print_statemachines();
 		print_printablechars();
@@ -265,15 +267,19 @@ void syntaxgenerator::print_includes()
 		<<newline<<"#include <treemaker.h>"
 		<<newline<<"#include <deque>"
 		<<newline<<"#include <lalr1machine.h>"
-		<<newline<<"#include <cplcompiler.h>"
+		<<newline<<"#include <compiler_setup.h>"
+		<<newline<<"#include <compiler.h>"
+		<<newline<<"#include <type_helper.h>"
+		<<newline<<"#include \""<<gname_<<"_compiler.h\""
 		<<newline
 		<<newline<<"using namespace sc;"
 		<<newline<<"using namespace compile;"
 		<<newline<<"using namespace compile::doc;"
 		<<newline<<"using namespace compile::runtime;"
-		<<newline<<"using namespace compile::cplc;"
+		<<newline<<"using namespace compile::runtime::operations;"
 		<<newline
 		<<newline<<"typedef lalr1machine::lalr1meta lalr1meta;"
+		<<newline<<"typedef lalr1machine::lalr1meta compilermeta;"
 		<<newline;
 }
 
@@ -290,32 +296,67 @@ void syntaxgenerator::print_compiler()
 		<<newline<<"#ifndef _"<<stringX::toupper(gname_)<<"_COMPILER_H_KOG_GEN_"
 		<<newline<<"#define _"<<stringX::toupper(gname_)<<"_COMPILER_H_KOG_GEN_"
 		<<newline
+		<<newline<<"#include <compiler_setup.h>"
 		<<newline<<"#include <lalr1machine.h>"
 		<<newline<<"#include <compiler.h>"
 		<<newline<<"#include <vector>"
+		<<newline<<"#include <arraylist.h>"
+		<<newline<<"#include <function.h>"
+		<<newline<<"#include <type.h>"
+		<<newline<<"#include <tuple.h>"
+		<<newline<<"#include <word.h>"
+		<<newline<<"#include <variable.h>"
+		<<newline<<"#include <scope.h>"
 		<<newline
-		<<newline<<"class "<<gname_
+		<<newline<<"class "<<gname_<<" : public compile::compiler_setup"
 		<<newline<<"{"
 		<<newline<<"public:"<<inc
 		<<newline<<"typedef sc::int32 int32;"
-		<<newline<<"typedef bool (*complex_symbol_convert)(compile::automachine::machine_meta* meta);"
-		<<newline<<"typedef std::vector<complex_symbol_convert> veccsconver;"
+		//<<newline<<"typedef bool (*complex_symbol_convert)(compile::automachine::machine_meta* meta);"
+		//<<newline<<"typedef std::vector<complex_symbol_convert> veccsconver;"
 		<<dec
 		<<newline<<"public:"<<inc
-		<<newline<<gname_<<"() {}"
+		<<newline<<gname_<<"();"
 		<<newline<<"virtual ~"<<gname_<<"() {}"<<dec
 		<<newline<<"protected:"<<inc
-		<<newline<<"void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid);"
-		<<newline<<"void init_complex_symbols(kog::smart_vector<veccsconver>& convertors);"
-		<<newline<<"void init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords);"
-		<<newline<<"void init_printablechars(kog::smart_vector<sc::int32>& printablechars);"
-		<<newline<<"void init_machines(std::map<std::string, compile::doc::machine>& machines);"
-		<<newline<<"void init_syntax_machine(compile::lalr1machine& lrm);"
-		<<newline<<"void init_grammar(compile::tinygrammar& tig);"
-		<<newline<<"void init_production_functions(kog::smart_vector<compile::ifunction*>& pfuncs);"<<dec
+		<<newline<<"/* overwrite */ virtual void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid);"
+		<<newline<<"/* overwrite */ virtual void init_complex_symbols(kog::smart_vector<veccsconver>& convertors);"
+		<<newline<<"/* overwrite */ virtual void init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords);"
+		<<newline<<"/* overwrite */ virtual void init_printablechars(kog::smart_vector<sc::int32>& printablechars);"
+		<<newline<<"/* overwrite */ virtual void init_machines(std::map<std::string, compile::doc::machine>& machines);"
+		<<newline<<"/* overwrite */ virtual void init_syntax_machine(compile::lalr1machine& lrm);"
+		<<newline<<"/* overwrite */ virtual void init_grammar(compile::tinygrammar& tig);"
+		<<newline<<"/* overwrite */ virtual void init_production_functions(kog::smart_vector<compile::ifunction*>& pfuncs);"
+		<<newline<<"/* overwrite */ virtual void init_whitespaces(bool& is_skipwhitespace, compile::tstring& whitespaces);"<<dec
 		<<newline<<"};"
 		<<newline
 		<<newline<<"#endif"
+		<<newline;
+}
+
+void syntaxgenerator::print_whitespaces()
+{
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	std::ostream& os = *cppstream_;
+	typedef std::ostream& (*pfun)(std::ostream& os);
+	pfun newline = tabident::newline;
+
+	os<<newline<<"void "<<gname_<<"::init_whitespaces(bool& is_skipwhitespace, compile::tstring& whitespaces)"
+		<<newline<<"{"<<inc
+		<<newline<<"is_skipwhitespace = "<<(syntax_->skipspace() ? "true" : "false")<<";"
+		<<newline<<"// set whitespaces"
+		<<newline<<"{"<<inc
+		<<newline<<"const tchar tmp[] = {";
+	// print whitespaces;
+	for (size_t i = 0; i < syntax_->whitespaces().size(); ++ i)
+	{
+		os<<(int)syntax_->whitespaces()[i]<<", ";
+	}
+	os<<"'\\0'};"
+		<<newline<<"whitespaces = tmp;"<<dec
+		<<newline<<"}"<<dec
+		<<newline<<"}"
 		<<newline;
 }
 
@@ -533,6 +574,19 @@ void syntaxgenerator::print_statemachines()
 			<<newline<<"}";
 	}
 #endif
+	os<<newline<<"// load syntax machine"
+		<<newline<<"{"
+		<<inc
+		<<newline<<"kog::smart_vector<ifunction*> pfuncs;"
+		<<newline<<"init_production_functions(pfuncs);"
+		<<newline<<"logstring(\"init productions done.\");"
+		<<newline<<"lalr1machine* tmpmachine = new lalr1machine(*g_, pfuncs);"
+		<<newline<<"init_syntax_machine(*tmpmachine);"
+		<<newline<<"machines[\"syntax_machine\"] = machine(tmpmachine, -1);"
+		<<newline<<"logstring(\"init syntax machine done.\");"
+		<<dec
+		<<newline<<"}";
+		
 	os<<newline<<dec
 		<<newline<<"}"
 		<<newline;
@@ -632,6 +686,21 @@ void syntaxgenerator::refine_machine(automachine& m) const
 	}
 }
 
+void syntaxgenerator::print_construct()
+{
+	tabident inc(tabident::inctab);
+	tabident dec(tabident::dectab);
+	std::ostream& os = *cppstream_;
+	typedef std::ostream& (*pfun)(std::ostream& os);
+	pfun newline = tabident::newline;
+
+	// print construct
+	os<<newline<<gname_<<"::"<<gname_<<"()"
+		<<newline<<"{"
+		<<newline<<"}"
+		<<newline;
+}
+
 void syntaxgenerator::print_grammar()
 {
 	tabident inc(tabident::inctab);
@@ -725,6 +794,12 @@ void syntaxgenerator::print_productions()
 	{
 		os<<newline<<"pfuncs["<<i<<"] = new production_func_"<<i<<"();";
 	}
+
+	os<<newline;
+	for (size_t i = 0; i < pholder.size(); ++ i)
+	{
+		os<<newline<<"pfuncs["<<i<<"]->prod_id = "<<i<<";";
+	}
 	os<<dec<<newline<<"}";
 }
 
@@ -791,13 +866,18 @@ function_parser& function_parser::operator()(const _Str& comment, const compiler
 		<<newline<<"struct "<<name<<" : public ifunction"
         <<newline<<"{"<<inc
         <<newline<<"/* overwrite */ virtual machine_meta* operator()(machine_meta*const* metas, int C, machine_meta* result)"
-        <<newline<<"{"<<inc;
+        <<newline<<"{"<<inc
+		//<<newline<<"result = new lalr1meta;"
+		<<newline<<"variable* resvar = NULL;";
 
-	os<<newline<<"return result;";
 	foreach(const tstring& pinfo, infos.content.begin(), infos.content.end())
 	{
-		//os<<newline<<pinfo<<";";
+		os<<newline<<pinfo;
 	}
+	
+	os<<newline<<"((lalr1meta*)result)->content = resvar;"
+		//<<newline<<"((lalr1meta*)result)->ctype = resvar != NULL ? resvar->vtype() : NULL;"
+		<<newline<<"return result;";
 
     os<<dec<<newline<<"}"<<dec
         <<newline<<"};\n";

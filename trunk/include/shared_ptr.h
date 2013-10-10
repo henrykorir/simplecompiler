@@ -20,6 +20,7 @@
 #define _SHARED_PTR_H_
 
 #include <macros.h>
+#include <algorithm>
 
 NAMESPACE_BEGIN(kog)
 
@@ -55,6 +56,13 @@ class shared_ptr {
 			count = o.count;
 			incref();
 			return *this;
+		}
+
+		T* reset(T* ptr)
+		{
+			shared_ptr<T> tmp(ptr);
+			tmp.swap(*this);
+			return get();
 		}
 		
 		T* get() { return ptr; }

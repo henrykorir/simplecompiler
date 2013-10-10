@@ -17,17 +17,16 @@
 #include <logger.h>
 #include <compiler.h>
 #include <extract.h>
-#include <cplcompiler.h>
 #include <lalr1machine.h>
-#include <cplcompiler.h>
+#include <CExpTest_compiler.h>
 
 using namespace sc;
 using namespace compile;
 using namespace compile::ga;
-using namespace compile::cplc;
+using namespace compile::runtime;
 
-void load_grammar_machine(tinygrammar& g, lalr1machine& m, symbol_machine& s, kog::smart_vector<cplcompiler::veccsconver>& symconvertor);
-extern void print_nodes();
+//void load_grammar_machine(tinygrammar& g, lalr1machine& m, symbol_machine& s, kog::smart_vector<cplcompiler::veccsconver>& symconvertor);
+//extern void print_nodes();
 class cexpression_test : public unittest
 {
 public:
@@ -41,24 +40,18 @@ public:
 	/* overwrite */ virtual void run_test()
 	{
 		logstring("open input file " + input);
-		std::ifstream ifs(input.c_str());
-		if (!ifs.is_open()) fire("can't open file "+ input);
 
-		cplcompiler c_expression_compiler;
+		compiler_setup* c_expression_compiler = new CExpTest;
 
 		logstring("start setup compiler...");
-		c_expression_compiler.setup();
+		compiler::instance().setup(c_expression_compiler);
 
 		logstring("start init compiler...");
-		c_expression_compiler.init();
+		compiler::instance().init(input);
 
 
 		logstring("start building...");
-		c_expression_compiler.build(ifs);
-
-		ifs.close();
-
-		print_nodes();
+		compiler::instance().build_src2iml();
 	}
 private:
 	std::string input;
@@ -66,62 +59,57 @@ private:
 
 NEW_UNITTEST(cexpression_test);
 
-void entry_types()
-{
-	typesystem::instance().new_type<type>("struct_type")->tsize = 4; // struct_type
-	typesystem::instance().new_type<type>("enum_type")->tsize = 4; // enum_type
-	typesystem::instance().new_type<type>("union_type")->tsize = 4; // enum_type
-	typesystem::instance().new_type<type>("void")->tsize = 0; // enum_type
-    typesystem::instance().new_type<type>("int")->tsize = sizeof(int32); // int_type
-    typesystem::instance().new_type<type>("float")->tsize = sizeof(float); // float_type
-    typesystem::instance().new_type<type>("double")->tsize = sizeof(double); // double_type
-    typesystem::instance().new_type<type>("short")->tsize = sizeof(short); // short_type
-    typesystem::instance().new_type<type>("char")->tsize = sizeof(char); // char_type
-    typesystem::instance().new_type<type>("long")->tsize = sizeof(long); // long_type
-    typesystem::instance().new_type<type>("long long")->tsize = sizeof(long long); // long_long_type
-    typesystem::instance().new_type<type>("unsigned char")->tsize = sizeof(unsigned char); // uchar_type
-    typesystem::instance().new_type<type>("unsigned short")->tsize = sizeof(unsigned short); // ushort_type
-    typesystem::instance().new_type<type>("unsigned int")->tsize = sizeof(unsigned int); // uint_type
-    typesystem::instance().new_type<type>("unsigned long")->tsize = sizeof(unsigned long); // ulong_type
-    typesystem::instance().new_type<type>("unsigned long long")->tsize = sizeof(unsigned long long); // ulong_long_type
-}
-
-using namespace compile::doc;
-extern void init_grammar(tinygrammar& tig);
-extern void init_machines(std::map<std::string, machine>& machines);
-extern void init_syntax_machine(lalr1machine& lrm);
-extern void init_production_functions(kog::smart_vector<ifunction*>& pfuncs);
-extern void init_complex_symbols(kog::smart_vector<cplcompiler::veccsconver>& convertors);
-
-void load_grammar_machine(tinygrammar& g, lalr1machine& m, symbol_machine& s, kog::smart_vector<cplcompiler::veccsconver>& symconvertor)
-{
-	{
-		init_grammar(g);
-		logstring("init grammar done.");
-	}
-	{
-		std::map<std::string, machine> machines;
-		init_machines(machines);
-		s.swap(*dynamic_cast<symbol_machine*>(machines["symbol_machine"].mac.get()));
-		logstring("init symbol machine done.");
-	}
-
-	{
-		kog::smart_vector<ifunction*> pfuncs;
-		init_production_functions(pfuncs);
-		logstring("init productions done.");
-
-		lalr1machine tmpmachine(g, pfuncs);
-		init_syntax_machine(tmpmachine);
-		m.swap(tmpmachine);
-		logstring("init machine done.");
-	}
-
-	{
-		init_complex_symbols(symconvertor);
-		logstring("init complex symbols done.");
-	}
-}
+//void entry_types()
+//{
+//	typesystem::instance().new_type<type>("struct_type")->tsize = 4; // struct_type
+//	typesystem::instance().new_type<type>("enum_type")->tsize = 4; // enum_type
+//	typesystem::instance().new_type<type>("union_type")->tsize = 4; // enum_type
+//	typesystem::instance().new_type<type>("void")->tsize = 0; // enum_type
+//    typesystem::instance().new_type<type>("int")->tsize = sizeof(int32); // int_type
+//    typesystem::instance().new_type<type>("float")->tsize = sizeof(float); // float_type
+//    typesystem::instance().new_type<type>("double")->tsize = sizeof(double); // double_type
+//    typesystem::instance().new_type<type>("short")->tsize = sizeof(short); // short_type
+//    typesystem::instance().new_type<type>("char")->tsize = sizeof(char); // char_type
+//    typesystem::instance().new_type<type>("long")->tsize = sizeof(long); // long_type
+//    typesystem::instance().new_type<type>("long long")->tsize = sizeof(long long); // long_long_type
+//    typesystem::instance().new_type<type>("unsigned char")->tsize = sizeof(unsigned char); // uchar_type
+//    typesystem::instance().new_type<type>("unsigned short")->tsize = sizeof(unsigned short); // ushort_type
+//    typesystem::instance().new_type<type>("unsigned int")->tsize = sizeof(unsigned int); // uint_type
+//    typesystem::instance().new_type<type>("unsigned long")->tsize = sizeof(unsigned long); // ulong_type
+//    typesystem::instance().new_type<type>("unsigned long long")->tsize = sizeof(unsigned long long); // ulong_long_type
+//}
+//
+//using namespace compile::doc;
+//
+//void load_grammar_machine(tinygrammar& g, lalr1machine& m, symbol_machine& s, kog::smart_vector<cplcompiler::veccsconver>& symconvertor)
+//{
+//	{
+//		init_grammar(g);
+//		logstring("init grammar done.");
+//	}
+//	{
+//		std::map<std::string, machine> machines;
+//		init_machines(machines);
+//		s.swap(*dynamic_cast<symbol_machine*>(machines["symbol_machine"].mac.get()));
+//		logstring("init symbol machine done.");
+//	}
+//
+//	{
+//		kog::smart_vector<ifunction*> pfuncs;
+//		init_production_functions(pfuncs);
+//		logstring("init productions done.");
+//
+//		lalr1machine tmpmachine(g, pfuncs);
+//		init_syntax_machine(tmpmachine);
+//		m.swap(tmpmachine);
+//		logstring("init machine done.");
+//	}
+//
+//	{
+//		init_complex_symbols(symconvertor);
+//		logstring("init complex symbols done.");
+//	}
+//}
 
 //void init_grammar(tinygrammar& tig) {}
 //void init_machines(std::map<std::string, machine>& machines) {}

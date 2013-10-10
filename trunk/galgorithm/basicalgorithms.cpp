@@ -124,7 +124,7 @@ void removenotused::new_grammar(const tinygrammar& tig, tinygrammar& tog)
 		{
 			OldNewMap[i] = (int)j;
 			NewSymbols[j] = tig.symbols()[i];
-			NewSymbols[j++].sid = j; // reset sid
+			NewSymbols[j++].sid = (int32)j; // reset sid
 		}
 	}
 
@@ -141,7 +141,7 @@ void removenotused::new_grammar(const tinygrammar& tig, tinygrammar& tog)
 		{
 			*iterD = OldNewMap[*iterS];
 		}
-		prodList.push_back(production(OldNewMap[refProd.left()], tempRightList.get(), tempRightList.size()));
+		prodList.push_back(production(OldNewMap[refProd.left()], tempRightList.get(), (int32)tempRightList.size()));
 	}
 
 	tinygrammar gout_kernel(NewSymbols.begin(), NewSymbols.end(), prodList.begin(), prodList.end(), OldNewMap[tig.starts()]);
@@ -180,7 +180,7 @@ void removesingle::operator()(const tinygrammar& tig, tinygrammar& tog)
 	std::vector<int> idx(N, -1);
 	for(size_t i = 0; i < singleP.size(); ++ i)
 	{
-		if(idx[singleP[i].first] == -1) idx[singleP[i].first] = i;
+		if(idx[singleP[i].first] == -1) idx[singleP[i].first] = (int)i;
 	}
 	singleP.push_back(std::make_pair(-1, -1)); // to make for(v=idx[x];;) to stop 
 
@@ -190,7 +190,7 @@ void removesingle::operator()(const tinygrammar& tig, tinygrammar& tog)
 		std::deque<int32> Wstack;
 		kog::smart_vector<int32> Wi(N);
 		memset(Wi.get(), 0, Wi.size_in_bytes());
-		Wstack.push_back(i);
+		Wstack.push_back((int32)i);
 		while(!Wstack.empty())
 		{
 			int32 x = Wstack.back();
@@ -210,7 +210,7 @@ void removesingle::operator()(const tinygrammar& tig, tinygrammar& tog)
 		{
 			const production& p = refProductions[j];
 			if(!(Wi[p.left()] && (p.right_size() != 1 || IsTerm[p.right()[0]]))) continue;
-			NewProdList.push_back(production(i, p.right().get(), p.right_size()));
+			NewProdList.push_back(production((int32)i, p.right().get(), (int32)p.right_size()));
 		}
 	}
 	// remove duplicate productions
@@ -352,7 +352,7 @@ void eliminate_eplison::new_start_symbol(const tinygrammar& tig, tinygrammar& to
 	symbol asym;
 	asym.Lfuncs = 0;
 	asym.ist = 0;
-	asym.sid = sholder.size();
+	asym.sid = (int32)sholder.size();
 	std::string name_tmp = stringX::format("S%d", asym.sid);
 	asym.name = name_tmp.c_str();
 	asym.Lname = (int32)name_tmp.size();
@@ -415,7 +415,7 @@ void eliminate_eplison::rmeplison(const tinygrammar& tig, tinygrammar& tog)
 					{
 						kog::smart_vector<int32> rtmp(tmp_right.size());
 						for(size_t i = 0; i < rtmp.size(); ++ i) rtmp[i] = oldnewmap[tmp_right[i]];
-						NewProductions.push_back(production(oldnewmap[p.left()], rtmp.get(), rtmp.size()));
+						NewProductions.push_back(production(oldnewmap[p.left()], rtmp.get(), (int32)rtmp.size()));
 					}
 					while(!SymStack.empty() && SymStack.top().second == 0)
 					{
@@ -433,7 +433,7 @@ void eliminate_eplison::rmeplison(const tinygrammar& tig, tinygrammar& tog)
 				{
 					size_t x = *top.third;
 					SymStack.push(kog::make_triple(x, toe[x], kog::iterator_next(top.third)));
-					tmp_right.push_back(x);
+					tmp_right.push_back((int32)x);
 				}
 			}
 		}
@@ -450,7 +450,7 @@ void eliminate_eplison::rmeplison(const tinygrammar& tig, tinygrammar& tog)
 	{
 		std::deque<symbol> newsymlist(sholder.size() - 1);
 		for(size_t i = 0, j = 0; i < sholder.size(); ++ i)
-			if(i != eid) { newsymlist[j] = sholder[i]; newsymlist[j].sid = j; ++ j;}
+			if(i != eid) { newsymlist[j] = sholder[i]; newsymlist[j].sid = (int32)j; ++ j;}
 		tinygrammar tmp(newsymlist.begin(), newsymlist.end(), NewProductions.begin(), NewProductions.end(), oldnewmap[tig.starts()]);
 		tog.swap(tmp);
 	}

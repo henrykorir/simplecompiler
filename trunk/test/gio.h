@@ -123,7 +123,7 @@ private:
 			{
 				right[i] = finds(bufs, slist, rightstr[i]);
 			}
-			plist.push_back(production(L, right.get(), right.size()));
+			plist.push_back(production(L, right.get(), (int32)right.size()));
             
             char ch;
             if(is>>ch)
@@ -195,7 +195,16 @@ public:
 			os_<<sholder.at(p[0]).name;
 			for(int32 j = 1; j < p.right_size(); ++ j)
 			{
-				os_<<' '<<sholder.at(p[j]).name;
+				const symbol& s = sholder.at(p[j]);
+				if (s.name[0] == '\0' || ::isprint(s.name[0]))
+					os_<<' '<<s.name;
+				else
+				{
+					os_<<"'";
+					for (int16 k = 0; k < s.Lname; ++ k)
+						os_<<"\\"<<(int)s.name[k];
+					os_<<"'";
+				}
 			}
 			//os_<<"\n";
 			os_<<std::endl;

@@ -69,6 +69,7 @@ size_t makecompiler::parse_file(const std::string& syntaxfile, compiler_grammar&
 		else if (lower_tmp == "terminates") parse_terms(ifs, cg);
 		else if (lower_tmp == "non-terminates") parse_nonterms(ifs, cg);
 		else if (lower_tmp == "complex-symbols") parse_complex_symbols(ifs, cg);
+		else if (lower_tmp == "white-spaces") parse_whitespaces(ifs, cg);
 		else if (stringX::xregex::is_match("^keywords\\s*:\\s*[^\\s]+\\s*$", lower_tmp)) parse_keywords(ifs, cg, lower_tmp.substr(lower_tmp.find(':') + 1));
 		else if (stringX::xregex::is_match("^function\\s*:\\s*[^\\s]+\\s*$", lower_tmp)) parse_function(ifs, cg, lower_tmp.substr(lower_tmp.find(':') + 1));
 		else if (lower_tmp.find("->") != std::string::npos) parse_production(ifs, cg, tmp); // add new production
@@ -77,7 +78,7 @@ size_t makecompiler::parse_file(const std::string& syntaxfile, compiler_grammar&
 			cg.starts() = cg.index(stringX::trim(tmp.substr(tmp.find(":") + 1)));
 		else if (stringX::xregex::is_match("grammarname\\s*:.*", lower_tmp))
 			cg.name() = stringX::trim(tmp.substr(tmp.find(":") + 1));
-		else 
+		else
 		{
 			fire("invalidate syntax@ %s:%d", syntaxfile.c_str(), curfile_.iLine);
 		}
@@ -88,6 +89,37 @@ size_t makecompiler::parse_file(const std::string& syntaxfile, compiler_grammar&
 	std::swap(curfile_, bkfile);
 
 	return bkfile.iLine;
+}
+
+size_t makecompiler::parse_whitespaces(std::istream& is, compiler_grammar& cg)
+{
+	logstring("start parse whitespaces");
+	std::string tmp;
+
+	std::set<tchar> whitespaces(cg.whitespaces().begin(), cg.whitespaces().end());
+	while (get_nextline(is, tmp, curfile_.iLine))
+	{
+#ifdef WIN32
+		if(!std::isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read seprators, need a whitespace");
+#else
+		if(!std::isspace(tmp[0])) fire(errorpos() + "failed when read seprators, need a whitespace");
+#endif
+		
+		tmp = stringX::trim(tmp, 2); // remove leading spaces and ending spaces
+		std::vector<tstring> spaces = stringX::split(tmp, tstring("\t"), true);
+
+		for (size_t i = 0; i < spaces.size(); ++ i)
+		{
+			tmp = stringX::trim(spaces[i], stringX::trim_both);
+			if (tmp.empty()) continue;
+			logstring("new whitespaces %s", tmp.c_str());
+			whitespaces.insert((tchar)atoi(tmp.c_str()));
+		}
+	}
+
+	// update whitespaces
+	cg.whitespaces() = tstring(whitespaces.begin(), whitespaces.end());
+	return curfile_.iLine;
 }
 
 size_t makecompiler::parse_seprators(std::istream& is, compiler_grammar& cg)
@@ -138,7 +170,7 @@ size_t makecompiler::parse_operators(std::istream& is, compiler_grammar& cg)
 		stringX::string_split_t<tchar> spliter(tmp, "\t", false);
 		stringX::string_split_t<tchar>::const_iterator iter = spliter.begin();
 		operator_t opr;
-		opr.txt = stringX::trim(*(iter ++));
+		opr.txt = _get_real_content(stringX::trim(*(iter ++)));
 		if (opr.txt.empty()) fire(errorpos() + "operator must have txt");
 
 		if (iter != spliter.end())
@@ -206,16 +238,18 @@ size_t makecompiler::parse_production(std::istream& is, compiler_grammar& cg, co
 	syntax::compiler_action_parser action_parser(pinfo);
 	while (get_nextline(is, tmp, curfile_.iLine))
 	{
+		//logstring("read line(%s)", tmp.c_str());
+		tmp = stringX::trim(tmp, 1); // remove ending spaces
+		if (tmp.empty()) continue;
 #ifdef WIN32
-		if(!std::isspace(tmp[0], std::locale(""))) fire(errorpos() + "failed when read production item, need a whitespace");
+		if (!std::isspace(tmp[0], std::locale("")) && !(tmp == "}" || tmp == "{")) 
 #else
-		if(!std::isspace(tmp[0])) fire(errorpos() + "failed when read production item, need a whitespace");
+		if(!std::isspace(tmp[0]) && !(tmp == "}" || tmp == "{"))
 #endif
+			fire(errorpos() + "failed when read production item, need a whitespace");
 
-		tmp = stringX::trim(tmp, 2); // remove leading spaces and ending spaces
-
-		if(!action_parser.newline(tmp))
-			fire(errorpos() + "invalidate production syntax");
+		if (!action_parser.newline(tmp))
+			break;
 	}
 
 	// insert new production
@@ -476,6 +510,40 @@ int32 makecompiler::_need_replace(const tchar* p) const
 		}
 	}
 	return px->depth;
+}
+
+tstring makecompiler::_get_real_content(const tstring& str)
+{
+	if (str.size() <= 1) return str;
+	else if (str[0] == '"' && str[str.size()-1] == '"')
+	{
+		tstring buf;
+		for (size_t i = 0; i < str.size(); ++ i)
+		{
+			switch (str[i])
+			{
+			case '\\':
+				if (i + 1 >= str.size()) fire("invalidte string (%s)", str.c_str());
+				switch (str[i + 1])
+				{
+				case '\\': buf.push_back('\\'); break;
+				case '\"': buf.push_back('"'); break;
+				case 'n': buf.push_back('\n'); break;
+				case 't': buf.push_back('\t'); break;
+				case 'v': buf.push_back('\v'); break;
+				case 'f': buf.push_back('\f'); break;
+				case 'r': buf.push_back('\r'); break;
+				default:
+					fire("invlidate string (%s) at pos %d", str.c_str(), i);
+				}
+				break;
+			default:
+				buf.push_back(str[i]);
+				break;
+			}
+		}
+	}
+	return  str;
 }
 
 tstring makecompiler::errorpos() const

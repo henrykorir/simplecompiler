@@ -114,7 +114,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\..\include;..\..\third_party;..\..\syntax;..\..\galgorithm;..\..\makecompiler"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;VISUAL_STDIO"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

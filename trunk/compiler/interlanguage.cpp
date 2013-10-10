@@ -3,8 +3,12 @@
 #include <algorithm>
 #include <logger.h>
 #include <fstream>
+#include <stack>
 #include <scerror.h>
+#include <indentstream.h>
+#include <oformatstream.h>
 #include <typeinfo>
+#include <iomanip>
 
 #include "extract.h"
 #include "lalr1machine.h"
@@ -80,4 +84,76 @@ void interlanguage::generate(const std::string& finput_name, const std::string& 
 	//	asmg.print(ps);
 	//}
 	ofile.close();
+}
+
+void interlanguage::print_il(const std::string& ilfile) const
+{
+	std::ofstream ofs(ilfile.c_str());
+	if (!ofs.is_open()) fire("can't open file(%s)", ilfile.c_str());
+	kog::oformatstream os(ofs);
+    //kog::oindentstream os(ofs);
+	//os.setf(std::ostream::left);
+	os<<std::left;
+    using kog::inctab;
+    using kog::dectab;
+    using kog::fmtline;
+	std::stack<scope*> ptStack;
+	ptStack.push(main_scope_);
+	while (!ptStack.empty())
+	{
+		scope* ps = ptStack.top();
+		ptStack.pop();
+		if (ps == NULL) continue;
+		foreach (scope* p, ps->children().begin(), ps->children().end())
+		{
+			ptStack.push(p);
+		}
+
+		logstring("output scope(%s)", ps->name().c_str());
+		os<<ps->name();
+
+		os<<fmtline<<"========readonly data========"<<kog::flush<<inctab;
+		const rodata_session* rods = as<rodata_session>(ps->get_session(typeid(rodata_session).name()));
+		os<<fmtline<<"content"<<"type"<<"size";
+		if (rods != NULL)
+		{
+			const std::deque<variable*>& vars = rods->variables();
+			foreach (const variable* v, vars.begin(), vars.end())
+			{
+				os<<fmtline<<v->name()<<v->vtype()->to_string()<<v->vtype()->tsize;
+			}
+		}
+		os<<kog::flush<<dectab<<kog::newline;
+		
+		os<<fmtline<<"========variables========"<<kog::flush<<inctab;
+		// print scope's variables
+		const data_session* ds = as<data_session>(ps->get_session(typeid(data_session).name()));
+		os<<fmtline<<"name"<<"type"<<"size";
+		if (ds != NULL)
+		{
+			const std::deque<variable*>& vars = ds->variables();
+			foreach (const variable* v, vars.begin(), vars.end())
+			{
+				os<<fmtline<<v->to_string()<<v->vtype()->to_string()<<v->vtype()->tsize;
+			}
+		}
+		os<<kog::flush<<dectab<<kog::newline;
+		
+		// print scope's tuples
+		const text_session* ts = as<text_session>(ps->get_session(typeid(text_session).name()));
+		if (ts == NULL) continue;
+
+		os<<fmtline<<"========tuples========"<<kog::flush<<inctab
+			<<fmtline<<"oper"<<"src1"<<"src2"<<"dest";
+    	for (std::deque<tuple*>::const_iterator iter = ts->tuples().begin(); iter != ts->tuples().end(); ++ iter)
+		{
+       		four_tuple* pt = (four_tuple*)(*iter);
+			os<<fmtline<<operations::op_string::to_string(pt->oper)<<obj2str(pt->src1)
+				<<obj2str(pt->src2)<<obj2str(pt->dst);
+		}
+
+		os<<kog::flush<<dectab<<kog::newline<<kog::newline;
+	}
+
+	ofs.close();
 }

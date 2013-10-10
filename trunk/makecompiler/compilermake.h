@@ -66,6 +66,8 @@ private:
 	size_t parse_complex_symbols(std::istream& is, compiler_grammar& cg);
 	// read function 
 	size_t parse_function(std::istream& is, compiler_grammar& cg, const tstring& funcname);
+	// read whitespaces
+	size_t parse_whitespaces(std::istream& is, compiler_grammar& cg);
 private:
 	bool get_nextline(std::istream& is, std::string& tmp, size_t& flines) const;
 	int32 parse_complex_symbol(const tstring& rline, compiler_grammar& cg);
@@ -73,6 +75,7 @@ private:
 	void _replace(tstring& tmp) const;
 	void _new_replacer(const tstring& pattern, const tstring& replacer);
 	int32 _need_replace(const tchar* p) const;
+	tstring _get_real_content(const tstring& str);
 protected:
 	// get error string of curfile_
 	tstring errorpos() const;

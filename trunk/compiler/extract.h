@@ -25,6 +25,8 @@ public:
 public:
 	MEMBER_VARIABLE_GET(const deqwords&, words, words_);
 public:
+	
+public:
 	deqwords& operator()(std::istream& is);
 private:
 	deqwords words_;

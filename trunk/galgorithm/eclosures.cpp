@@ -24,7 +24,7 @@ void eclosure::operator()(const tinygrammar& tig, closure_array& closures)
 
 	kog::smart_vector<std::set<int32> > edges(sholder.size());
 	for (size_t i = 0; i < sholder.size(); ++ i) 
-		if(!sholder[i].ist) edges[i].insert(i);
+		if(!sholder[i].ist) edges[i].insert((int32)i);
 	// create graph
 	int32 virtual_ending = -1;
 	for (prodholder_proxy::const_iterator iter = prods.begin(); iter != prods.end(); ++ iter)
@@ -53,7 +53,7 @@ void eclosure::operator()(const tinygrammar& tig, closure_array& closures)
 		if(sholder[i].ist) continue;
 		std::stack<int32> visitstack;
 		kog::smart_vector<int32> isvisited(sholder.size(), 0);
-		visitstack.push(i);
+		visitstack.push((int32)i);
 		closure_array::value_type& iclosure = closures[i];
 		while(!visitstack.empty())
 		{
@@ -71,7 +71,7 @@ void eclosure::operator()(const tinygrammar& tig, closure_array& closures)
 		iclosure.reset(n);
 		for (size_t v = 0, j = 0; v < sholder.size(); ++ v)
 		{
-			if(isvisited[v]) iclosure[j ++] = v;
+			if(isvisited[v]) iclosure[j ++] = (int32)v;
 		}
 
 #ifdef DEBUG_OUTPUT

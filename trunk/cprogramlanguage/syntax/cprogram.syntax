@@ -16,10 +16,6 @@ ProgramItemList -> ProgramItem
 
 ProgramItemList -> ProgramItem ProgramItemList
 
-ProgramItem -> Define ;
-
-ProgramItem -> Include
-
 ProgramItem -> Typedef ;
 
 ProgramItem -> ExternValue ;
@@ -44,14 +40,6 @@ ProgramItem -> FunctionDeclear ;
 
 ProgramItem -> Function
 
-#Define -> #define symbol define_content
-
-#Define -> #define symbol ( NameList ) 
-
-Include -> #include stringvalue
-
-Include -> #include < file_name >
-
 SymbolWithArray -> symbol
 
 SymbolWithArray -> symbol ArraySize
@@ -61,8 +49,6 @@ SymbolWithPtrArray -> SymbolWithArray
 SymbolWithPtrArray -> * SymbolWithPtrArray
 
 SymbolWithPtrArray -> const SymbolWithPtrArray
-
-#Typedef -> typedef Type symbol
 
 Typedef -> typedef basic_type SymbolWithPtrArray
 
@@ -79,5 +65,4 @@ Typedef -> typedef void ( * SymbolWithArray ) ( ParamList )
 ExternValue -> extern Type symbol
 
 ExternFunc -> extern FunctionDeclear
-
 
