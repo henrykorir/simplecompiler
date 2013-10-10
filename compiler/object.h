@@ -38,6 +38,11 @@ struct object
     }
 };
 
+inline tstring obj2str(const object* obj)
+{
+	return obj == NULL ? "(null)" : obj->to_string();
+}
+
 //class objectptrlist : public std::vector<object*>
 //{
 //};

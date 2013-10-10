@@ -5,10 +5,15 @@
 #include <fstream>
 #include <scerror.h>
 #include <typeinfo>
+#include <folder.h>
+#include <typeinfoname.h>
 
 #include "extract.h"
 #include "lalr1machine.h"
 #include "asmgenerate.h"
+#include "compiler_setup.h"
+#include "extract_stream.h"
+#include "scope.h"
 
 using namespace sc;
 using namespace compile;
@@ -16,9 +21,6 @@ using namespace compile::doc;
 using namespace compile::runtime;
 
 compiler::compiler()
-: keywords_(string_2_int::max_int)
-, iml_(new interlanguage())
-, tg_(new grammar)
 {
 }
 
@@ -26,195 +28,133 @@ compiler::~compiler()
 {
 }
 
-state_machine compiler::get_number_machine()
+compile::interlanguage* compiler::get_iml()
 {
-	return *(dynamic_cast<state_machine*>(instance().machines_["number"].mac.get()));
+	return iml_.get();
 }
 
-state_machine compiler::get_symbol_machine()
+void compiler::setup(kog::shared_ptr<compile::compiler_setup> setup_obj)
 {
-	return *(dynamic_cast<state_machine*>(instance().machines_["symbol"].mac.get()));
+	setup_ = setup_obj;
+	setup_->setup();
 }
 
-state_machine compiler::get_string_machine()
+void compiler::init(const tstring& src_file, const tstring& obj_folder)
 {
-	return *(dynamic_cast<state_machine*>(instance().machines_["string"].mac.get()));
-}
-
-symbol_machine compiler::get_terminates_machine()
-{
-	return *(dynamic_cast<symbol_machine*>(instance().machines_["terminates"].mac.get()));
-}
-
-const tstring& compiler::get_whitespaces()
-{
-	const tinygrammar* p = instance().tg_.get();
-	return as<grammar>(p)->whitespaces();
-}
-
-bool compiler::is_separator(int32 elem)
-{
-	return std::find(instance().separators_.begin(), 
-			instance().separators_.end(), elem) != instance().separators_.end();
-}
-
-int compiler::get_all_machines(std::list<machine>& mlist)
-{
-	for(std::map<std::string, machine>::iterator iter = instance().machines_.begin(); iter != instance().machines_.end(); ++ iter)
+	std::string folder, filename;
+	std::string title, ext;
+	if (!kog::filesystem::split_path(src_file, folder, filename) || filename.empty())
 	{
-		if (typeid(*iter->second.mac) == typeid(state_machine))
-		{
-			mlist.push_back(iter->second);
-		}
-	}
-		
-	return (int32)mlist.size();
-}
-    
-automachine& compiler::get_machine(const std::string& machine_name)
-{
-    std::map<std::string, compile::doc::machine>& ms = instance().machines_;
-    std::map<std::string, compile::doc::machine>::iterator iter = ms.find(machine_name);
-    if (iter == ms.end())
-        fire("not found machine, " + machine_name);
-    return *(iter->second.mac);
-}
-    
-compile::interlanguage& compiler::getiml()
-{
-    return *(instance().iml_);
-}
-
-extern void init_grammar(tinygrammar& tig);
-extern void init_machines(std::map<std::string, machine>& machines);
-extern void init_syntax_machine(lalr1machine& lrm);
-extern void init_keywords(kog::buckethash<std::string, int32, string_2_int>& keywords);
-extern void init_separators(kog::smart_vector<sc::int32>& separators, kog::tree<int32>& sepsid);
-extern void init_printablechars(kog::smart_vector<sc::int32>& printablechars);
-extern void init_production_functions(kog::smart_vector<ifunction*>& pfuncs);
-
-void compiler::initialization()
-{
-	init_grammar(*tg_);
-	init_printablechars(printablechars_);
-	init_keywords(keywords_);
-	init_separators(separators_, sepsid_);
-	init_machines(machines_);
-
-    kog::smart_vector<ifunction*> tmp_prods;
-    init_production_functions(tmp_prods);
-    
-    // create new machine
-    lalr1machine* lalr1mac = new lalr1machine(*tg_, tmp_prods);
-	machines_["__main__"] = machine(kog::shared_ptr<automachine>(lalr1mac), -1);
-	init_syntax_machine(*lalr1mac);
-}
-
-
-int32 compiler::is_keywords(const std::string& s) const
-{
-	kog::buckethash<std::string, sc::int32, string_2_int>::const_iterator x = keywords_.find(s);
-	if (x == keywords_.end()) return -1;
-	return x->second;
-}
-
-struct split_separators
-{
-	split_separators(const tchar* w)
-		: aword(w)
-		, x(-1)
-	{
-		next();
+		fire("invalidate input source file %s", src_file.c_str());
 	}
 
-	int32 get() const
+	if (!kog::filesystem::split_title(filename, title, ext) || ext.empty() || title.empty())
 	{
-		return x;
+		fire("invalidate input source file %s", src_file.c_str());
 	}
 
-	int32 next()
+	_src_file = src_file;
+	if (obj_folder.empty())
 	{
-		kog::tree<int32>::link p = compiler::instance().sepsid_.root();
-		buf.clear();
-		while(*aword && p->nc)
-		{
-			unsigned char t = *(const unsigned char*)aword;
-			kog::tree<int32>::link q = p->children[t];
-			if(q) { buf.push_back(*(aword ++)); p = q; }
-			else break;
-		}
-
-		return x = p->v;
+		_il_file = kog::filesystem::path_cat(folder, title + ".il");
+		_asm_file = kog::filesystem::path_cat(folder, title + ".asm");
+	}
+	else
+	{
+		_il_file = kog::filesystem::path_cat(obj_folder, title + ".il");
+		_asm_file = kog::filesystem::path_cat(obj_folder, title + ".asm");
 	}
 
-	const tchar* aword;
-	tstring buf;
-	int32 x;
-};
+	iml_.reset(new compile::interlanguage);
 
-void compiler::check(const std::string& fname)
-{
-	streamsplit wordsplit;
-	std::ifstream cifs(fname.c_str());
-	if(!cifs.is_open()) fire("can't open file: " + fname);
-	streamsplit::deqwords& words = wordsplit(cifs);
-	cifs.close();
+	symbol_machine* symbol_mac = (symbol_machine*)(setup_->machines_["symbol_machine"].mac.get());
+	lalr1machine* syntax_mac = (lalr1machine*)(setup_->machines_["syntax_machine"].mac.get());
+
+	if (symbol_mac == NULL)
+	{
+		fire("not load symbol machine");
+	}
 	
-	lrmachine& lrm = *(dynamic_cast<lrmachine*>(machines_["__main__"].mac.get()));
-	lrm.init();
-
-	logstring("\nstart to run machine...");
-	for(streamsplit::deqwords::iterator iter = words.begin(); iter != words.end(); ++ iter)
+	if (syntax_mac == NULL)
 	{
-		switch (iter->wordClass)
+		fire("not load syntax machine");
+	}
+
+	syntax_mac->init();
+	symbol_mac->init();
+
+	compile::runtime::global_scope = iml_->current_scope();
+
+	typesystem::instance().init_buildin_types();
+}
+
+void compiler::build_src2iml()
+{
+	const int eof_sid = -1;
+	const int space_sid = -2;
+	symbol_machine* symbol_mac = (symbol_machine*)(setup_->machines_["symbol_machine"].mac.get());
+	lalr1machine* syntax_mac = (lalr1machine*)(setup_->machines_["syntax_machine"].mac.get());
+	compiler_grammar* g = setup_->g_.get();
+	kog::smart_vector<compiler_setup::veccsconver>& symconvertor = setup_->symconvertor_;
+	std::allocator<doc::word> walloc;
+	symholder_proxy symproxy = g->symbols();
+
+	std::ifstream ifs(_src_file.c_str());
+	if (!ifs.is_open()) fire("can't open file(%s)", _src_file.c_str());
+	extrace_stream es(ifs, *symbol_mac, eof_sid, /*g->whitespaces()*/"\r\n\t\v\f ", g->skipspace());
+	//logstring("whitespaces is (%s)", g->whitespaces().c_str());
+
+	// read words
+	for (streamword word; es>>word;)
+	{
+		logstring("extrace word '%s', sid is %d, name(%s)", word.txt.c_str(), word.sid, 
+			word.sid >= 0 ? symproxy.at(word.sid).name : "$eof");
+		automachine::machine_meta* tmp_meta = syntax_mac->new_meta(word.sid);
+		lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
+		pm->content = new doc::word;//walloc.allocate(1);
+        //pm->ctype = wtype;
+		as<compile::doc::word>(pm->content)->txt = word.txt;
+
+		if (word.sid >= 0)
 		{
-		case 0: // separators
+			foreach (compiler_setup::complex_symbol_convert& convertor, symconvertor[word.sid].begin(), symconvertor[word.sid].end())
 			{
-				split_separators splits(iter->txt.c_str());
-				for (int32 x = splits.get(); x != -1; x = splits.next())
+				if (convertor != NULL && convertor(tmp_meta)) 
 				{
-					logstring("%s\t%d", splits.buf.c_str(), x);
-                    automachine::machine_meta* tmp_meta = lrm.new_meta(x);
-                    lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
-                    pm->content = &(*iter);
-                    pm->ctype = typesystem::instance().word_type();
-					if(!lrm.eta(tmp_meta))
-						fire("not expected sep!\n");
+					logstring("convert sid from (%d) to (%d), result symbol is(%s)", 
+						word.sid, tmp_meta->sid, symproxy.at(tmp_meta->sid).name);
+					break;
 				}
 			}
-			break;
-		case -1: // eof
-			{
-				logstring("%s\t%d\n", iter->txt.c_str(), -1);
-                automachine::machine_meta* tmp_meta = lrm.new_meta(-1);
-                lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
-                pm->content = &(*iter);
-                pm->ctype = typesystem::instance().word_type();
-				if(!lrm.eta(tmp_meta))
-					fire("not expected eof!\n");
-			}
-			break;
-		default:
-			{
-				int32 x = is_keywords(iter->txt);
-				if(x == -1) x = iter->wordClass;
-				logstring("%s\t%d", iter->txt.c_str(), x);
-                automachine::machine_meta* tmp_meta = lrm.new_meta(x);
-                lalr1machine::lalr1meta* pm = (lalr1machine::lalr1meta*)tmp_meta;
-                pm->content = &(*iter);
-                pm->ctype = typesystem::instance().word_type();
-				if(!lrm.eta(tmp_meta))
-					fire("not expected word!\n");
-			}
+		}
+		else if (word.sid == space_sid)
+		{
+		}
+
+		try {
+			if (!syntax_mac->eta(tmp_meta))
+				fire("invalidate word '%s'!", word.txt.c_str());
+		} catch(sc::scerror& sce) {
+			fire("%s(%d) : error %s: %s\ncall stack:\n%s", 
+					_src_file.c_str(), es.get_line_count(), kog::typeinfo_name(typeid(sce).name()).c_str(), sce.what(), sce.trace_message().c_str());
+		} catch (std::exception& ex) {
+			fire("%s(%d) : error %s: %s", _src_file.c_str(), es.get_line_count(), kog::typeinfo_name(typeid(ex).name()).c_str(), ex.what());
+		} catch (...) {
+			fire("%s(%d) : error %s: %s", _src_file.c_str(), es.get_line_count(), "unknown", "unknown error");
 		}
 	}
 
-	if(lrm.isaccepted())
-		logstring("\naccepted!");
-	else logstring("\nerror, not accepted!");
+	if(syntax_mac->isaccepted()) logstring("accepted!");
+	else logstring("error, not accepted!");
+
+	ifs.close();
+
+	// print il file
+	logstring("write il file(%s)", _il_file.c_str());
+	iml_->print_il(_il_file);
 }
-    
-void compiler::generate_asm(const std::string& asmfile)
+
+void compiler::build_iml2asm()
 {
-	iml_->generate("tinyg.x", asmfile);
+	
 }

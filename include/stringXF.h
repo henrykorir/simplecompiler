@@ -593,22 +593,28 @@ namespace Format
 	};
 }
 
+enum trim_type : int
+{
+	trim_leading = 0x02,
+	trim_ending = 0x01,
+	trim_both = trim_leading | trim_ending
+};
 // erase the pad spaces of the string
 // param@ path, the original string
 // param@ trimType
 //		trimType == 1 : erase the ending spaces
 //		trimType == 2 : erase the leading spaces
 //		trimType == 3 : erase the leading and ending spaces
-inline std::string trim(const std::string& path, int trimType = 3)
+inline std::string trim(const std::string& path, int trimType = trim_both)
 {
 	size_t pos = 0;
 	size_t len = path.size();
 
-	if(trimType & 0x01)
+	if(trimType & trim_ending)
 	{
 		while(len && Format::IsSpace()(path[len-1])) -- len;
 	}
-	if(trimType & 0x02)
+	if(trimType & trim_leading)
 	{
 		while(len && Format::IsSpace()(path[pos])) ++ pos, -- len;
 	}

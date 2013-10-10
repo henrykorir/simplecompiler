@@ -56,6 +56,7 @@ public:
 public:
 	// and a new const value object
     variable* entry_value(const _Str& content, const type* canTypes[], int _N);
+	variable* entry_value(const _Str& content, const type* var_type);
 
 	// regist a new function
     variable* entry_function(int ass_type, const _Str& fname, function_type* ftype);
@@ -64,6 +65,11 @@ public:
 	// ass_type is access type of the variable(public/protected/private or more)
     variable* entry_variable(const _Str& vname, const type* vtype, int ass_type, int32 vscope = varscope::vstack);
 
+	// get a temporary variable's name
+	tstring get_temp_name();
+	// regist a temporary variable
+	// it's name is given by scope
+	//variable* entry_temporary(variable* v);
 	// add new op
 	tuple* entry_tuple(const operation* oper, const object* src1, const object* src2, const object* dst);
 
@@ -72,6 +78,8 @@ public:
 
 	// get access type of given variable
 	int32 access_type(const _Str& str) const;
+public:
+	const session* get_session(const _Str& session_name) const;
 protected:
 	variable* find_here(const _Str& name) const;
 public:
@@ -107,7 +115,8 @@ private:
 	// scope type
 	int32 stype_;
 private:
-	symboltable reg_table_;
+	symboltable reg_table_; // include using and parent scope
+	//symboltable self_table_; // just self
 	access_info_map access_;
 protected:
     _Str name_;
@@ -156,6 +165,8 @@ private:
 	// function type of the function
 	function_type* funtype_;
 };
+
+extern scope* global_scope;
 
 NAMESPACE_END(runtime)
 NAMESPACE_END(compile)

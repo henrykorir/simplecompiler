@@ -1,0 +1,25 @@
+# program
+
+GrammarName : CExpTest
+
+includes
+	expression.syntax
+	cdeclear.syntax
+	complextype.syntax
+	type.syntax
+	whitespaces.syntax
+
+StartSymbol : CProgram
+
+CProgram -> ProgramItemList
+
+ProgramItemList -> ProgramItem
+
+ProgramItemList -> ProgramItem ProgramItemList
+
+ProgramItem -> ValueDeclear ;
+
+ProgramItem -> ExpressionList 
+
+ProgramItem -> ComplexTypeDefine ;
+

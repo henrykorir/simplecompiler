@@ -88,6 +88,7 @@ public:
 	MEMBER_VARIABLE_GET_SET(int32, eplisons, eplison_symbol_);
 	MEMBER_VARIABLE_GET_SET(int32, endings, ending_symbol_);
 	MEMBER_VARIABLE_GET_SET(tstring, name, gname_);
+	MEMBER_VARIABLE_GET_SET(bool, skipspace, skip_whitespaces_);
 private:
 	int32 make_terminate(const tstring& sname, const tstring& content, const tstring& stype, int32 flag);
 	symbol make_symbol(const tstring& name, int32 sid, bool isTerm);

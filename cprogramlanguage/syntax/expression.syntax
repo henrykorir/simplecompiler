@@ -10,406 +10,573 @@ ExpressionList -> Expression ;
 ExpressionList -> Expression ; ExpressionList
 
 Expression1 -> symbol
+{
 	$0 : word
-	$$ = as<variable>(find($0.txt))
+	$$ = find($0.txt);
+}
 
 Expression1 -> intvalue
+{
 	$0 : word
-	$$ = temporary($0.txt, int_type)
+	$$ = temporary($0.txt, int_type);
+}
 
 Expression1 -> floatvalue
+{
 	$0 : word
-	$$ = temporary($0.txt, float_type)
+	$$ = temporary($0.txt, float_type);
+}
 
 Expression1 -> doublevalue
+{
 	$0 : word
-	$$ = temporary($0.txt, double_type)
+	$$ = temporary($0.txt, double_type);
+}
 
 Expression1 -> charvalue
+{
 	$0 : word
-	$$ = temporary($0.txt, char_type)
+	$$ = temporary($0.txt, char_type);
+}
 
 Expression1 -> stringvalue
+{
 	$0 : word
-	$$ = temporary($0.txt, string_type)
+	$$ = temporary($0.txt, string_type);
+}
 
 Expression1 -> FunctionCall
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 FunctionCall -> Expression1 ( ParamList )
-	$0 : variable, function_type
-	$2 : list
-	$$ = tempory(as<function>($0).return_type)
-	tuple(call, $0, $2, $$)
+{
+	$0 : function
+	$2 : arraylist
+	$$ = temporary($0.return_type);
+	add_tuple("call", $0, $2, $$);
+}
 
 FunctionCall -> Expression1 ( )
-	$0 : variable
-	$$ = tempory(as<function>($0).return_type)
-	tuple(call, $0, NULL, $$)
+{
+	$0 : function
+	$$ = temporary($0->return_type);
+	add_tuple("call", $0, NULL, $$);
+}
 
 ParamList -> Expression15
+{
 	$0 : variable
-	$$ = $0
+	$$ = [[ $0 ]];
+}
 
 ParamList -> Expression15 , ParamList
+{
 	$0 : variable
-	$2 : list
-	$$ = [$0] + $2
+	$2 : arraylist
+	$$ = $2.insert([[ $0 ]]);
+}
 
 Expression1 -> ( Expression )
+{
 	$1 : variable
-	$$ = $1
+	$$ = $1;
+}
 
 Expression1 -> Expression1 [ Expression ]
+{
 	$0 : pointer_variable
 	$2 : variable
-	$$ = ref($0,  $2)
+	#0 : $0.basic_type
+	$$ = ary_ref($0,  $2, #0);
+}
 
 Expression1 -> Expression1 -> symbol
+{
 	$0 : pointer_variable
 	$2 : word
-	$$ = ptr_ref($0, $2.txt)
+	#0 : get_result_type("mem", $0.basic_type, $2.txt)
+	$$ = ptr_ref($0, $2.txt, #0);
+}
 
 Expression1 -> Expression1 . symbol
+{
 	$0 : variable
 	$2 : word
-	$$ = ref($0, $2.txt)
+	#0 : get_result_type("mem", $0.type, $2.txt)
+	$$ = mem_ref($0, $2.txt, #0);
+}
 
 Expression1 -> :: symbol
+{
 	$0 : word
-	$$ = as<variable>find($0.txt)
+	$$ = find($0.txt, global_scope);
+}
 
 Expression1 -> Expression1 ++
+{
 	$0 : variable
-	$$ = temporary($0)
-	tuple(inc, $0)
+	$$ = temporary($0);
+	add_tuple("inc", $0);
+}
 
 Expression1 -> Expression1 --
+{
 	$0 : variable
-	$$ = temporary($0)
-	tuple(dec, $0)
+	$$ = temporary($0);
+	add_tuple("dec", $0);
+}
 
 Expression2 -> Expression1
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression2 -> ! Expression2
+{
 	$1 : variable
-	$$ = temporary(int_type)
-	tuple(not, $$, NULL, $$)
+	$$ = temporary(int_type);
+	add_tuple("not", $$, NULL, $$);
+}
 
 Expression2 -> ~ Expression2
+{
 	$1 : variable
-	$$ = temporary($1)
-	tuple(inv, $$, NULL, $$)
+	$$ = temporary($1);
+	add_tuple("inv", $$, NULL, $$);
+}
 
 Expression2 -> ++ Expression2
+{
 	$1 : variable
-	$$ = $0
-	tuple(inc, $$)
+	$$ = $1;
+	add_tuple("inc", $$);
+}
 
 Expression2 -> -- Expression2
+{
 	$1 : variable
-	$$ = $0
-	tuple(dec, $$)
+	$$ = $1;
+	add_tuple("dec", $$);
+}
 
 Expression2 -> - Expression2
+{
 	$1 : variable
-	$$ = temporary($0.type)
-	tuple(negative, $0, NULL, $$)
+	$$ = temporary($1.type);
+	add_tuple("negative", $1, NULL, $$);
+}
 
 Expression2 -> + Expression2
+{
 	$1 : variable
-	$$ = temporary($0.type)
+	$$ = $1;
+}
 
 Expression2 -> * Expression2
+{
 	$1 : pointer_variable
-	$$ = ref($0, 0)
+	#0 : $1.basic_type
+	$$ = ref($1, 0, #0);
+}
 
 Expression2 -> & Expression2
+{
 	$1 : variable
-	$$ = temporary(pointer($0.type))
-	tuple(lda, $0, NULL, $$)
+	#0 : get_result_type("ptr", $1.type, NULL)
+	$$ = #0;
+	add_tuple("lda", $1, NULL, $$);
+}
 
 Expression2 -> ( Type ) Expression2
+{
 	$1 : type
 	$3 : variable
-	$$ = temporary($1)
-	tuple(cvt, $3, $1, $$)
+	$$ = temporary($1);
+	add_tuple("cvt", $3, $1, $$);
+}
 
 Expression2 -> sizeof ( Expression2 )
+{
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(mov, $2.size, NULL, $$)
+	$$ = temporary(int_type);
+	add_tuple("assign", temporary($2.type.tsize), NULL, $$);
+}
 
 Expression3 -> Expression2
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression3 -> Expression3 ->* symbol
+{
 	$0 : pointer_variable
 	$2 : word
-	$$ = ptr_ref($0, $3)
+	#0 : get_result_type("mem", $0.basic_type, $2.txt)
+	$$ = ptr_ref($0, $2.txt, #0);
+}
 
 Expression3 -> Expression3 .* symbol
+{
 	$0 : pointer_variable
 	$2 : word
-	$$ = ref($0, $3)
+	#0 : get_result_type("mem", $0.basic_type, $2.txt)
+	$$ = mem_ref($0, $2.txt, #0);
+}
 
 Expression4 -> Expression3
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression4 -> Expression4 * Expression3
+{
 	$0 : variable
 	$2 : variable
-	#0 = result_type(mul, $0.type, $2.type)
-	$$ = temporary(#0)
-	tuple(mul, $0, $2, $$)
+	#0 : get_result_type("multi", $0.type, $2.type)
+	$$ = #0;
+	add_tuple("multi", $0, $2, $$);
+}
 
 Expression4 -> Expression4 / Expression3
+{
 	$0 : variable
 	$2 : variable
-	#0 = result_type(div, $0.type, $2.type)
-	$$ = temporary(#0)
-	tuple(div, $0, $2, $$)
+	#0 : get_result_type("divid", $0.type, $2.type)
+	$$ = #0;
+	add_tuple("divid", $0, $2, $$);
+}
 
 Expression4 -> Expression4 % Expression3
+{
 	$0 : variable
 	$2 : variable
-	#0 = result_type(mod, $0.type, $2.type)
-	$$ = temporary(#0)
-	$$ = temporary($0.type)
-	tuple(mod, $0, $2, $$)
+	#0 : get_result_type("mod", $0.type, $2.type)
+	$$ = #0;
+	add_tuple("mod", $0, $2, $$);
+}
 
 Expression5 -> Expression4
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression5 -> Expression5 + Expression4
+{
 	$0 : variable
 	$2 : variable
-	#0 = result_type(add, $0.type, $2.type)
-	$$ = temporary(#0)
-	tuple(add, $0, $2, $$)
+	#0 : get_result_type("plus", $0.type, $2.type)
+	$$ = #0;
+	add_tuple("plus", $0, $2, $$);
+}
 
 Expression5 -> Expression5 - Expression4
+{
 	$0 : variable
 	$2 : variable
-	#0 = result_type(sub, $0.type, $2.type)
-	$$ = temporary(#0)
-	tuple(sub, $0, $2, $$)
+	#0 : get_result_type("minus", $0.type, $2.type)
+	$$ = #0;
+	add_tuple("minus", $0, $2, $$);
+}
 
 Expression6 -> Expression5
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression6 -> Expression6 << Expression5
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary($0.type)
-	tuple(lst, $0, $2, $$)
+	$$ = temporary($0.type);
+	add_tuple("lst", $0, $2, $$);
+}
 
 Expression6 -> Expression6 >> Expression5
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary($0.type)
-	tuple(rst, $0, $2, $$)
+	$$ = temporary($0.type);
+	add_tuple("rst", $0, $2, $$);
+}
 
 Expression7 -> Expression6
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression7 -> Expression7 < Expression6
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(lt, $0, $2, $$)
+	$$ = temporary(int_type);
+	add_tuple("lt", $0, $2, $$);
+}
 
 Expression7 -> Expression7 > Expression6
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(gt, $0, $2, $$)
+	$$ = temporary(int_type);
+	add_tuple("gt", $0, $2, $$);
+}
 
 Expression7 -> Expression7 <= Expression6
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(le, $0, $2, $$)
+	$$ = temporary(int_type);
+	add_tuple("le", $0, $2, $$);
+}
 
 Expression7 -> Expression7 >= Expression6
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(ge, $0, $2, $$)
+	$$ = temporary(int_type);
+	add_tuple("ge", $0, $2, $$);
+}
 
 Expression8 -> Expression7
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression8 -> Expression8 == Expression7
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(eq, $0, $2, $$)
+	$$ = temporary(int_type);
+	add_tuple("eq", $0, $2, $$);
+}
 
 Expression8 -> Expression8 != Expression7
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(ne, $0, $2, $$)
+	$$ = temporary(int_type);
+	add_tuple("ne", $0, $2, $$);
+}
 
 Expression9 -> Expression8
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression9 -> Expression9 & Expression8
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary($0.type)
-	tuple(and, $0, $2, $$)
+	$$ = temporary($0.type);
+	add_tuple("and", $0, $2, $$);
+}
 
 Expression10 -> Expression9
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression10 -> Expression10 ^ Expression9
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary($0.type)
-	tuple(xor, $0, $2, $$)
+	$$ = temporary($0.type);
+	add_tuple("xor", $0, $2, $$);
+}
 
 Expression11 -> Expression10
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression11 -> Expression11 | Expression10
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary($0.type)
-	tuple(or, $0, $2, $$)
+	$$ = temporary($0.type);
+	add_tuple("or", $0, $2, $$);
+}
 
 Expression12 -> Expression11
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression12 -> Expression12 && Expression11
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(ne, $0, 0, $$)
-	#0 = temporary_tuple(ne, $2, 0, $$)
-	tuple(if, #0, NULL, $$)
+	#0 : tuple_type
+	$$ = temporary(int_type);
+	add_tuple("ne", $0, 0, $$);
+	#0 = temporary_tuple("ne", $2, 0, $$);
+	add_tuple("if", #0, NULL, $$);
+}
 
 Expression13 -> Expression12
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression13 -> Expression13 || Expression12
+{
 	$0 : variable
 	$2 : variable
-	$$ = temporary(int_type)
-	tuple(ne, $0, 0, $$)
-	#0 = temporary_tuple(ne, $2, 0, $$)
-	tuple(if, NULL, #0, $$)
+	#0 : tuple_type
+	$$ = temporary(int_type);
+	add_tuple("ne", $0, 0, $$);
+	#0 = temporary_tuple("ne", $2, 0, $$);
+	add_tuple("if", NULL, #0, $$);
+}
 
 Expression14 -> Expression13
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression14 -> Expression14 ? Expression13 : Expression13
+{
 	$0 : variable
 	$2 : variable
 	$4 : variable
-	#0 = temporary(int_type)
-	$$ = temporary($2.type)
-	tuple(ne, $0, 0, #0)
-	#1 = temporary_tuple(mov, $4, NULL, $$)
-	#2 = temporary_tuple(mov, $2, NULL, $$)
-	tuple(if, #1, #2, #0)
+	#0 : int_type
+	#1 : tuple_type
+	#2 : tuple_type
+	$$ = temporary($2.type);
+	add_tuple("ne", $0, 0, #0);
+	#1 = temporary_tuple("assign", $4, NULL, $$);
+	#2 = temporary_tuple("assign", $2, NULL, $$);
+	add_tuple("if", #1, #2, #0);
+}
 
 Expression15 -> Expression14
+{
 	$0 : variable
-	$$ = $0
+	$$ = $0;
+}
 
 Expression15 -> Expression14 = Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(mov, $2, NULL, $0)
+	$$ = $0;
+	if ($0.type != $0.type && !can_convert($2.type, $0.type))
+	{
+		fire("can't convert from type (%s) to (%s)", get_typeinfo($2.type), get_typeinfo($0.type));
+	}
+	add_tuple("assign", $2, NULL, $0);
+}
 
 Expression15 -> Expression14 += Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(add, $0, $2, $$)
+	$$ = $0;
+	add_tuple("plus", $0, $2, $$);
+}
 
 Expression15 -> Expression14 -= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(sub, $0, $2, $$)
+	$$ = $0;
+	add_tuple("minus", $0, $2, $$);
+}
 
 Expression15 -> Expression14 *= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(mul, $0, $2, $$)
+	$$ = $0;
+	add_tuple("multi", $0, $2, $$);
+}
 
 Expression15 -> Expression14 /= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(div, $0, $2, $$)
+	$$ = $0;
+	add_tuple("divid", $0, $2, $$);
+}
 
 Expression15 -> Expression14 %= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(mod, $0, $2, $$)
+	$$ = $0;
+	add_tuple("mod", $0, $2, $$);
+}
 
 Expression15 -> Expression14 &= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(and, $0, $2, $$)
+	$$ = $0;
+	add_tuple("and", $0, $2, $$);
+}
 
 Expression15 -> Expression14 ^= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(xor, $0, $2, $$)
+	$$ = $0;
+	add_tuple("xor", $0, $2, $$);
+}
 
 Expression15 -> Expression14 |= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(or, $0, $2, $$)
+	$$ = $0;
+	add_tuple("or", $0, $2, $$);
+}
 
 Expression15 -> Expression14 <<= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(lst, $0, $2, $$)
+	$$ = $0;
+	add_tuple("lst", $0, $2, $$);
+}
 
 Expression15 -> Expression14 >>= Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $0
-	tuple(rst, $0, $2, $$)
+	$$ = $0;
+	add_tuple("rst", $0, $2, $$);
+}
 
 Expression16 -> Expression15
-	$0 : varaible
-	$$ = $0
+{
+	$0 : variable
+	$$ = $0;
+}
 
 Expression16 -> Expression16 , Expression15
+{
 	$0 : variable
 	$2 : variable
-	$$ = $2
+	$$ = $2;
+}
 
 Expression -> Expression16
+{
 	$0 : variable
-	$$ = $0
-
+	$$ = $0;
+}

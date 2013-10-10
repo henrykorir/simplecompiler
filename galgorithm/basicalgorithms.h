@@ -146,6 +146,7 @@ private:
 	const tinygrammar* gin_;
 	tinygrammar* gout_;
 };
+
 NAMESPACE_END(ga)
 NAMESPACE_END(compile)
 

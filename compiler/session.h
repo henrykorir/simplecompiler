@@ -31,7 +31,7 @@ public:
 	data_session(scope* env);
 	virtual ~data_session();
 public:
-	MEMBER_VARIABLE_REF(std::deque<variable*>&, variables, varlist_);
+	MEMBER_VARIABLE_GET_SET(std::deque<variable*>, variables, varlist_);
 public:
 	void insert(variable* v);
 protected:
@@ -44,7 +44,7 @@ public:
 	text_session(scope* env);
 	virtual ~text_session();
 public:
-    MEMBER_VARIABLE_REF(std::deque<tuple*>&, tuples, tuples_);
+    MEMBER_VARIABLE_GET_SET(std::deque<tuple*>, tuples, tuples_);
 protected:
     std::deque<tuple*> tuples_;
 };
@@ -55,7 +55,7 @@ public:
 	rodata_session(scope* env);
 	virtual ~rodata_session();
 public:
-	MEMBER_VARIABLE_REF(std::deque<variable*>&, variables, varlist_);
+	MEMBER_VARIABLE_GET_SET(std::deque<variable*>, variables, varlist_);
 public:
 	void insert(variable* v);
 protected:

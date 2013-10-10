@@ -6,7 +6,9 @@ Terminates
 	floatvalue : ((\d*\.\d+)|(\d+\.)|((\d+|(\d*\.\d+)|(\d+\.))[Ee][+\-]?(\d+)))f
 	doublevalue : (\d*\.\d+)|(\d+\.)|((\d+|(\d*\.\d+)|(\d+\.))[Ee][+\-]?(\d+))
 	charvalue : '([^\\']*(\\.)*)*'
+	wcharvalue : L'([^\\']*(\\.)*)*'
 	stringvalue : "([^\\"]*(\\.)*)*"
+	wstringvalue : L"([^\\"]*(\\.)*)*"
 	macros_keyword : #[a-z]+
 
 Terminates
@@ -57,6 +59,7 @@ Keywords : symbol
 	register
 	volatile
 	goto
+	wchar_t
 
 Keywords : macros_keyword
 	#define

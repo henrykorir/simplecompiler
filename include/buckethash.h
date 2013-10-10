@@ -97,7 +97,7 @@ public:
 		typedef keyvalue_pair* pointer;
 		typedef keyvalue_pair& reference;
 	protected:
-		_Const_iterator(const buckethash* r, int key_id, const typename bucket::bucket_node* p)
+		_Const_iterator(const buckethash* r, size_t key_id, const typename bucket::bucket_node* p)
 			: ref(r)
 			, kid(key_id)
 			, iter(p)
@@ -657,8 +657,8 @@ private:
 	void _setbit(bitmap_item* bitmap, size_t kid, bool isSet)
 	{
 		// clear bit map
-		int x = kid / sizeof(bitmap_item) / 8;
-		int y = kid - x * sizeof(bitmap_item) * 8;
+		int x = (int)kid / sizeof(bitmap_item) / 8;
+		int y = (int)kid - x * sizeof(bitmap_item) * 8;
 		if (isSet) bitmap[x] |= 1 << (sizeof(bitmap_item) * 8 - 1 - y);
 		else bitmap[x] &= ~(1 << (sizeof(bitmap_item) * 8 - 1 - y));
 	}

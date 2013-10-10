@@ -14,6 +14,11 @@
 #endif
 #endif
 
+#ifndef _t
+// if using unicode define _t(x) Lx
+#define _t(x) x
+#endif
+
 NAMESPACE_BEGIN(sc)
 
 typedef long int int64;

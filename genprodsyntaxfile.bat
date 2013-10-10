@@ -1,0 +1,1 @@
+vs2008\Debug\syntaxgenerator.exe  makecompiler\syntax\prodparse.syntax  makecompiler\syntax

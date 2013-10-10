@@ -2,14 +2,6 @@
 
 Import('aEnv')
 
-cppfiles = ['cplcompiler.cpp', 'expression-test-funcs.cpp']
-
-inc = ['../include', '../syntax', '../compiler', '../makecompiler']
-usedlib = ['compiler', 'syntax', 'mcompiler', 'regex']
-usedlibpath = ['../syntax', '../compiler', '../mcompiler', '../third_party/regexlib']
-
-aEnv.Library(target='cplcompiler', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)
-
 if int(ARGUMENTS.get('cplc', 0)):
 	incboost = aEnv['boost_inc']
 	cpllib = ['cplcompiler', 'unittest', 'mcompiler', 'compiler', 'ga', 'syntax', 'stacktrace', 'typename', 'regex', aEnv['regexlib']]

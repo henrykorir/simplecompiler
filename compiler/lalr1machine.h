@@ -11,7 +11,6 @@
 
 NAMESPACE_BEGIN(compile)
 
-
 class lalr1machine : public compile::lrmachine
 {
 public:
@@ -20,17 +19,17 @@ public:
         lalr1meta(int32 meta = -1)
             : lrmeta(meta)
             , content(NULL)
-            , ctype(NULL)
+            //, ctype(NULL)
         {}
 
         lalr1meta(const lalr1meta& other)
             : lrmeta(other)
             , content(other.content)
-            , ctype(other.ctype)
+            //, ctype(other.ctype)
         {}
 
         /*const*/ object* content;
-        const type* ctype;
+        //const type* ctype;
     };
 public:
 	lalr1machine();

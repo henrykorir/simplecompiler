@@ -6,18 +6,46 @@ includes
 If_Expression -> If_Content
 
 If_Content -> if ( Expression ) AExpression
+{
+	$2 : variable
+	$4 : variable
+	$$ = add_tuple("if", $2, NULL, $4);
+}
 
-If_Expression -> If_Content Else_Statement 
+If_Expression -> If_Content Else_Statement
+{
+	$0 : tuple
+	$1 : variable
+	$0.src2 = $1
+	$$ = $0;
+}
 
 Else_Statement -> else AExpression
+{
+	$1 : variable
+	$$ = $1;
+}
 
 While_Expression -> while ( Expression ) AExpression
+{
+	$2 : variable
+	$4 : variable
+	tuple* p = add_tuple("if", $2, NULL, $4);
+}
 
 For_Expression -> for ( First_Statememnt Second_Statememnt Third_Statement ) AExpression
+{
+	$2 : variable
+	$3 : variable
+	$4 : variable
+	$6 : variable
+
+
+}
 
 First_Statememnt -> ;
 
-First_Statememnt -> ValueDeclear ;
+First_Statememnt -> Expression ;
 
 First_Statememnt -> Expression ;
 

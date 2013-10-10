@@ -918,7 +918,17 @@ int32 regex2nfa::make_cfg_forelem(proccess_content& pc)
 				}
 				else if (r == parsecontent::spaces)
 				{
-					fire("don't support!");
+					//fire("don't support!");
+					int32 n = std::min((int32)tmpsyms_.size(), SUPPORT_CHARACTOR_COUNT);
+					for (int32 e = 1; e < n; ++ e)
+					{
+						if (!tmpsyms_[e].ist) break;
+#if (defined _WIN32 || defined WIN32)
+						else if (std::isspace(e, std::locale(""))) excludes[e] = 0;
+#else
+						else if (std::isspace(e)) excludes[e] = 0;
+#endif
+					}
 				}
 				else if (r < 0 || r >= SUPPORT_CHARACTOR_COUNT)
 					fire("invalidate switch char(%d)", r);

@@ -100,14 +100,16 @@ public:
 	reference at(size_type idx)
 	{
 		if(idx < 0 || idx >= _Length)
-			throw std::range_error("out of range of smart array!");
+			//throw std::range_error("out of range of smart array!");
+			KOG_THROW_EXCEPTION(std::range_error, "out of range of smart array!");
 		return _buf[idx];
 	}
 
 	const_reference at(size_type idx) const
 	{
 		if(idx < 0 || idx >= _Length)
-			throw std::range_error("out of range of smart array!");
+			//throw std::range_error("out of range of smart array!");
+			KOG_THROW_EXCEPTION(std::range_error, "out of range of smart array!");
 		return _buf[idx];
 	}
 private:
@@ -147,7 +149,8 @@ protected:
 #ifdef _DEBUG
 			if((values == NULL && count != 0) ||
 				(values != NULL && count == 0))
-				throw std::runtime_error("invalidate memory block!");
+				KOG_THROW_EXCEPTION(std::runtime_error, "invalidate memory block!");
+				//throw std::runtime_error("invalidate memory block!");
 #endif
 			if(values != NULL && is_auto_delete)
 			{
@@ -319,14 +322,16 @@ public:
 	reference at(size_type idx)
 	{
 		if(idx < 0 || idx >= size())
-			throw std::range_error("out of range of smart vector!");
+			KOG_THROW_EXCEPTION(std::range_error, "out of range of smart vector!");
+			//throw std::range_error("out of range of smart vector!");
 		return buf_.values[idx];
 	}
 
 	const_reference at(size_type idx) const
 	{
 		if(idx < 0 || idx >= size())
-			throw std::range_error("out of range of smart vector!");
+			KOG_THROW_EXCEPTION(std::range_error, "out of range of smart vector!");
+			//throw std::range_error("out of range of smart vector!");
 		return buf_.values[idx];
 	}
 public:
@@ -338,7 +343,8 @@ protected:
 	void assert_validate() const
 	{
 		if(buf_.values == NULL)
-			throw std::out_of_range("empty vector!");
+			KOG_THROW_EXCEPTION(std::out_of_range, "empty vector!");
+			//throw std::out_of_range("empty vector!");
 	}
 private:
 

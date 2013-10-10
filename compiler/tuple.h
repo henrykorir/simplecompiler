@@ -11,7 +11,7 @@
 NAMESPACE_BEGIN(compile)
 NAMESPACE_BEGIN(runtime)
 
-struct tuple : public object
+struct tuple : public variable
 {
 };
 

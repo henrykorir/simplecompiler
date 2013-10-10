@@ -27,17 +27,20 @@ private:
 	void print_rpfile();
 private:
 	void print_compiler();
+	void print_construct();
 	void print_grammar();
 	void print_symbols();
 	void print_statemachines();
 	void print_includes();
 	void print_separators();
 	void print_keywords();
+	void print_whitespaces();
 	void print_keyword_convert_funcs();
 	void print_complexsymbols();
 	void print_printablechars();
 	void print_machine(std::ostream& os, const compile::automachine& mac);
     void print_productions();
+	void print_class();
 private:
 	void regex_str_to_machine(const std::string& regexstr, automachine& m, bool is_directly);
 	void refine_machine(automachine& m) const;

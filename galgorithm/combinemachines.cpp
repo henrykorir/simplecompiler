@@ -119,7 +119,7 @@ void combine_machines::operator()(const machine_vector& inputmacs, automachine& 
 	for (size_t i = 0; i < inputmacs.size(); ++ i)
 	//foreach (const automachine* m, inputmacs.begin(), inputmacs.end())
 	{
-		closures_.back().push_back(citem(i, inputmacs[i]->sstate()));
+		closures_.back().push_back(citem((int32)i, inputmacs[i]->sstate()));
 	}
 	rows_.resize(1);
 	std::sort(rows_[0].begin(), rows_[0].end(), intpair_less());
@@ -130,7 +130,7 @@ void combine_machines::operator()(const machine_vector& inputmacs, automachine& 
 	while (rid < rows_.size())
 	{
 		// start to expand newsheet[rid]
-		update_sheet_row(rid ++);
+		update_sheet_row((int32)(rid ++));
 	}
 
 	// copy temporary sheet rows to output machine

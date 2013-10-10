@@ -107,6 +107,7 @@ int32 tinygrammar::index(const tstring& name) const
 }
 
 grammar::grammar()
+: skip_whitespaces_(true)
 {
 }
 

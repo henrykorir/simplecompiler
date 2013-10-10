@@ -3,44 +3,200 @@
 includes
 	cfunction.syntax
 
-ValueDeclear -> basic_type VarDeclearList 
+ValueDeclear -> basic_type VarDeclearList
+{
+	$0 : type_variable
+	$1 : arraylist
+	foreach (object* var in $1)
+	{
+		complex_variable* p = (complex_variable*)var;
+		const type* ptype = create_type($0.typevar, as<arraylist>((*p)["type"]), as<variable>((*p)["init"]));
+		enter_variable((as<word>((*p)["name"])).txt, ptype, as<variable>((*p)["init"]));
+	}
+}
 
 ValueDeclear -> const basic_type VarDeclearList 
+{
+	$1 : type_variable
+	$2 : arraylist
+	foreach (object* var in $2)
+	{
+		complex_variable* p = (complex_variable*)var;
+		arraylist* t = as<arraylist>((*p)["type"]).insert([[ new string_value("const") ]]);
+		const type* ptype = create_type($1.typevar, t, as<variable>((*p)["init"]));
+		enter_variable((as<word>((*p)["name"])).txt, ptype, as<variable>((*p)["init"]));
+	}
+}
 
 VarDeclearList -> AVarDeclear
+{
+	$0 : complex_variable
+	$$ = [[ $0 ]];
+}
 
 VarDeclearList -> AVarDeclear , VarDeclearList
+{
+	$0 : complex_variable
+	$2 : arraylist
+	$2.insert([[ $0 ]]);
+	$$ = $2;
+}
 
-AVarDeclear -> PtrArrayValue
+AVarDeclear -> SymbolWithPtr ArraySize = { InitList }
+{
+	$0 : complex_variable
+	$1 : arraylist
+	$4 : arraylist
+	as<arraylist>((*$0)["type"]).append($1);
+	(*$0)["init"] = $4;
+	$$ = $0;
+}
 
-PtrArrayValue -> SymbolWithPtrArray
+AVarDeclear -> SymbolWithPtr ArraySize = { }
+{
+	$0 : complex_variable
+	$1 : arraylist
+	as<arraylist>((*$0)["type"]).append($1);
+	(*$0)["init"] = [[ ]];
+	$$ = $0;
+}
+
+AVarDeclear -> SymbolWithPtr ArraySize
+{
+	$0 : complex_variable
+	$1 : arraylist
+	as<arraylist>((*$0)["type"]).append($1);
+	$$ = $0;
+}
 
 ArraySize -> [ ]
-
-ArraySize -> [ ] ArraySize2
+{
+	$$ = [[ temporary("-1", int_type) ]];
+}
 
 ArraySize -> ArraySize2
+{
+	$0 : arraylist
+	$$ = $0;
+}
+
+ArraySize -> [ ] ArraySize2
+{
+	$2 : arraylist
+	$2.append([[ temporary("-1", int_type) ]]);
+	$$ = $2;
+}
 
 AArraySize -> [ intvalue ]
+{
+	$1 : word
+	$$ = temporary($1.txt, int_type);
+}
 
 AArraySize -> [ symbol ]
+{
+	$1 : word
+	$$ = find($1.txt);
+}
 
 ArraySize2 -> AArraySize
+{
+	$0 : variable
+	$$ = [[ $0 ]];
+}
 
 ArraySize2 -> AArraySize ArraySize2
-
-# can't use ',', '=', '+=', ... operators
-AVarDeclear -> PtrArrayValue = Expression14
-
-#AVarDeclear -> PtrArrayValue = { InitList }
+{
+	$0 : variable
+	$1 : arraylist
+	$1.append([[ $0 ]]);
+	$$ = $1;
+}
 
 AInitContent -> Expression15
+{
+	$0 : variable
+	$$ = $0;
+}
 
 AInitContent -> { InitList }
+{
+	$1 : variable
+	$$ = $1;
+}
+
+AInitContent -> { }
+{
+	$$ = [[ ]];
+}
 
 InitList -> AInitContent , InitList
+{
+	$0 : variable
+	$2 : arraylist
+	$2.insert([[ $0 ]]);
+	$$ = $2;
+}
 
-#AVarDeclear -> symbol ( Expression )
+InitList -> AInitContent
+{
+	$0 : variable
+	$$ = [[ $0 ]];
+}
+
+AVarDeclear -> SymbolWithPtr 
+{
+	$0 : complex_variable
+	$$ = $0;
+}
+
+AVarDeclear -> SymbolWithPtr = Expression14
+{
+	$0 : complex_variable
+	$2 : variable
+	(*$0)["init"] = $2;
+	$$ = $0;
+}
+
+AVarDeclear -> SymbolWithPtr ( Expression )
+{
+	$0 : complex_variable
+	$2 : variable
+	(*$0)["init"] = $2;
+	$$ = $0;
+}
+
+SymbolWithPtr -> symbol
+{
+	$0 : word
+	#0 : complex_variable
+	(*#0)["name"] = $0;
+	(*#0)["type"] = [[ new string_value("") ]];
+	$$ = #0;
+}
+
+SymbolWithPtr -> const symbol
+{
+	$1 : word
+	#0 : complex_variable
+	(*#0)["name"] = $1;
+	(*#0)["type"] = [[ new string_value("const"), new string_value("") ]];
+	$$ = #0;
+}
+
+SymbolWithPtr -> * SymbolWithPtr
+{
+	$1 : complex_variable
+	$$ = $1;
+	as<arraylist>((*$1)["type"]).insert([[ new string_value("*") ]]);
+}
+
+SymbolWithPtr -> const * SymbolWithPtr
+{
+	$2 : complex_variable
+	$$ = $2;
+	as<arraylist>((*$2)["type"]).insert([[ new string_value("const"), new string_value("*") ]]);
+}
 
 FunctionDeclear -> FunctionHeader 
 

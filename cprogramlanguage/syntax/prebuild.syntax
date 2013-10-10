@@ -1,0 +1,82 @@
+# prebuild.syntax : macros includes 
+
+StartSymbol : CFile
+
+CFile -> AItem
+
+CFile -> AItem CFile
+
+AItem -> Include
+
+AItem -> Define
+
+AItem -> If
+
+AItem -> Error
+
+AItem -> Content
+
+Include -> #include " filename " <br>
+
+Include -> #include < filename > <br>
+
+Define -> #define symbol <br>
+
+Define -> #define symbol content <br>
+
+Define -> #define symbol ( symbolList ) <br>
+
+Define -> #define symbol ( symbolList ... )
+
+symbolList -> symbol
+
+symbolList -> symbol symbolList
+
+If -> #if OrBoolValue <br> #endif
+
+If -> #ifdefine symbol <br> #endif
+
+If -> #if OrBoolValue <br> Else
+
+Else -> #else <br> <any> #endif
+
+OrBoolValue -> AndBoolValue
+
+OrBoolValue -> AndBoolValue || OrBoolValue
+
+AndBoolValue -> ABoolValue
+
+AndBoolValue -> ABoolValue && AndBoolValue
+
+ABoolValue -> intvalue
+
+ABoolValue -> defined symbol
+
+ABoolValue -> ( OrBoolValue )
+
+Error -> #error content <br>
+
+Content -> AContentItem
+
+Content -> AContentItem Content
+
+AContentItem -> Comment
+
+AContentItem -> stringvalue
+
+AContentItem -> intvalue
+
+AContentItem -> symbol
+
+AContentItem -> charvalue
+
+AContentItem -> floatvalue
+
+AContentItem -> doublevalue
+
+AContentItem -> seperator
+
+Comment -> // <any> <br>
+
+Comment -> /* <any> */
+

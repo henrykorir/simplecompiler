@@ -5,6 +5,7 @@
 #include <stack>
 #include "funcparams.h"
 #include <logger.h>
+#include <functionalX.h>
 
 using namespace compile;
 using namespace compile::runtime;
@@ -289,7 +290,7 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
                 	<<newline<<"ret";
             }
             break;
-		case internal:
+		case internal_:
 			{
 				logstring("asm.print code: internal");
 				// internal_call* icall = as<internal_call>(src1);
@@ -318,48 +319,49 @@ void asmgenerate::print_code(const _Str& name, text_session* ts)
 
 void asmgenerate::print_printasm()
 {
-    kog::oindentstream os(*os_); 
+    kog::oindentstream os(*os_);
     using kog::inctab;
     using kog::dectab;
     using kog::newline;
 
-	// print_int
-	os<<inctab<<newline<<".section .rodata"<<dectab
-		<<newline<<".LC_kog0:"<<inctab
-		<<newline<<".string \"%d\\n\""
-		<<newline<<".text "
-		<<newline<<".global print_int"
-		<<newline<<".type print_int, @function"<<dectab
-		<<newline<<"print_int:"
-		<<newline<<".LFB0:"<<inctab
-		<<newline<<"pushl %ebp"
-		<<newline<<"movl %esp, %ebp"
-		<<newline<<"movl 8(%ebp), %eax"
-		<<newline<<"pushl %eax"
-		<<newline<<"movl $.LC_kog0, %eax"
-		<<newline<<"pushl %eax"
-		<<newline<<"call printf"
-		<<newline<<"leave"
-		<<newline<<"ret"<<dectab
-		<<std::endl;
+	// build-in function: print_int
+	//os<<inctab<<newline<<".section .rodata"<<dectab
+	//	<<newline<<".LC_kog0:"<<inctab
+	//	<<newline<<".string \"%d\\n\""
+	//	<<newline<<".text "
+	//	<<newline<<".global print_int"
+	//	<<newline<<".type print_int, @function"<<dectab
+	//	<<newline<<"print_int:"
+	//	<<newline<<".LFB0:"<<inctab
+	//	<<newline<<"pushl %ebp"
+	//	<<newline<<"movl %esp, %ebp"
+	//	<<newline<<"movl 8(%ebp), %eax"
+	//	<<newline<<"pushl %eax"
+	//	<<newline<<"movl $.LC_kog0, %eax"
+	//	<<newline<<"pushl %eax"
+	//	<<newline<<"call printf"
+	//	<<newline<<"leave"
+	//	<<newline<<"ret"<<dectab
+	//	<<std::endl;
 
-	os<<inctab<<newline<<".section .rodata"<<dectab
-		<<newline<<".LC_kog1:"<<inctab
-		<<newline<<".string \"%f\\n\""
-		<<newline<<".text "
-		<<newline<<".global print_float"
-		<<newline<<".type print_float, @function"<<dectab
-		<<newline<<"print_float:"
-		<<newline<<".LFB1:"<<inctab
-		<<newline<<"pushl %ebp"
-		<<newline<<"movl %esp, %ebp"
-		<<newline<<"subl $12, %esp"
-		<<newline<<"flds 8(%ebp)"
-		<<newline<<"fstpl -8(%ebp)"
-		<<newline<<"movl $.LC_kog1, %eax"
-		<<newline<<"movl %eax, -12(%ebp)"
-		<<newline<<"call printf"
-		<<newline<<"leave"
-		<<newline<<"ret"<<dectab
-		<<std::endl;
+	// build-in function: print_float
+	// os<<inctab<<newline<<".section .rodata"<<dectab
+	//	<<newline<<".LC_kog1:"<<inctab
+	//	<<newline<<".string \"%f\\n\""
+	//	<<newline<<".text "
+	//	<<newline<<".global print_float"
+	//	<<newline<<".type print_float, @function"<<dectab
+	//	<<newline<<"print_float:"
+	//	<<newline<<".LFB1:"<<inctab
+	//	<<newline<<"pushl %ebp"
+	//	<<newline<<"movl %esp, %ebp"
+	//	<<newline<<"subl $12, %esp"
+	//	<<newline<<"flds 8(%ebp)"
+	//	<<newline<<"fstpl -8(%ebp)"
+	//	<<newline<<"movl $.LC_kog1, %eax"
+	//	<<newline<<"movl %eax, -12(%ebp)"
+	//	<<newline<<"call printf"
+	//	<<newline<<"leave"
+	//	<<newline<<"ret"<<dectab
+	//	<<std::endl;
 }

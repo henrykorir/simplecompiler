@@ -23,7 +23,7 @@ public:
 	production(const symholder_proxy& syms, int32 L, const int32* Rs, int32 N);
 public:
 	MEMBER_VARIABLE_GET_SET(int32, left, L_);
-	MEMBER_VARIABLE_GET(int32, right_size, Rs_.size());
+	MEMBER_VARIABLE_GET(int32, right_size, (int32)Rs_.size());
 	MEMBER_VARIABLE_GET(const right_array&, right, Rs_);
 	MEMBER_VARIABLE_GET_SET_INDEXER(int32, std::size_t, Rs_);
     MEMBER_VARIABLE_GET_SET(_Str, func, func_);

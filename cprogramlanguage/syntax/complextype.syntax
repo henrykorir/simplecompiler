@@ -1,20 +1,58 @@
 # struct, enum, union 
 
-StructDefine -> StructHeader { StructContent } 
+ComplexTypeDefine -> StructDefine
 
-StructDefine_WithVar -> StructHeader { StructContent } ValueDefineList
+ComplexTypeDefine -> StructDefine_WithVar
+
+ComplexTypeDefine -> EnumDefine
+
+ComplexTypeDefine -> EnumDefine_WithVar
+
+ComplexTypeDefine -> UnionDefine
+
+ComplexTypeDefine -> UnionDefine_WithVar
+
+StructDefine -> StructHeader { } 
+{
+	$0 : complex_variable
+	#1 : type_variable
+	
+}
+
+StructDefine -> StructHeader { StructContent } 
+{
+	$0 : complex_variable
+	$2 : scope
+	set_global_var("struct", NULL);
+}
+
+StructDefine_WithVar -> StructHeader { } VarDeclearList
+
+StructDefine_WithVar -> StructHeader { StructContent } VarDeclearList
+{
+	$0 : complex_variable
+	$2 : scope
+	set_global_var("struct", NULL);
+}
 
 EnumDefine -> EnumHeader { EnumContent } 
 
-EnumDefine_WithVar -> EnumHeader { EnumContent } ValueDefineList 
+EnumDefine_WithVar -> EnumHeader { EnumContent } VarDeclearList
 
 UnionDefine -> UnionHeader { UnionContent } 
 
-UnionDefine_WithVar -> UnionHeader { UnionContent } ValueDefineList 
+UnionDefine_WithVar -> UnionHeader { UnionContent } VarDeclearList
 
 StructContent -> AStructContent ;
+{
+	$0 : complex_variable
+	#0 : complex_variable
+	
+}
 
-StructContent -> AStructContent StructContent
+StructContent -> AStructContent ; StructContent
+
+#AStructContent -> ;
 
 AStructContent -> StructDefine 
 
@@ -28,45 +66,202 @@ AStructContent -> UnionDefine
 
 AStructContent -> UnionDefine_WithVar
 
-AStructContent -> basic_type SymbolWithPtrArray
+AStructContent -> basic_type SymbolWithPtrArrayList
+{
+	$0 : type_variable
+	$1 : complex_variable
+	scope* struct_scope = as<scope*>(get_global_var("struct", new_scope, new string_value("struct")));
+	foreach (object* var in $1)
+	{ // add const
+		complex_variable* p = as<complex_variable>(var);
+		const type* ptype = create_type($0.typevar, as<arraylist>((*p)["type"]), NULL);
+		enter_member((as<word>((*p)["name"])).txt, ptype, struct_scope);
+	}
+	$$ = struct_scope;
+}
 
-AStructContent -> const basic_type SymbolWithPtrArray
+AStructContent -> const basic_type SymbolWithPtrArrayList
+{
+	$1 : type_variable
+	$2 : arraylist
+	scope* struct_scope = as<scope*>(get_global_var("struct", new_scope, new string_value("struct")));
+	foreach (object* var in $2)
+	{ // add const
+		complex_variable* p = as<complex_variable>(var);
+		(*p)["type"].insert([[ new string_value("const") ]]);
+		const type* ptype = create_type($0.typevar, as<arraylist>((*p)["type"]), NULL);
+		enter_member((as<word>((*p)["name"])).txt, ptype, struct_scope);
+	}
+	$$ = struct_scope;
+}
 
-AStructContent -> integer_type symbol : intvalue
+AStructContent -> basic_type symbol : intvalue
+{
+	$0 : type_variable
+	$1 : word
+	$3 : word
+	scope* struct_scope = as<scope*>(get_global_var("struct", new_scope, new string_value("struct")));
+	enter_member(($1.txt, $0.typevar, struct_scope);
+	$$ = struct_scope;
+}
+
+SymbolWithPtrArrayList -> SymbolWithPtr
+{
+	$0 : complex_variable
+	$$ = [[ $0 ]];
+}
+
+SymbolWithPtrArrayList -> SymbolWithPtr , SymbolWithPtrArrayList
+{
+	$0 : complex_variable
+	$2 : arraylist
+	$2.insert([[ $0 ]]);
+	$$ = $2;
+}
+
+SymbolWithPtrArray -> SymbolWithPtr
+{
+	$0 : complex_variable
+	$$ = $0;
+}
+
+SymbolWithPtrArray -> SymbolWithPtr ArraySize2
+{
+	$0 : complex_variable
+	$1 : arraylist
+	as<arraylist>((*$0)["type"]).append($1);
+	$$ = $0;
+}
 
 AStructContent -> Typedef 
 
 StructHeader -> struct
+{
+	#0 : complex_variable
+	(*#0)["name"] = "$struct$" + get_temporary_name();
+	$$ = #0;
+}
 
 StructHeader -> struct symbol
+{
+	$1 : word
+	#0 : complex_variable
+	(*#0)["name"] = $1.txt;
+	$$ = #0;
+}
 
-EnumDefine -> AEnumItem
+EnumContent -> AEnumItem 
+{
+	$0 : complex_variable
+	$$ = [[ $0 ]];
+}
 
-EnumDefine -> AEnumItem , EnumDefine
+EnumContent -> AEnumItem , EnumContent
+{
+	$0 : complex_variable
+	$2 : arraylist
+	$2.insert([[ $0 ]]);
+	$$ = $2;
+}
 
 AEnumItem -> symbol
+{
+	$0 : word
+	#0 : complex_variable
+	(*#0)["name"] = $0.txt;
+	(*#0)["value"] = NULL;
+	$$ = #0;
+}
 
 AEnumItem -> symbol = intvalue
+{
+	$0 : word
+	#0 : complex_variable
+	(*#0)["name"] = $0.txt;
+	(*#0)["value"] = temporary($1.txt, int_type);
+	$$ = #0;
+}
 
 EnumHeader -> enum
+{
+	#0 : complex_variable
+	(*#0)["name"] = "$enum$" + get_temporary_name();
+	(*#0)["type"] = int_type;
+	$$ = #0;
+}
 
 EnumHeader -> enum EnumName
+{
+	$1 : complex_variable
+	$$ = $1;
+}
 
-EnumName -> :
+#EnumName -> :
 
 EnumName -> symbol
+{
+	$0 : word
+	#0 : complex_variable
+	(*#0)["name"] = $0.txt;
+	(*#0)["type"] = int_type;
+	$$ = #0;
+}
 
 EnumName -> symbol : integer_type
+{
+	$0 : word
+	$2 : type_variable
+	#0 : complex_variable
+	(*#0)["name"] = $0.txt;
+	(*#0)["type"] = $2.typevar;
+	$$ = #0;
+}
 
-UnionContent -> AUnionItem
+UnionContent -> AUnionItem ;
+{
+	$0 : complex_variable
+	$$ = [[ $0 ]];
+}
 
-UnionContent -> AUnionItem  UnionContent
+UnionContent -> AUnionItem ; UnionContent
+{
+	$0 : complex_variable
+	$2 : arraylist
+	$2.insert($0);
+	$$ = $2;
+}
 
-AUnionItem -> basic_type SymbolWithPtrArray
+AUnionItem -> basic_type SymbolWithPtrArray 
+{
+	$0 : type_variable
+	$1 : complex_variable
+	$$ = $1;
+}
 
-AUnionItem -> const basic_type SymbolWithPtrArray
+AUnionItem -> const basic_type SymbolWithPtrArray 
+
+AUnionItem -> StructDefine 
+
+AUnionItem -> StructDefine_WithVar 
+
+AUnionItem -> EnumDefine_WithVar 
+
+AUnionItem -> UnionDefine 
+
+AUnionItem -> UnionDefine_WithVar 
 
 UnionHeader -> union
+{
+	#0 : complex_variable
+	(*#0)["name"] = "$union$" + get_temporary_name();
+	$$ = #0;
+}
 
 UnionHeader -> union symbol
+{
+	$1 : word
+	#0 : complex_variable
+	(*#0)["name"] = $1.txt;
+	$$ = #0;
+}
 

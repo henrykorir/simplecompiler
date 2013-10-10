@@ -28,7 +28,7 @@ enum op
     ne,
     newv,
     func_ret,
-    internal
+    internal_
 };
 
 struct op_string
@@ -48,14 +48,14 @@ private:
 public:
     static const _Str& to_string(op i)
     {
-        if (i < plus || i > internal)
+        if (i < plus || i > internal_)
             fire("invalidate operation!");
         return enum_string()[i];
     }
 
     static op parse(const _Str& str)
     {
-        for (op i = plus; i <= internal; i = (op)(i + 1))
+        for (op i = plus; i <= internal_; i = (op)(i + 1))
         {
             if (to_string(i) == str)
                 return i;

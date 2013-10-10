@@ -1,11 +1,9 @@
-# terminate symbol
+# non-terminate symbol
 
 Non-Terminates
 	CProgram
 	ProgramItemList
 	ProgramItem
-	Define
-	Include
 	Typedef
 	ExternValue
 	ExternFunc
@@ -62,6 +60,9 @@ Non-Terminates
 	ArraySize
 	ArraySize2
 	AArraySize
+	FuncParamArraySize
+	WithArrayDeclear2
+	WithArrayDeclear
 	VarDeclearList
 	ExpressionList
 	Expression
@@ -83,12 +84,15 @@ Non-Terminates
 	Expression16
 	FunctionCall
 	ParamList
+	ParamList_NoMore
+	SymbolWithPtrArrayList
 	SymbolWithPtrArray
 	SymbolWithArray
+	SymbolWithPtr
 	Type
 	type
 	basic_type
 	integer_type
 	ReturnType
 	FunctionType
-	file_name
+	ComplexTypeDefine

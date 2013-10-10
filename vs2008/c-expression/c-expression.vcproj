@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\;..\..\syntax;..\..\galgorithm;..\..\makecompiler;..\..\compiler;..\..\cprogramlanguage"
+				AdditionalIncludeDirectories="..\..\include\;..\..\syntax;..\..\galgorithm;..\..\makecompiler;..\..\compiler;..\..\cexpressiontest"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;VISUAL_STDIO"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -115,7 +115,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="..\..\include\;..\..\syntax;..\..\galgorithm;..\..\makecompiler;..\..\compiler;..\..\cexpressiontest"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;VISUAL_STDIO"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -176,15 +177,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\test\output\cexpression_test_out.cpp"
+				RelativePath="..\..\cexpressiontest\CExpTest_compiler.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\cprogramlanguage\cplcompiler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\cprogramlanguage\expression-test-funcs.cpp"
+				RelativePath="..\..\cexpressiontest\CExpTest_pruductions.cpp"
 				>
 			</File>
 		</Filter>
@@ -194,11 +191,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\cprogramlanguage\cplcompiler.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\cprogramlanguage\extract_stream.h"
+				RelativePath="..\..\cexpressiontest\CExpTest_compiler.h"
 				>
 			</File>
 		</Filter>

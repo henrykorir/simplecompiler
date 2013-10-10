@@ -2,13 +2,11 @@
 
 Import('aEnv')
 
-cppfiles = ['extract.cpp', 'compiler.cpp', 'lalr1machine.cpp', 'scope.cpp', 'type.cpp', 'module.cpp', 'interlanguage.cpp', 'session.cpp', 'variable.cpp']
+cppfiles = ['arraylist.cpp', 'ifunction.cpp', 'compiler.cpp', 'compiler_setup.cpp', 'lalr1machine.cpp', 'scope.cpp', 'type.cpp', 'module.cpp', 'interlanguage.cpp', 'session.cpp', 'variable.cpp']
 cppfiles += ['asmgenerate.cpp']
 
-inc = ['../include', '../syntax', '../makecompiler']
+inc = ['../include', '../syntax', '../makecompiler', '../third_party/filesystem', '../third_party/typeinfo']
 usedlib = ['syntax']
 usedlibpath = ['../syntax']
-
-#aEnv.Library(target='wordextract', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)
 
 aEnv.Library(target='compiler', source=cppfiles, CPPPATH=inc, LIBS=usedlib, LIBPATH=usedlibpath)

@@ -58,11 +58,11 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 	const symholder_proxy& sholder = tig.symbols();
 
 	kog::smart_vector<int32> ist(sholder.size());
-	const int32 virtual_ending = sholder.size();
+	const int32 virtual_ending = (int32)sholder.size();
 	kog::smart_vector<std::set<int32> > eClosures(sholder.size() + 1);
 	// init eclosure, e-closure(i) = {i}, i is non-terminate
 	for (size_t i = 0; i < sholder.size(); ++ i) 
-		if(!(ist[i] = sholder[i].ist)) eClosures[i].insert(i);
+		if(!(ist[i] = sholder[i].ist)) eClosures[i].insert((int32)i);
 	kog::smart_vector<const production*> plist;
 	plist.reset(prods.size());
 	for(size_t i = 0; i < prods.size(); ++ i) plist[i] = &prods[i];
@@ -73,7 +73,7 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 	//  ntpi[i] is first production: symbol[i] -> ...
 	kog::smart_vector<int32> ntpi(sholder.size(), -1);
 	for(size_t i = 0; i < plist.size(); ++ i)
-		if(ntpi[plist[i]->left()] == -1) ntpi.at(plist[i]->left()) = i;
+		if(ntpi[plist[i]->left()] == -1) ntpi.at(plist[i]->left()) = (int32)i;
 	// e-closure
 	kog::smart_vector<int32> updated(sholder.size(), 1); // mark who is updated
 	while(std::find(updated.begin(), updated.end(), 1) != updated.end()) // until don't update
@@ -83,7 +83,7 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 		{
 			const int32 l = prods[i].left();
 			const int32 r0 = prods[i].right().at(0);
-			int osize = eClosures[l].size();
+			int osize = (int32)eClosures[l].size();
 			if(ist[r0] && r0 != tig.eplisons() && r0 != tig.endings()) continue; // normal teriminate
 			else if(r0 == tig.endings() && prods[i].right_size() == 1) // ending 
 				eClosures[l].insert(virtual_ending);
@@ -118,7 +118,7 @@ void nfa2dfa::todfa(const tinygrammar& tig, tinygrammar& tog)
 	{
 		if(sholder[i].ist && i != tig.eplisons()) // the output grammar is not contain eplison
 		{
-			sidmap[i] = j ++;
+			sidmap[i] = (int32)(j ++);
 			slist.push_back(sholder[i]);
 			slist.back().sid = sidmap[i]; // update sid
 		}
@@ -282,7 +282,7 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 		if(!sholder[i].ist && smap[i] == -1)
 		{
 			smap[i] = 1;
-			pi[1].insert(i);
+			pi[1].insert((int32)i);
 		}
 	}
 	if(pi[1].empty() || pi[0].empty())
@@ -296,7 +296,7 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 	std::sort(plist.begin(), plist.end(), kog::composite_function(dpp, dpp, pleft_less()));
 	kog::smart_vector<int32> ntpi(sholder.size(), -1);
 	for(size_t i = 0; i < plist.size(); ++ i)
-		if(ntpi[plist[i]->left()] == -1) ntpi[plist[i]->left()] = i;
+		if(ntpi[plist[i]->left()] == -1) ntpi[plist[i]->left()] = (int32)i;
 	size_t opisize = 0;
 	do{
 		opisize = pi.size();
@@ -343,7 +343,7 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 	{
 		if(sholder[i].ist && i != tig.eplisons()) // we also don't use eplison here too
 		{
-			smap[i] = j ++;
+			smap[i] = (int32)(j ++);
 			news.push_back(sholder[i]);
 			news.back().sid = smap[i];
 		}
@@ -359,7 +359,7 @@ void nfa2dfa::mini_status(const tinygrammar& tig, tinygrammar& tog)
 		memset(&asym, 0, sizeof(asym));
 		asym.name = strbuf.back().c_str();
 		asym.Lname = (int32)strbuf.back().size();
-		asym.sid = i + first_nontsid;
+		asym.sid = (int32)i + first_nontsid;
 		news.push_back(asym);
 		
 		// insert ending productions A -> EOF
@@ -430,7 +430,7 @@ void nfa2dfa::split(const std::vector<const production*>& t, kog::smart_vector<i
 		if(caneats.size() != s[newSid].size())
 		{
 			// we leave uneat sets
-			ns = ts.size();
+			ns = (int32)ts.size();
 			s.resize(x + ns);
 			//s[newSid] -= caneats;
 			std::deque<int32> vtmp;
@@ -461,7 +461,7 @@ void nfa2dfa::split(const std::vector<const production*>& t, kog::smart_vector<i
 		}
 		else
 		{
-			ns = ts.size() - 1;
+			ns = (int32)ts.size() - 1;
 			s.resize(x + ns);
 			//bool is_ending = s[newSid].find(virtual_ending) != s[newSid].end();
 			s[newSid].clear();

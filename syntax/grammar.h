@@ -5,6 +5,7 @@
 #define _GRAMMAR_H_SC_
 
 #include <macros.h>
+#include <stringX.h>
 #include <arrayX.h>
 #include <functionalX.h>
 #include "production.h"
@@ -90,6 +91,7 @@ public:
 	MEMBER_VARIABLE_GET/*_SET*/(int32, eplisons, eplison_symbol_);
 	MEMBER_VARIABLE_GET/*_SET*/(int32, endings, ending_symbol_);
 	MEMBER_VARIABLE_GET(const tstring&, whitespaces, whitespaces_);
+	MEMBER_VARIABLE_GET(bool, skipspace, skip_whitespaces_);
 public:
 	const tinygrammar& gettinyg() const
 	{
@@ -105,6 +107,7 @@ protected:
 	tstring seperators_;	// seperators: split word
 protected:
 	bool dthenu_; // symbol need be defined before use?
+	bool skip_whitespaces_; // skip whitespace ?
 };
 
 NAMESPACE_END(compile)
